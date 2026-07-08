@@ -1,0 +1,14 @@
+{
+  "name": "dancingissogood",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "landing",
+    "backend",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace landing",
+    "test": "echo \"Add tests when apps are scaffolded\""
+  }
+}
