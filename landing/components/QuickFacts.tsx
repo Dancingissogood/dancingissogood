@@ -8,7 +8,7 @@ export function QuickFacts({ facts }: QuickFactsProps) {
   return (
     <section className="quick-facts" aria-label="Program highlights">
       {facts.map((fact) => (
-        <div data-reveal key={fact.label}>
+        <div key={fact.label}>
           <span>{fact.label}</span>
           <strong>{fact.value}</strong>
         </div>

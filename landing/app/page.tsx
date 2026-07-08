@@ -42,11 +42,11 @@ export default function HomePage() {
       <QuickFacts facts={quickFacts} />
 
       <section id="program" className="section section-intro">
-        <div className="section-heading" data-reveal="left">
+        <div className="section-heading">
           <p className="eyebrow">The concept</p>
           <h2>A studio camp served like a daily specials menu.</h2>
         </div>
-        <div className="intro-copy" data-reveal="right">
+        <div className="intro-copy">
           <p>
             Each six-week camp has a live menu shaped by the instructors teaching
             that week. Students can choose technique refreshers, private coaching,
@@ -60,7 +60,7 @@ export default function HomePage() {
       </section>
 
       <section id="menu" className="section menu-section">
-        <div className="section-heading" data-reveal>
+        <div className="section-heading">
           <p className="eyebrow">Studio menu</p>
           <h2>Choose your next 20-minute section.</h2>
         </div>
@@ -68,7 +68,7 @@ export default function HomePage() {
       </section>
 
       <section id="schedule" className="section schedule-section">
-        <div className="schedule-panel" data-reveal="left">
+        <div className="schedule-panel">
           <div>
             <p className="eyebrow">Summer schedule</p>
             <h2>Camp weeks in July, August, and September.</h2>
@@ -92,7 +92,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        <div className="day-format" data-reveal="right">
+        <div className="day-format">
           <h3>Daily format</h3>
           <ol>
             <li>
@@ -114,7 +114,7 @@ export default function HomePage() {
       </section>
 
       <section id="pass" className="section pass-section">
-        <div className="pass-copy" data-reveal="left">
+        <div className="pass-copy">
           <p className="eyebrow">Camp pass</p>
           <h2>Three days of movement, technique, and wellness for $100.</h2>
           <p>
@@ -123,7 +123,7 @@ export default function HomePage() {
             favorite sections, or train through the full 9 AM to 2 PM window.
           </p>
         </div>
-        <aside className="price-card" aria-label="Three day pass price" data-reveal="right">
+        <aside className="price-card" aria-label="Three day pass price">
           <span className="price-label">3-Day Pass</span>
           <strong>$100</strong>
           <p>Unlimited class access between 9 AM and 2 PM, Monday through Wednesday.</p>
@@ -134,23 +134,23 @@ export default function HomePage() {
       </section>
 
       <section className="section instructor-section">
-        <div className="section-heading" data-reveal>
+        <div className="section-heading">
           <p className="eyebrow">Instruction model</p>
           <h2>Professional instruction with room to choose your pace.</h2>
         </div>
         <div className="feature-grid">
-          <div data-reveal>
+          <div>
             <h3>Rotating specialists</h3>
             <p>
               Class offerings shift with teacher specialties, guest instructors,
               and weekly availability.
             </p>
           </div>
-          <div data-reveal>
+          <div>
             <h3>Private and group sessions</h3>
             <p>Move between targeted personal coaching and the energy of group instruction.</p>
           </div>
-          <div data-reveal>
+          <div>
             <h3>Whole-dancer training</h3>
             <p>
               Dance technique pairs with recovery, meditation, rhythm, nutrition,
@@ -161,7 +161,7 @@ export default function HomePage() {
       </section>
 
       <section id="contact" className="section contact-section">
-        <div data-reveal="left">
+        <div>
           <p className="eyebrow">Join the next camp</p>
           <h2>Get the next schedule menu.</h2>
           <p>

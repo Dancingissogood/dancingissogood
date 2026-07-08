@@ -24,7 +24,7 @@ export default function StudiosPage() {
 
       <StudioDirectory studios={studioProfiles} />
 
-      <section className="section studio-note" data-reveal>
+      <section className="section studio-note">
         <p className="eyebrow">How they fit</p>
         <h2>Different spaces, one movement ecosystem.</h2>
         <p>

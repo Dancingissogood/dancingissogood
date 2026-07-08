@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Sans, Playfair_Display } from "next/font/google";
 
-import { MotionProvider } from "@/components/MotionProvider";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 
@@ -55,7 +54,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${instrumentSans.variable} ${playfairDisplay.variable}`}>
-        <MotionProvider />
         <SiteHeader />
         {children}
         <SiteFooter />

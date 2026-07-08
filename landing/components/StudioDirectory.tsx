@@ -12,7 +12,6 @@ export function StudioDirectory({ studios }: StudioDirectoryProps) {
       {studios.map((studio, index) => (
         <article
           className={`studio-profile${index % 2 === 1 ? " studio-profile-reverse" : ""}`}
-          data-reveal={index % 2 === 1 ? "right" : "left"}
           key={studio.name}
         >
           <div

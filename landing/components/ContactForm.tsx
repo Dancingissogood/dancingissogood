@@ -1,6 +1,6 @@
 export function ContactForm() {
   return (
-    <form className="contact-form" data-reveal="right">
+    <form className="contact-form">
       <label>
         Name
         <input type="text" name="name" placeholder="Your name" />

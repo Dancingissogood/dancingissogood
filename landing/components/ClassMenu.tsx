@@ -10,7 +10,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
   return (
     <div className="menu-grid">
       {classes.map((item) => (
-        <article className="menu-card" data-reveal key={item.title}>
+        <article className="menu-card" key={item.title}>
           <div className="menu-card-image">
             <Image
               src={item.image}
