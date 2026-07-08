@@ -1,10 +1,10 @@
 # landing
 
-Public website for the dance studio.
+Next.js public website for the dance studio.
 
 ## Preview
 
-Open `index.html` directly in a browser, or run this from the repo root:
+Run this from the repo root:
 
 ```sh
 npm run dev
@@ -13,7 +13,7 @@ npm run dev
 Then visit:
 
 ```txt
-http://localhost:4321
+http://localhost:3000
 ```
 
 Expected responsibilities:

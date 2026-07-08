@@ -9,5 +9,6 @@ dist/
 build/
 .next/
 coverage/
+*.tsbuildinfo
 
 *.log

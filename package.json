@@ -9,6 +9,9 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace landing",
-    "test": "echo \"Add tests when apps are scaffolded\""
+    "build": "npm run build --workspace landing",
+    "lint": "npm run lint --workspace landing",
+    "typecheck": "npm run typecheck --workspace landing",
+    "test": "npm run lint && npm run typecheck && npm run build"
   }
 }
