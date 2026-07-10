@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ClassMenu } from "@/components/ClassMenu";
+import { CheckoutButton } from "@/components/CheckoutButton";
 import { ContactForm } from "@/components/ContactForm";
 import { QuickFacts } from "@/components/QuickFacts";
 import { classMenuItems, quickFacts } from "@/content/site";
@@ -127,9 +128,7 @@ export default function HomePage() {
           <span className="price-label">3-Day Pass</span>
           <strong>$100</strong>
           <p>Unlimited class access between 9 AM and 2 PM, Monday through Wednesday.</p>
-          <Link className="button button-primary" href="#contact">
-            Request the Schedule
-          </Link>
+          <CheckoutButton passSlug="three-day-camp-pass" />
         </aside>
       </section>
 

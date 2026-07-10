@@ -233,6 +233,25 @@ h3 {
   background: #a94c3d;
 }
 
+.button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.checkout-control {
+  width: 100%;
+}
+
+.checkout-control .button {
+  width: 100%;
+}
+
+.checkout-error {
+  color: #9f3024;
+  font-size: 0.9rem;
+  margin: 10px 0 0;
+}
+
 .button-secondary {
   background: rgba(255, 255, 255, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.36);
@@ -274,6 +293,23 @@ h3 {
 
 .section {
   padding: clamp(72px, 9vw, 124px) clamp(20px, 6vw, 86px);
+}
+
+.checkout-result {
+  align-items: center;
+  display: flex;
+  min-height: 100vh;
+  padding: 150px clamp(20px, 6vw, 86px) 80px;
+}
+
+.checkout-result > div {
+  max-width: 680px;
+}
+
+.checkout-result p:not(.eyebrow) {
+  color: var(--muted);
+  font-size: 1.1rem;
+  margin-bottom: 28px;
 }
 
 .section-heading {

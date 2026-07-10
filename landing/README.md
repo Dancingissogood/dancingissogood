@@ -16,6 +16,11 @@ Then visit:
 http://localhost:3000
 ```
 
+For the local checkout proxy, set `BACKEND_URL` in the ignored
+`.env.development.local`. The committed `.env.example` shows the required
+value. In Vercel, set the same server-side `BACKEND_URL` value to the deployed
+backend URL; it is never exposed to the browser.
+
 Expected responsibilities:
 
 - Home/landing page

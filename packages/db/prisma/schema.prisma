@@ -69,7 +69,7 @@ model PassProduct {
 
 model PassPurchase {
   id                      String         @id @default(cuid())
-  userId                  String
+  userId                  String?
   passProductId           String
   status                  PurchaseStatus @default(PENDING)
   passStatus              PassStatus?
@@ -78,19 +78,23 @@ model PassPurchase {
   stripeCheckoutSessionId String?        @unique
   stripePaymentIntentId   String?        @unique
   stripeSubscriptionId    String?        @unique
+  stripeCustomerId        String?
+  purchaserEmail          String?
   validFrom               DateTime?
   validUntil              DateTime?
   paidAt                  DateTime?
   createdAt               DateTime       @default(now())
   updatedAt               DateTime       @updatedAt
 
-  user          UserProfile         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  user          UserProfile?        @relation(fields: [userId], references: [id], onDelete: Restrict)
   passProduct   PassProduct         @relation(fields: [passProductId], references: [id], onDelete: Restrict)
   registrations ClassRegistration[]
 
   @@index([userId, status])
   @@index([passProductId])
   @@index([paidAt])
+  @@index([purchaserEmail])
+  @@index([stripeCustomerId])
 }
 
 model ClassSession {

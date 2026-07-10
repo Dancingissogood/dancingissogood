@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -eu
+
+if git diff --cached --no-ext-diff --unified=0 | rg -q '^\+[^+].*\b(?:sk|rk)_(?:test|live)_[A-Za-z0-9]'; then
+  echo "Blocked commit: staged Stripe server-side API key detected."
+  exit 1
+fi
+
+if git diff --cached --no-ext-diff --unified=0 | rg -q '^\+[^+].*\bwhsec_[A-Za-z0-9]'; then
+  echo "Blocked commit: staged Stripe webhook signing secret detected."
+  exit 1
+fi
