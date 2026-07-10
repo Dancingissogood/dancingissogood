@@ -1,0 +1,21 @@
+{
+  "name": "@dancingissogood/db",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "db:deploy": "prisma migrate deploy",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:reset": "prisma migrate reset",
+    "db:status": "prisma migrate status",
+    "db:studio": "prisma studio",
+    "db:validate": "prisma validate"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.8.0"
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.3",
+    "prisma": "^7.8.0"
+  }
+}

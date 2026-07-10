@@ -10,6 +10,16 @@
   "scripts": {
     "dev": "npm run dev --workspace landing",
     "build": "npm run build --workspace landing",
+    "db:deploy": "npm run db:deploy --workspace @dancingissogood/db",
+    "db:down": "docker compose down",
+    "db:generate": "npm run db:generate --workspace @dancingissogood/db",
+    "db:logs": "docker compose logs -f postgres",
+    "db:migrate": "npm run db:migrate --workspace @dancingissogood/db --",
+    "db:reset": "npm run db:reset --workspace @dancingissogood/db",
+    "db:status": "npm run db:status --workspace @dancingissogood/db",
+    "db:studio": "npm run db:studio --workspace @dancingissogood/db",
+    "db:up": "docker compose up -d postgres",
+    "db:validate": "npm run db:validate --workspace @dancingissogood/db",
     "lint": "npm run lint --workspace landing",
     "typecheck": "npm run typecheck --workspace landing",
     "test": "npm run lint && npm run typecheck && npm run build"

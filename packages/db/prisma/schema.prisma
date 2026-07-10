@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PurchaseStatus {
+  PENDING
+  PAID
+  CANCELED
+  REFUNDED
+  FAILED
+}
+
+enum PassStatus {
+  ACTIVE
+  USED
+  EXPIRED
+  CANCELED
+  REFUNDED
+}
+
+enum RegistrationStatus {
+  RESERVED
+  ATTENDED
+  CANCELED
+  NO_SHOW
+}
+
+model UserProfile {
+  id               String   @id @default(cuid())
+  clerkUserId      String   @unique
+  email            String   @unique
+  firstName        String?
+  lastName         String?
+  phone            String?
+  stripeCustomerId String?  @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  purchases     PassPurchase[]
+  registrations ClassRegistration[]
+
+  @@index([email])
+}
+
+model PassProduct {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  name          String
+  description   String?
+  priceCents    Int
+  currency      String   @default("usd")
+  accessDays    Int
+  accessStarts  String
+  accessEnds    String
+  active        Boolean  @default(true)
+  stripePriceId String?  @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  purchases PassPurchase[]
+
+  @@index([active])
+}
+
+model PassPurchase {
+  id                      String         @id @default(cuid())
+  userId                  String
+  passProductId           String
+  status                  PurchaseStatus @default(PENDING)
+  passStatus              PassStatus?
+  amountTotalCents        Int
+  currency                String         @default("usd")
+  stripeCheckoutSessionId String?        @unique
+  stripePaymentIntentId   String?        @unique
+  stripeSubscriptionId    String?        @unique
+  validFrom               DateTime?
+  validUntil              DateTime?
+  paidAt                  DateTime?
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+
+  user          UserProfile         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  passProduct   PassProduct         @relation(fields: [passProductId], references: [id], onDelete: Restrict)
+  registrations ClassRegistration[]
+
+  @@index([userId, status])
+  @@index([passProductId])
+  @@index([paidAt])
+}
+
+model ClassSession {
+  id             String   @id @default(cuid())
+  title          String
+  description    String?
+  instructorName String?
+  locationName   String?
+  startsAt       DateTime
+  endsAt         DateTime
+  capacity       Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  registrations ClassRegistration[]
+
+  @@index([startsAt])
+}
+
+model ClassRegistration {
+  id             String             @id @default(cuid())
+  userId         String
+  classSessionId String
+  passPurchaseId String?
+  status         RegistrationStatus @default(RESERVED)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  user         UserProfile   @relation(fields: [userId], references: [id], onDelete: Restrict)
+  classSession ClassSession  @relation(fields: [classSessionId], references: [id], onDelete: Cascade)
+  passPurchase PassPurchase? @relation(fields: [passPurchaseId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, classSessionId])
+  @@index([classSessionId, status])
+  @@index([passPurchaseId])
+}
+
+model PaymentEvent {
+  id            String    @id @default(cuid())
+  stripeEventId String    @unique
+  eventType     String
+  payload       Json
+  processedAt   DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([eventType])
+  @@index([processedAt])
+}
