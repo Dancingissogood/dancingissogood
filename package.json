@@ -10,6 +10,9 @@
   "scripts": {
     "dev": "npm run dev --workspace landing",
     "build": "npm run build --workspace landing",
+    "backend:build": "npm run build --workspace @dancingissogood/db && npm run build --workspace @dancingissogood/backend",
+    "backend:dev": "npm run backend:build && npm run dev --workspace @dancingissogood/backend",
+    "backend:test": "npm run backend:build && npm run test --workspace @dancingissogood/backend",
     "db:deploy": "npm run db:deploy --workspace @dancingissogood/db",
     "db:down": "docker compose down",
     "db:generate": "npm run db:generate --workspace @dancingissogood/db",
@@ -22,6 +25,6 @@
     "db:validate": "npm run db:validate --workspace @dancingissogood/db",
     "lint": "npm run lint --workspace landing",
     "typecheck": "npm run typecheck --workspace landing",
-    "test": "npm run lint && npm run typecheck && npm run build"
+    "test": "npm run lint && npm run typecheck && npm run build && npm run backend:test"
   }
 }

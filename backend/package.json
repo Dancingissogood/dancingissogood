@@ -1,0 +1,28 @@
+{
+  "name": "@dancingissogood/backend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "dev": "dotenv -e ../packages/db/.env -- tsx watch src/server.ts",
+    "start": "node dist/src/server.js",
+    "test": "dotenv -e ../packages/db/.env -- tsx --test test/**/*.test.ts",
+    "typecheck": "tsc --noEmit --project tsconfig.test.json"
+  },
+  "dependencies": {
+    "@dancingissogood/db": "*",
+    "@fastify/cors": "^11.3.0",
+    "fastify": "^5.10.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "dotenv-cli": "^11.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=24.10.0"
+  }
+}
