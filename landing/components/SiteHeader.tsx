@@ -1,3 +1,4 @@
+import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 
 import { navigationItems } from "@/content/site";
@@ -20,9 +21,26 @@ export function SiteHeader({ ctaHref = "/#contact" }: SiteHeaderProps) {
           </Link>
         ))}
       </nav>
-      <Link className="header-cta" href={ctaHref}>
-        Request the Schedule
-      </Link>
+      <div className="header-actions">
+        <Show when="signed-out">
+          <SignInButton mode="modal">
+            <button className="auth-link" type="button">
+              Sign In
+            </button>
+          </SignInButton>
+          <SignUpButton mode="modal">
+            <button className="account-cta" type="button">
+              Create Account
+            </button>
+          </SignUpButton>
+        </Show>
+        <Show when="signed-in">
+          <UserButton />
+        </Show>
+        <Link className="header-cta" href={ctaHref}>
+          Request the Schedule
+        </Link>
+      </div>
     </header>
   );
 }

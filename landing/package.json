@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "16.3.0-preview.5",
+    "@clerk/nextjs": "^7.5.16",
+    "next": "^16.2.10",
     "react": "19.2.7",
     "react-dom": "19.2.7"
   },
@@ -19,7 +20,7 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "eslint": "9.39.4",
-    "eslint-config-next": "16.3.0-preview.5",
+    "eslint-config-next": "^16.2.10",
     "typescript": "6.0.3"
   }
 }

@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Instrument_Sans, Playfair_Display } from "next/font/google";
 
@@ -54,9 +55,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${instrumentSans.variable} ${playfairDisplay.variable}`}>
-        <SiteHeader />
-        {children}
-        <SiteFooter />
+        <ClerkProvider>
+          <SiteHeader />
+          {children}
+          <SiteFooter />
+        </ClerkProvider>
       </body>
     </html>
   );

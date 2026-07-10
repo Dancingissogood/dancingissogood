@@ -87,15 +87,45 @@ img {
   color: var(--ink);
 }
 
+.header-actions {
+  align-items: center;
+  display: inline-flex;
+  gap: 12px;
+}
+
+.auth-link,
+.account-cta,
 .header-cta,
 .button {
   align-items: center;
+  border: 0;
   border-radius: 999px;
   display: inline-flex;
+  font: inherit;
   font-weight: 800;
   justify-content: center;
   min-height: 46px;
   padding: 0 20px;
+}
+
+.auth-link,
+.account-cta {
+  cursor: pointer;
+}
+
+.auth-link {
+  background: transparent;
+  color: var(--muted);
+  padding: 0;
+}
+
+.auth-link:hover {
+  color: var(--ink);
+}
+
+.account-cta {
+  background: var(--green);
+  color: var(--white);
 }
 
 .header-cta {
@@ -690,6 +720,15 @@ select:focus {
 
 .studio-note {
   background: var(--green-light);
+}
+
+.auth-page {
+  align-items: center;
+  background: var(--cream);
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 150px 20px 96px;
 }
 
 @media (max-width: 1100px) {
