@@ -15,3 +15,11 @@ coverage/
 *.tsbuildinfo
 
 *.log
+
+.terraform/
+*.tfplan
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log

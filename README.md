@@ -12,6 +12,7 @@ dancingissogood/
     db/             # Database schema, migrations, and database client
     shared/         # Shared types, validation schemas, constants
     config/         # Shared TypeScript, lint, and environment config
+  infrastructure/   # AWS Terraform, deployment scripts, and operations guide
 ```
 
 ## Notes

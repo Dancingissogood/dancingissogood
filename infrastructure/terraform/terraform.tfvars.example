@@ -1,0 +1,2 @@
+budget_notification_email = "billing@example.com"
+monthly_budget_usd         = 35

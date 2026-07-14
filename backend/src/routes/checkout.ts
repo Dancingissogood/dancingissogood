@@ -3,6 +3,8 @@ import type { FastifyInstance } from "fastify";
 import type Stripe from "stripe";
 import { z } from "zod";
 
+import { synchronizeAccount } from "../accounts.js";
+import type { IdentityProvider } from "../auth.js";
 import { createPassCheckoutSession } from "../payments.js";
 
 const checkoutRequestSchema = z
@@ -13,7 +15,11 @@ const checkoutRequestSchema = z
 
 export async function registerCheckoutRoutes(
   app: FastifyInstance,
-  dependencies: { database: DatabaseClient; stripe: Stripe },
+  dependencies: {
+    database: DatabaseClient;
+    identityProvider: IdentityProvider;
+    stripe: Stripe;
+  },
 ): Promise<void> {
   app.post("/v1/checkout-sessions", async (request, reply) => {
     const parsedRequest = checkoutRequestSchema.safeParse(request.body);
@@ -23,9 +29,20 @@ export async function registerCheckoutRoutes(
     }
 
     try {
+      const identity = await dependencies.identityProvider.authenticate(request);
+      const user = identity
+        ? await synchronizeAccount(dependencies.database, identity)
+        : null;
       const checkoutSession = await createPassCheckoutSession(
         dependencies,
         parsedRequest.data.passSlug,
+        user
+          ? {
+              email: user.email,
+              stripeCustomerId: user.stripeCustomerId,
+              userId: user.id,
+            }
+          : null,
       );
 
       if (!checkoutSession) {

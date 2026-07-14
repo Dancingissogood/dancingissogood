@@ -5,6 +5,7 @@ import test from "node:test";
 import { createDatabaseClient } from "@dancingissogood/db";
 import Stripe from "stripe";
 
+import type { IdentityProvider } from "../src/auth.js";
 import { buildApp } from "../src/app.js";
 
 const webhookSecret = process.env["STRIPE_WEBHOOK_SECRET"];
@@ -88,6 +89,50 @@ test("checkout derives the amount from the server-owned Stripe price", async () 
     assert.equal(purchase.status, "PENDING");
   } finally {
     await database.passPurchase.deleteMany({ where: { passProductId: product.id } });
+    await database.passProduct.delete({ where: { id: product.id } });
+    await app.close();
+  }
+});
+
+test("authenticated checkout links the purchase and pre-fills the verified email", async () => {
+  const { database, product } = await createTestPassProduct();
+  const stripeMock = createStripeMock();
+  const suffix = randomUUID();
+  const clerkUserId = `user_${suffix}`;
+  const identityProvider: IdentityProvider = {
+    configured: true,
+    authenticate: async () => ({
+      clerkUserId,
+      email: `dancer-${suffix}@example.com`,
+      firstName: "Test",
+      lastName: "Dancer",
+      phone: null,
+    }),
+  };
+  const app = await buildApp({ database, identityProvider, stripe: stripeMock.stripe });
+
+  try {
+    const response = await app.inject({
+      headers: { authorization: "Bearer valid-session" },
+      method: "POST",
+      payload: { passSlug: product.slug },
+      url: "/v1/checkout-sessions",
+    });
+
+    assert.equal(response.statusCode, 201);
+    assert.equal(
+      stripeMock.getCheckoutParameters()?.customer_email,
+      `dancer-${suffix}@example.com`,
+    );
+
+    const profile = await database.userProfile.findUniqueOrThrow({ where: { clerkUserId } });
+    const purchase = await database.passPurchase.findFirstOrThrow({
+      where: { passProductId: product.id },
+    });
+    assert.equal(purchase.userId, profile.id);
+  } finally {
+    await database.passPurchase.deleteMany({ where: { passProductId: product.id } });
+    await database.userProfile.deleteMany({ where: { clerkUserId } });
     await database.passProduct.delete({ where: { id: product.id } });
     await app.close();
   }

@@ -35,6 +35,9 @@ export function SiteHeader({ ctaHref = "/#contact" }: SiteHeaderProps) {
           </SignUpButton>
         </Show>
         <Show when="signed-in">
+          <Link className="auth-link" href="/account">
+            Account
+          </Link>
           <UserButton />
         </Show>
         <Link className="header-cta" href={ctaHref}>

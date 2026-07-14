@@ -42,13 +42,20 @@ try {
       description: pass.description,
       metadata: { pass_product_slug: pass.slug },
       name: pass.name,
+    }, {
+      idempotencyKey: `pass-product:${pass.slug}:v1`,
     });
-    const price = await stripe.prices.create({
-      currency: pass.currency,
-      lookup_key: pass.slug,
-      product: product.id,
-      unit_amount: pass.priceCents,
-    });
+    const price = await stripe.prices.create(
+      {
+        currency: pass.currency,
+        lookup_key: pass.slug,
+        product: product.id,
+        unit_amount: pass.priceCents,
+      },
+      {
+        idempotencyKey: `pass-price:${pass.slug}:${pass.currency}:${pass.priceCents}:v1`,
+      },
+    );
 
     stripePriceId = price.id;
   }

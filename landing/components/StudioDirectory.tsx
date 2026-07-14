@@ -14,26 +14,15 @@ export function StudioDirectory({ studios }: StudioDirectoryProps) {
           className={`studio-profile${index % 2 === 1 ? " studio-profile-reverse" : ""}`}
           key={studio.name}
         >
-          <div
-            className={`studio-media${studio.imageTone === "dark" ? " studio-media-dark" : ""}`}
-          >
-            {studio.imageTone === "dark" ? (
-              <Image
-                src={studio.image}
-                alt={studio.imageAlt}
-                width={577}
-                height={785}
-                className="studio-logo-image"
-                sizes="(max-width: 1100px) 280px, 320px"
-              />
-            ) : (
-              <Image
-                src={studio.image}
-                alt={studio.imageAlt}
-                fill
-                sizes="(max-width: 1100px) 100vw, 40vw"
-              />
-            )}
+          <div className={`studio-media studio-media-${studio.imageTheme}`}>
+            <Image
+              src={studio.image}
+              alt={studio.imageAlt}
+              width={studio.imageWidth}
+              height={studio.imageHeight}
+              className={`studio-logo-image studio-logo-image-${studio.imageVariant}`}
+              sizes="(max-width: 560px) 280px, 420px"
+            />
           </div>
           <div className="studio-content">
             <p className="eyebrow">{studio.locationLabel}</p>

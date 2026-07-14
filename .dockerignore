@@ -1,0 +1,12 @@
+**
+!package.json
+!package-lock.json
+!backend/package.json
+!backend/tsconfig.json
+!backend/src/**
+!packages/db/package.json
+!packages/db/tsconfig.json
+!packages/db/prisma.config.ts
+!packages/db/src/**
+!packages/db/prisma/schema.prisma
+!packages/db/prisma/migrations/**

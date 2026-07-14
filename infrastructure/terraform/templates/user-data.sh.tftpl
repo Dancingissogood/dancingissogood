@@ -1,0 +1,222 @@
+#!/bin/bash
+set -euo pipefail
+
+dnf install -y docker jq
+install -d -m 0755 /etc/docker
+cat > /etc/docker/daemon.json <<'DOCKER_CONFIG'
+{
+  "log-driver": "local",
+  "log-opts": {
+    "max-file": "3",
+    "max-size": "10m"
+  }
+}
+DOCKER_CONFIG
+systemctl enable --now docker
+
+install -d -m 0700 /opt/dancingissogood
+install -d -m 0755 /opt/dancingissogood/caddy
+
+cat > /opt/dancingissogood/caddy/Caddyfile <<'CADDYFILE'
+${api_domain} {
+  encode zstd gzip
+  reverse_proxy backend:3001
+
+  header {
+    -Server
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    Permissions-Policy "camera=(), geolocation=(), microphone=()"
+  }
+}
+CADDYFILE
+
+cat > /opt/dancingissogood/deploy.sh <<'DEPLOY_SCRIPT'
+#!/bin/bash
+set -euo pipefail
+
+exec 9>/var/lock/dancingissogood-deploy.lock
+flock -n 9 || {
+  echo "Another deployment is already running."
+  exit 1
+}
+
+IMAGE_TAG="$${1:?Usage: deploy.sh IMAGE_TAG}"
+AWS_ACCOUNT_ID="${aws_account_id}"
+AWS_REGION="${aws_region}"
+REPOSITORY_URL="${repository_url}"
+RUNTIME_IMAGE="$${REPOSITORY_URL}:runtime-$${IMAGE_TAG}"
+MIGRATION_IMAGE="$${REPOSITORY_URL}:migration-$${IMAGE_TAG}"
+MIGRATION_ENV="$(mktemp /run/dancingissogood-migration.XXXXXX)"
+
+cleanup() {
+  rm -f "$${MIGRATION_ENV}"
+}
+trap cleanup EXIT
+
+ACTUAL_ACCOUNT_ID="$(aws sts get-caller-identity --region "$${AWS_REGION}" --query Account --output text)"
+if [[ "$${ACTUAL_ACCOUNT_ID}" != "$${AWS_ACCOUNT_ID}" ]]; then
+  echo "Refusing deployment: expected AWS account $${AWS_ACCOUNT_ID}, received $${ACTUAL_ACCOUNT_ID}." >&2
+  exit 1
+fi
+
+aws ecr get-login-password --region "$${AWS_REGION}" \
+  | docker login --username AWS --password-stdin "$${AWS_ACCOUNT_ID}.dkr.ecr.$${AWS_REGION}.amazonaws.com"
+
+docker pull "$${RUNTIME_IMAGE}"
+docker pull "$${MIGRATION_IMAGE}"
+
+DB_SECRET="$(aws secretsmanager get-secret-value \
+  --region "$${AWS_REGION}" \
+  --secret-id "${database_secret_arn}" \
+  --query SecretString \
+  --output text)"
+DB_USERNAME="$(jq -r '.username' <<<"$${DB_SECRET}")"
+DB_PASSWORD="$(jq -r '.password' <<<"$${DB_SECRET}")"
+DB_USERNAME_ENCODED="$(jq -rn --arg value "$${DB_USERNAME}" '$value | @uri')"
+DB_PASSWORD_ENCODED="$(jq -rn --arg value "$${DB_PASSWORD}" '$value | @uri')"
+
+get_parameter() {
+  aws ssm get-parameter \
+    --region "$${AWS_REGION}" \
+    --name "${parameter_prefix}/$1" \
+    --with-decryption \
+    --query Parameter.Value \
+    --output text
+}
+
+CLERK_PUBLISHABLE_KEY="$(get_parameter clerk_publishable_key)"
+CLERK_SECRET_KEY="$(get_parameter clerk_secret_key)"
+STRIPE_SECRET_KEY="$(get_parameter stripe_secret_key)"
+STRIPE_WEBHOOK_SECRET="$(get_parameter stripe_webhook_secret)"
+RUNTIME_DB_PASSWORD="$(get_parameter runtime_database_password)"
+RUNTIME_DB_PASSWORD_ENCODED="$(jq -rn --arg value "$${RUNTIME_DB_PASSWORD}" '$value | @uri')"
+
+umask 077
+{
+  printf '%s\n' "DATABASE_URL=postgresql://$${DB_USERNAME_ENCODED}:$${DB_PASSWORD_ENCODED}@${database_host}:${database_port}/${database_name}?sslmode=verify-full&sslrootcert=/app/certs/rds-global-bundle.pem"
+  printf '%s\n' "DATABASE_CA_CERT_PATH=/app/certs/rds-global-bundle.pem"
+  printf '%s\n' "RUNTIME_DATABASE_PASSWORD=$${RUNTIME_DB_PASSWORD}"
+} > "$${MIGRATION_ENV}"
+
+{
+  printf '%s\n' "NODE_ENV=production"
+  printf '%s\n' "PORT=3001"
+  printf '%s\n' "DATABASE_URL=postgresql://app_runtime:$${RUNTIME_DB_PASSWORD_ENCODED}@${database_host}:${database_port}/${database_name}?sslmode=verify-full&sslrootcert=/app/certs/rds-global-bundle.pem"
+  printf '%s\n' "DATABASE_CA_CERT_PATH=/app/certs/rds-global-bundle.pem"
+  printf '%s\n' "DATABASE_POOL_MAX=5"
+  printf '%s\n' "CORS_ORIGINS=${cors_origins}"
+  printf '%s\n' "LANDING_URL=${landing_url}"
+  printf '%s\n' "CLERK_PUBLISHABLE_KEY=$${CLERK_PUBLISHABLE_KEY}"
+  printf '%s\n' "CLERK_SECRET_KEY=$${CLERK_SECRET_KEY}"
+  printf '%s\n' "STRIPE_SECRET_KEY=$${STRIPE_SECRET_KEY}"
+  printf '%s\n' "STRIPE_WEBHOOK_SECRET=$${STRIPE_WEBHOOK_SECRET}"
+} > /opt/dancingissogood/backend.env
+
+unset DB_SECRET DB_USERNAME DB_PASSWORD DB_USERNAME_ENCODED DB_PASSWORD_ENCODED
+unset CLERK_PUBLISHABLE_KEY CLERK_SECRET_KEY STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET
+unset RUNTIME_DB_PASSWORD RUNTIME_DB_PASSWORD_ENCODED
+
+docker network inspect dancingissogood >/dev/null 2>&1 \
+  || docker network create dancingissogood >/dev/null
+
+docker run --rm \
+  --name dancingissogood-migration \
+  --network dancingissogood \
+  --env-file "$${MIGRATION_ENV}" \
+  --read-only \
+  --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+  --tmpfs /home/node:rw,noexec,nosuid,size=32m \
+  --security-opt no-new-privileges \
+  --cap-drop ALL \
+  --pids-limit 128 \
+  "$${MIGRATION_IMAGE}"
+
+docker run --rm \
+  --name dancingissogood-database-role \
+  --network dancingissogood \
+  --env-file "$${MIGRATION_ENV}" \
+  --read-only \
+  --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+  --security-opt no-new-privileges \
+  --cap-drop ALL \
+  --pids-limit 128 \
+  "$${MIGRATION_IMAGE}" \
+  node packages/db/dist/src/provision-runtime-role.js
+
+docker run --rm \
+  --name dancingissogood-pass-sync \
+  --network dancingissogood \
+  --env-file /opt/dancingissogood/backend.env \
+  --read-only \
+  --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+  --security-opt no-new-privileges \
+  --cap-drop ALL \
+  --pids-limit 128 \
+  --memory 256m \
+  --memory-swap 320m \
+  "$${RUNTIME_IMAGE}" \
+  node backend/dist/src/scripts/sync-stripe-pass.js
+
+docker rm -f backend-candidate >/dev/null 2>&1 || true
+docker run -d \
+  --name backend-candidate \
+  --restart unless-stopped \
+  --network dancingissogood \
+  --env-file /opt/dancingissogood/backend.env \
+  --read-only \
+  --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+  --security-opt no-new-privileges \
+  --cap-drop ALL \
+  --pids-limit 128 \
+  --memory 640m \
+  --memory-swap 768m \
+  "$${RUNTIME_IMAGE}" >/dev/null
+
+for attempt in {1..30}; do
+  HEALTH="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}starting{{end}}' backend-candidate)"
+  if [[ "$${HEALTH}" == "healthy" ]]; then
+    break
+  fi
+  if [[ "$${HEALTH}" == "unhealthy" || "$${attempt}" == "30" ]]; then
+    docker logs backend-candidate >&2
+    docker rm -f backend-candidate >/dev/null 2>&1 || true
+    exit 1
+  fi
+  sleep 2
+done
+
+docker rm -f backend >/dev/null 2>&1 || true
+docker rename backend-candidate backend
+
+if [[ "$(docker inspect --format '{{.State.Running}}' caddy 2>/dev/null || true)" == "true" ]]; then
+  docker exec caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
+else
+  docker rm -f caddy >/dev/null 2>&1 || true
+  docker run -d \
+    --name caddy \
+    --restart unless-stopped \
+    --network dancingissogood \
+    -p 80:80 \
+    -p 443:443 \
+    -p 443:443/udp \
+    -v /opt/dancingissogood/caddy/Caddyfile:/etc/caddy/Caddyfile:ro \
+    -v caddy_data:/data \
+    -v caddy_config:/config \
+    --read-only \
+    --tmpfs /tmp:rw,noexec,nosuid,size=32m \
+    --security-opt no-new-privileges \
+    --cap-drop ALL \
+    --cap-add NET_BIND_SERVICE \
+    --pids-limit 64 \
+    --memory 128m \
+    --memory-swap 160m \
+    caddy:2.10.2-alpine@sha256:8dbca3525dd8dce671e495665a0eb297a83ec87ee30f373947d0ea93115949db >/dev/null
+fi
+
+docker image prune -f --filter "until=168h" >/dev/null
+echo "Deployment $${IMAGE_TAG} completed."
+DEPLOY_SCRIPT
+
+chmod 0700 /opt/dancingissogood/deploy.sh

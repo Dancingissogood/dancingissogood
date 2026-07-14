@@ -13,9 +13,16 @@ export type CheckoutSessionResult = {
   url: string;
 };
 
+type CheckoutAccount = {
+  email: string;
+  stripeCustomerId: string | null;
+  userId: string;
+};
+
 export async function createPassCheckoutSession(
   { database, stripe }: CheckoutDependencies,
   passSlug: string,
+  account: CheckoutAccount | null = null,
 ): Promise<CheckoutSessionResult | null> {
   const passProduct = await database.passProduct.findFirst({
     where: { active: true, slug: passSlug },
@@ -41,14 +48,24 @@ export async function createPassCheckoutSession(
       amountTotalCents: passProduct.priceCents,
       currency: passProduct.currency,
       passProductId: passProduct.id,
+      userId: account?.userId,
     },
   });
 
   try {
+    const customerParameters: Pick<
+      Stripe.Checkout.SessionCreateParams,
+      "customer" | "customer_creation" | "customer_email"
+    > = account?.stripeCustomerId
+      ? { customer: account.stripeCustomerId }
+      : {
+          customer_creation: "always",
+          ...(account ? { customer_email: account.email } : {}),
+        };
     const checkoutSession = await stripe.checkout.sessions.create({
       cancel_url: `${config.landingUrl}/#passes`,
       client_reference_id: purchase.id,
-      customer_creation: "always",
+      ...customerParameters,
       line_items: [{ price: stripePrice.id, quantity: 1 }],
       metadata: {
         passProductId: passProduct.id,

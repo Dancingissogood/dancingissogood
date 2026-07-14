@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 const checkoutRequestSchema = {
@@ -34,10 +35,15 @@ export async function POST(request: Request) {
   }
 
   try {
+    const { getToken, userId } = await auth();
+    const token = userId ? await getToken() : null;
     const response = await fetch(`${backendUrl}/v1/checkout-sessions`, {
       body: JSON.stringify(body),
       cache: "no-store",
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        ...(token ? { authorization: `Bearer ${token}` } : {}),
+      },
       method: "POST",
       signal: AbortSignal.timeout(10_000),
     });

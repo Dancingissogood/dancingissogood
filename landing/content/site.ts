@@ -22,7 +22,10 @@ export type StudioProfile = {
   description: string;
   image: string;
   imageAlt: string;
-  imageTone?: "light" | "dark";
+  imageWidth: number;
+  imageHeight: number;
+  imageVariant: "portrait" | "emblem";
+  imageTheme: "belleville" | "rhizome";
   tags: string[];
   details: Array<{
     label: string;
@@ -128,9 +131,12 @@ export const studioProfiles: StudioProfile[] = [
     locationLabel: "Belleville, Michigan",
     description:
       "Belleville Lake Dance Company offers dance programming across styles including jazz, tap, ballet, hip-hop, ballroom, and acro. The studio is based at 500 E. Huron River Drive in Belleville.",
-    image: "/assets/studios/belleville-lake-dance-company.webp",
+    image: "/assets/studios/belleville-lake-dance-logo-official.webp",
     imageAlt: "Belleville Lake Dance Company logo",
-    imageTone: "dark",
+    imageWidth: 577,
+    imageHeight: 618,
+    imageVariant: "portrait",
+    imageTheme: "belleville",
     tags: ["Jazz", "Tap", "Ballet", "Hip-hop", "Ballroom", "Acro"],
     details: [
       {
@@ -152,8 +158,12 @@ export const studioProfiles: StudioProfile[] = [
     locationLabel: "Ypsilanti, Michigan",
     description:
       "Rhizome Roots Studio focuses on inclusive wellness programming for all ages, genders, and ability levels, with movement, education, community-building, and nature-centered activities.",
-    image: "/assets/studios/rhizome-roots-studio.jpg",
-    imageAlt: "Rhizome Roots Studio movement and wellness collage",
+    image: "/assets/studios/rhizome-roots-contact-logo.png",
+    imageAlt: "Rhizome Roots Studio logo",
+    imageWidth: 594,
+    imageHeight: 460,
+    imageVariant: "emblem",
+    imageTheme: "rhizome",
     tags: [
       "Social dancing",
       "Yoga",
