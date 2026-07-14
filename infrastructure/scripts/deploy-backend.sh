@@ -47,18 +47,37 @@ docker buildx build \
   --push \
   "${REPOSITORY_ROOT}"
 
+resolve_arm64_digest() {
+  local image_tag="$1"
+  local image_index
+
+  image_index="$(aws ecr batch-get-image \
+    --profile "${AWS_PROFILE_NAME}" \
+    --region "${AWS_REGION_NAME}" \
+    --repository-name "dancingissogood/backend" \
+    --image-ids imageTag="${image_tag}" \
+    --accepted-media-types application/vnd.oci.image.index.v1+json \
+    --query 'images[0].imageManifest' \
+    --output text)"
+
+  jq -er '.manifests[] | select(.platform.os == "linux" and .platform.architecture == "arm64") | .digest' \
+    <<<"${image_index}"
+}
+
 for image_tag in "runtime-${IMAGE_TAG}" "migration-${IMAGE_TAG}"; do
+  image_digest="$(resolve_arm64_digest "${image_tag}")"
+
   aws ecr wait image-scan-complete \
     --profile "${AWS_PROFILE_NAME}" \
     --region "${AWS_REGION_NAME}" \
     --repository-name "dancingissogood/backend" \
-    --image-id imageTag="${image_tag}"
+    --image-id imageDigest="${image_digest}"
 
   CRITICAL_FINDINGS="$(aws ecr describe-image-scan-findings \
     --profile "${AWS_PROFILE_NAME}" \
     --region "${AWS_REGION_NAME}" \
     --repository-name "dancingissogood/backend" \
-    --image-id imageTag="${image_tag}" \
+    --image-id imageDigest="${image_digest}" \
     --query 'imageScanFindings.findingSeverityCounts.CRITICAL' \
     --output text)"
 

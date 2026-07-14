@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-FROM node:24.10.0-alpine AS build
+FROM node:24.18.0-alpine@sha256:a0b9bf06e4e6193cf7a0f58816cc935ff8c2a908f81e6f1a95432d679c54fbfd AS build
 WORKDIR /app
 
 ADD --checksum=sha256:e5bb2084ccf45087bda1c9bffdea0eb15ee67f0b91646106e466714f9de3c7e3 \
@@ -21,7 +21,7 @@ ENV NODE_ENV=production
 USER node
 CMD ["npm", "run", "db:deploy"]
 
-FROM node:24.10.0-alpine AS runtime-dependencies
+FROM node:24.18.0-alpine@sha256:a0b9bf06e4e6193cf7a0f58816cc935ff8c2a908f81e6f1a95432d679c54fbfd AS runtime-dependencies
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -29,7 +29,7 @@ COPY backend/package.json backend/package.json
 COPY packages/db/package.json packages/db/package.json
 RUN npm ci --omit=dev --omit=optional --ignore-scripts && npm cache clean --force
 
-FROM node:24.10.0-alpine AS runtime
+FROM node:24.18.0-alpine@sha256:a0b9bf06e4e6193cf7a0f58816cc935ff8c2a908f81e6f1a95432d679c54fbfd AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 
