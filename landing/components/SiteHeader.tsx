@@ -1,10 +1,11 @@
 "use client";
 
-import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import { Show, SignInButton, SignUpButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { navigationItems } from "@/content/site";
+import { AccountMenu } from "@/components/AccountMenu";
 
 type SiteHeaderProps = {
   ctaHref?: string;
@@ -65,10 +66,7 @@ export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
           </SignUpButton>
         </Show>
         <Show when="signed-in">
-          <Link className="auth-link" href="/account">
-            Account
-          </Link>
-          <UserButton />
+          <AccountMenu />
         </Show>
         <Link className="header-cta" href={ctaHref}>
           Buy Pass
