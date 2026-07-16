@@ -77,31 +77,17 @@ export default function HomePage() {
             <h2>Build your camp days from the live class menu.</h2>
             <p>
               Browse the classes currently available across Monday, Tuesday, and Wednesday.
+              Your pass includes unlimited access throughout the 9 AM to 2 PM class window.
             </p>
           </div>
           <div className="schedule-summary" aria-label="Schedule details">
             <div><span>Days</span><strong>Monday-Wednesday</strong></div>
             <div><span>Class length</span><strong>20 minutes</strong></div>
+            <div><span>Access</span><strong>Unlimited, 9 AM-2 PM</strong></div>
             <div><span>Time zone</span><strong>Eastern Time</strong></div>
           </div>
         </div>
         <PublicSchedule />
-        <div className="day-format">
-          <h3>Daily format</h3>
-          <ol>
-            <li>
-              <span>9:00 AM</span> Unlimited class access opens.
-            </li>
-            <li>
-              <span>9:00 AM-2:00 PM</span> Rotating 20-minute sessions run
-              throughout the day.
-            </li>
-            <li>
-              <span>Monday-Wednesday</span> Attend as many available sections as
-              you want with the pass.
-            </li>
-          </ol>
-        </div>
       </section>
 
       <section id="pass" className="section pass-section">
@@ -118,7 +104,10 @@ export default function HomePage() {
           <span className="price-label">3-Day Pass</span>
           <strong>$100</strong>
           <p>Unlimited class access between 9 AM and 2 PM, Monday through Wednesday.</p>
-          <CheckoutButton passSlug="three-day-camp-pass" />
+          <CheckoutButton
+            className="button button-primary pass-purchase-button"
+            passSlug="three-day-camp-pass"
+          />
         </aside>
       </section>
 

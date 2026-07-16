@@ -555,7 +555,6 @@ section[id] {
 
 .menu-card p,
 .feature-grid p,
-.day-format li,
 .pass-copy p,
 .schedule-heading-row p,
 .contact-section p {
@@ -799,6 +798,81 @@ section[id] {
   white-space: nowrap;
 }
 
+.calendar-event-popover {
+  background: var(--ink);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  box-shadow: 0 20px 60px rgba(18, 17, 14, 0.28);
+  color: var(--white);
+  overflow: hidden;
+  pointer-events: none;
+  position: fixed;
+  width: 320px;
+  z-index: 50;
+}
+
+.calendar-event-popover-image {
+  aspect-ratio: 16 / 7;
+  position: relative;
+}
+
+.calendar-event-popover-image img {
+  object-fit: cover;
+}
+
+.calendar-event-popover-body {
+  padding: 18px;
+}
+
+.calendar-event-popover-time {
+  color: #ff9f82;
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 750;
+  margin-bottom: 6px;
+}
+
+.calendar-event-popover-body > strong {
+  display: block;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.calendar-event-popover-body > p {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  margin: 9px 0 0;
+}
+
+.calendar-event-popover dl {
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  display: grid;
+  gap: 7px;
+  margin: 14px 0 0;
+  padding-top: 12px;
+}
+
+.calendar-event-popover dl div {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 64px minmax(0, 1fr);
+}
+
+.calendar-event-popover dt,
+.calendar-event-popover dd {
+  font-size: 0.7rem;
+  margin: 0;
+}
+
+.calendar-event-popover dt {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.calendar-event-popover dd {
+  color: rgba(255, 255, 255, 0.86);
+}
+
 @container calendar-event (max-width: 110px) {
   .calendar-event-content {
     grid-template-columns: minmax(0, 1fr);
@@ -825,34 +899,6 @@ section[id] {
 .admin-alert,
 .dialog-error {
   color: #9d2f1e;
-}
-
-.day-format {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 24px;
-  padding: clamp(28px, 4vw, 44px);
-}
-
-.day-format ol {
-  list-style: none;
-  margin: 27px 0 0;
-  padding: 0;
-}
-
-.day-format li {
-  border-top: 1px solid var(--line);
-  font-size: 0.94rem;
-  padding: 17px 0;
-}
-
-.day-format span {
-  color: var(--ink);
-  display: block;
-  font-size: 0.8rem;
-  font-weight: 750;
-  letter-spacing: 0.02em;
-  margin-bottom: 5px;
 }
 
 /* Schedule administration */
@@ -1129,6 +1175,17 @@ section[id] {
 .checkout-control,
 .checkout-control .button {
   width: 100%;
+}
+
+.pass-purchase-button {
+  box-shadow: 0 12px 28px rgba(199, 76, 45, 0.24);
+  font-size: 1.05rem;
+  min-height: 62px;
+  padding: 0 28px;
+}
+
+.pass-purchase-button:hover {
+  box-shadow: 0 15px 32px rgba(199, 76, 45, 0.3);
 }
 
 .checkout-error {
@@ -1880,7 +1937,6 @@ select:focus {
     -webkit-line-clamp: 4;
   }
 
-  .day-format,
   .price-card,
   .contact-form,
   .studio-profile {
