@@ -5,6 +5,7 @@ import { ClassMenu } from "@/components/ClassMenu";
 import { CheckoutButton } from "@/components/CheckoutButton";
 import { ContactForm } from "@/components/ContactForm";
 import { QuickFacts } from "@/components/QuickFacts";
+import { PublicSchedule } from "@/components/PublicSchedule";
 import { classMenuItems, quickFacts } from "@/content/site";
 
 export default function HomePage() {
@@ -70,30 +71,21 @@ export default function HomePage() {
       </section>
 
       <section id="schedule" className="section schedule-section">
-        <div className="schedule-panel">
+        <div className="schedule-heading-row">
           <div>
-            <p className="eyebrow">Summer schedule</p>
-            <h2>Camp weeks in July, August, and September.</h2>
+            <p className="eyebrow">Current schedule</p>
+            <h2>Build your camp days from the live class menu.</h2>
             <p>
-              Summer camps run on the 1st and 4th Monday, Tuesday, and Wednesday
-              of each month.
+              Browse the classes currently available across Monday, Tuesday, and Wednesday.
             </p>
           </div>
-          <div className="schedule-list" aria-label="Summer camp date pattern">
-            <div>
-              <span>July</span>
-              <strong>1st & 4th Mon-Wed</strong>
-            </div>
-            <div>
-              <span>August</span>
-              <strong>1st & 4th Mon-Wed</strong>
-            </div>
-            <div>
-              <span>September</span>
-              <strong>1st & 4th Mon-Wed</strong>
-            </div>
+          <div className="schedule-summary" aria-label="Schedule details">
+            <div><span>Days</span><strong>Monday-Wednesday</strong></div>
+            <div><span>Class length</span><strong>20 minutes</strong></div>
+            <div><span>Time zone</span><strong>Eastern Time</strong></div>
           </div>
         </div>
+        <PublicSchedule />
         <div className="day-format">
           <h3>Daily format</h3>
           <ol>

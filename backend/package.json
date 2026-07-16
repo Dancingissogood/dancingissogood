@@ -8,6 +8,7 @@
     "dev": "dotenv -e .env -- tsx watch src/server.ts",
     "start": "node dist/src/server.js",
     "stripe:sync-pass": "dotenv -e .env -- tsx src/scripts/sync-stripe-pass.ts",
+    "user:set-role": "dotenv -e .env -- tsx src/scripts/set-user-role.ts",
     "test": "dotenv -e .env -- tsx --test test/**/*.test.ts",
     "typecheck": "tsc --noEmit --project tsconfig.test.json"
   },

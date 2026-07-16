@@ -30,6 +30,11 @@ enum RegistrationStatus {
   NO_SHOW
 }
 
+enum UserRole {
+  MEMBER
+  ADMIN
+}
+
 model UserProfile {
   id               String   @id @default(cuid())
   clerkUserId      String   @unique
@@ -38,11 +43,14 @@ model UserProfile {
   lastName         String?
   phone            String?
   stripeCustomerId String?  @unique
+  role             UserRole @default(MEMBER)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  purchases     PassPurchase[]
-  registrations ClassRegistration[]
+  purchases            PassPurchase[]
+  registrations        ClassRegistration[]
+  createdClassSessions ClassSession[]      @relation("ClassSessionCreatedBy")
+  updatedClassSessions ClassSession[]      @relation("ClassSessionUpdatedBy")
 
   @@index([email])
 }
@@ -106,12 +114,20 @@ model ClassSession {
   startsAt       DateTime
   endsAt         DateTime
   capacity       Int?
+  published      Boolean  @default(true)
+  createdById    String?
+  updatedById    String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   registrations ClassRegistration[]
+  createdBy     UserProfile?        @relation("ClassSessionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy     UserProfile?        @relation("ClassSessionUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
 
   @@index([startsAt])
+  @@index([published, startsAt])
+  @@index([createdById])
+  @@index([updatedById])
 }
 
 model ClassRegistration {
@@ -124,7 +140,7 @@ model ClassRegistration {
   updatedAt      DateTime           @updatedAt
 
   user         UserProfile   @relation(fields: [userId], references: [id], onDelete: Restrict)
-  classSession ClassSession  @relation(fields: [classSessionId], references: [id], onDelete: Cascade)
+  classSession ClassSession  @relation(fields: [classSessionId], references: [id], onDelete: Restrict)
   passPurchase PassPurchase? @relation(fields: [passPurchaseId], references: [id], onDelete: SetNull)
 
   @@unique([userId, classSessionId])

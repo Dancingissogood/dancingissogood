@@ -80,6 +80,7 @@ export async function getAccountSummary(database: DatabaseClient, userId: string
     email: user.email,
     firstName: user.firstName,
     lastName: user.lastName,
+    role: user.role,
     purchases: user.purchases.map((purchase) => ({
       amountTotalCents: purchase.amountTotalCents,
       createdAt: purchase.createdAt.toISOString(),

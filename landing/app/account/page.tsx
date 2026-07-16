@@ -64,9 +64,16 @@ export default async function AccountPage() {
             <h1>{displayName || "Welcome back"}</h1>
             <p>{account.email}</p>
           </div>
-          <Link className="button button-secondary" href="/#pass">
-            Purchase a Pass
-          </Link>
+          <div className="account-heading-actions">
+            {account.role === "ADMIN" ? (
+              <Link className="button button-secondary" href="/admin/schedule">
+                Manage Schedule
+              </Link>
+            ) : null}
+            <Link className="button button-secondary" href="/#pass">
+              Purchase a Pass
+            </Link>
+          </div>
         </header>
 
         <section className="account-passes" aria-labelledby="passes-title">

@@ -92,6 +92,7 @@ test("account synchronization claims only paid guest purchases for the verified 
     assert.equal(response.statusCode, 200);
     const account = response.json();
     assert.equal(account.email, "dancer@example.com");
+    assert.equal(account.role, "MEMBER");
     assert.equal(account.purchases.length, 1);
     assert.equal(account.purchases[0].id, paidPurchase.id);
 

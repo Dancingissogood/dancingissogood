@@ -53,7 +53,8 @@ a {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -569,42 +570,41 @@ section[id] {
 
 .schedule-section {
   display: grid;
-  gap: 18px;
-  grid-template-columns: minmax(0, 1.22fr) minmax(330px, 0.72fr);
+  gap: 24px;
 }
 
-.schedule-panel {
+.schedule-heading-row {
+  align-items: end;
   background: var(--night);
   border-radius: 24px;
   color: var(--white);
   display: grid;
-  gap: clamp(34px, 5vw, 74px);
-  grid-template-columns: minmax(0, 1fr) minmax(250px, 0.55fr);
+  gap: clamp(36px, 6vw, 92px);
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
   padding: clamp(32px, 5vw, 62px);
 }
 
-.schedule-panel h2 {
+.schedule-heading-row h2 {
   font-size: clamp(2.5rem, 4vw, 4.4rem);
   max-width: 660px;
 }
 
-.schedule-panel p {
+.schedule-heading-row p {
   color: rgba(255, 255, 255, 0.64);
   font-size: 1rem;
   margin-top: 24px;
   max-width: 580px;
 }
 
-.schedule-panel .eyebrow {
+.schedule-heading-row .eyebrow {
   color: #ff9f82;
 }
 
-.schedule-list {
-  align-self: center;
+.schedule-summary {
   border-top: 1px solid rgba(255, 255, 255, 0.18);
 }
 
-.schedule-list div {
+.schedule-summary div {
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.18);
   display: flex;
@@ -613,16 +613,128 @@ section[id] {
   padding: 17px 0;
 }
 
-.schedule-list span {
+.schedule-summary span {
   color: rgba(255, 255, 255, 0.52);
   font-size: 0.84rem;
   font-weight: 650;
 }
 
-.schedule-list strong {
+.schedule-summary strong {
   font-size: 0.9rem;
   font-weight: 600;
   text-align: right;
+}
+
+.public-calendar-shell,
+.admin-calendar {
+  --fc-border-color: rgba(23, 23, 20, 0.12);
+  --fc-button-bg-color: var(--ink);
+  --fc-button-border-color: var(--ink);
+  --fc-button-hover-bg-color: var(--ink-soft);
+  --fc-button-hover-border-color: var(--ink-soft);
+  --fc-button-active-bg-color: var(--accent-deep);
+  --fc-button-active-border-color: var(--accent-deep);
+  --fc-event-bg-color: var(--accent);
+  --fc-event-border-color: var(--accent-deep);
+  --fc-event-text-color: var(--white);
+  --fc-now-indicator-color: var(--accent-deep);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  overflow-x: auto;
+  padding: clamp(20px, 3vw, 36px);
+}
+
+.public-calendar-shell .fc,
+.admin-calendar .fc {
+  min-width: 720px;
+}
+
+.public-calendar-shell .fc .fc-toolbar,
+.admin-calendar .fc .fc-toolbar {
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.public-calendar-shell .fc .fc-toolbar-title,
+.admin-calendar .fc .fc-toolbar-title {
+  font-family: var(--font-bodoni-moda), serif;
+  font-size: clamp(1.6rem, 3vw, 2.35rem);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.public-calendar-shell .fc .fc-button,
+.admin-calendar .fc .fc-button {
+  border-radius: 8px;
+  box-shadow: none;
+  min-height: 38px;
+  padding: 0 13px;
+  text-transform: capitalize;
+}
+
+.public-calendar-shell .fc .fc-col-header-cell-cushion,
+.admin-calendar .fc .fc-col-header-cell-cushion {
+  font-size: 0.82rem;
+  font-weight: 750;
+  padding: 12px 5px;
+}
+
+.public-calendar-shell .fc .fc-timegrid-slot-label-cushion,
+.admin-calendar .fc .fc-timegrid-slot-label-cushion {
+  color: var(--subtle);
+  font-size: 0.7rem;
+  padding-right: 10px;
+}
+
+.public-calendar-shell .fc .fc-timegrid-slot,
+.admin-calendar .fc .fc-timegrid-slot {
+  height: 28px;
+}
+
+.public-calendar-shell .fc-event,
+.admin-calendar .fc-event {
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.public-calendar-event,
+.admin-calendar-event {
+  display: grid;
+  gap: 1px;
+  line-height: 1.2;
+  overflow: hidden;
+}
+
+.public-calendar-event strong,
+.admin-calendar-event strong {
+  font-size: 0.72rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-calendar-event span,
+.admin-calendar-event span {
+  font-size: 0.62rem;
+  opacity: 0.82;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendar-state {
+  color: var(--muted);
+  margin: 22px 0 0;
+  text-align: center;
+}
+
+.calendar-error,
+.admin-alert,
+.dialog-error {
+  color: #9d2f1e;
 }
 
 .day-format {
@@ -651,6 +763,220 @@ section[id] {
   font-weight: 750;
   letter-spacing: 0.02em;
   margin-bottom: 5px;
+}
+
+/* Schedule administration */
+
+.admin-page {
+  background: var(--paper);
+  min-height: 100vh;
+  padding: 140px var(--page-padding) 80px;
+}
+
+.admin-shell {
+  margin: 0 auto;
+  max-width: var(--content-max);
+}
+
+.admin-heading {
+  align-items: end;
+  display: flex;
+  gap: 32px;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.admin-heading h1 {
+  font-size: clamp(3rem, 6vw, 5.4rem);
+  margin-bottom: 0;
+}
+
+.admin-heading-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.admin-icon-link {
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  display: inline-flex;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 14px;
+}
+
+.admin-button-primary {
+  background: var(--ink);
+  color: var(--white);
+  gap: 8px;
+}
+
+.admin-button-primary:hover {
+  background: var(--ink-soft);
+}
+
+.admin-alert {
+  background: #fff0eb;
+  border: 1px solid rgba(157, 47, 30, 0.24);
+  border-radius: 8px;
+  margin: 0 0 18px;
+  padding: 12px 15px;
+}
+
+.admin-calendar {
+  box-shadow: var(--shadow-soft);
+}
+
+.admin-calendar .schedule-event-unpublished {
+  --fc-event-bg-color: #77746c;
+  --fc-event-border-color: #5f5c56;
+  opacity: 0.72;
+}
+
+.admin-access-state {
+  margin: 0 auto;
+  max-width: 760px;
+  padding: 80px 0;
+}
+
+.admin-access-state h1 {
+  font-size: clamp(3rem, 7vw, 5.6rem);
+}
+
+.admin-access-state > p:not(.eyebrow) {
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+.admin-access-state .button {
+  margin-top: 20px;
+}
+
+.schedule-dialog {
+  background: var(--surface);
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 24px 90px rgba(18, 17, 14, 0.26);
+  color: var(--ink);
+  max-height: calc(100vh - 40px);
+  max-width: 680px;
+  padding: 0;
+  width: calc(100% - 32px);
+}
+
+.schedule-dialog::backdrop {
+  background: rgba(23, 23, 20, 0.54);
+}
+
+.schedule-dialog form {
+  padding: clamp(24px, 5vw, 42px);
+}
+
+.schedule-dialog-heading {
+  align-items: start;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.schedule-dialog-heading h2 {
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+.icon-button {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 40px;
+  justify-content: center;
+  padding: 0;
+  width: 40px;
+}
+
+.schedule-form-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 18px 0;
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+}
+
+.field > span,
+.publish-control span {
+  color: var(--muted);
+  font-size: 0.73rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.field input,
+.field textarea {
+  background: var(--white);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: var(--ink);
+  min-height: 46px;
+  padding: 10px 12px;
+  width: 100%;
+}
+
+.field textarea {
+  min-height: 108px;
+  resize: vertical;
+}
+
+.field input:focus,
+.field textarea:focus {
+  border-color: var(--ink);
+  outline: 3px solid rgba(23, 23, 20, 0.08);
+}
+
+.publish-control {
+  align-items: center;
+  align-self: end;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  min-height: 46px;
+  padding: 0 12px;
+}
+
+.publish-control input {
+  accent-color: var(--accent-deep);
+  height: 18px;
+  width: 18px;
+}
+
+.schedule-dialog-actions {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 26px;
+}
+
+.danger-button {
+  background: transparent;
+  border-color: rgba(157, 47, 30, 0.38);
+  color: #9d2f1e;
+}
+
+.danger-button-confirm {
+  background: #9d2f1e;
+  color: var(--white);
 }
 
 .pass-section {
@@ -1102,6 +1428,13 @@ select:focus {
   margin-bottom: 0;
 }
 
+.account-heading-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .account-page .button-secondary {
   background: var(--ink);
   border-color: var(--ink);
@@ -1253,7 +1586,7 @@ select:focus {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .schedule-panel {
+  .schedule-heading-row {
     grid-template-columns: minmax(0, 1fr) minmax(240px, 0.65fr);
   }
 }
@@ -1325,7 +1658,7 @@ select:focus {
   }
 
   .pass-section,
-  .schedule-panel {
+  .schedule-heading-row {
     grid-template-columns: 1fr;
   }
 
@@ -1353,6 +1686,11 @@ select:focus {
   .account-pass {
     align-items: start;
     grid-template-columns: 1fr;
+  }
+
+  .admin-heading {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 
@@ -1450,7 +1788,7 @@ select:focus {
     -webkit-line-clamp: 4;
   }
 
-  .schedule-panel,
+  .schedule-heading-row,
   .day-format,
   .price-card,
   .contact-form,
@@ -1458,14 +1796,40 @@ select:focus {
     border-radius: 18px;
   }
 
-  .schedule-list div {
+  .schedule-summary div {
     align-items: flex-start;
     flex-direction: column;
     gap: 4px;
   }
 
-  .schedule-list strong {
+  .schedule-summary strong {
     text-align: left;
+  }
+
+  .public-calendar-shell,
+  .admin-calendar {
+    border-radius: 18px;
+    padding: 16px;
+  }
+
+  .admin-page {
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 120px;
+  }
+
+  .admin-heading-actions,
+  .admin-heading-actions .button {
+    width: 100%;
+  }
+
+  .admin-icon-link {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .schedule-form-grid {
+    grid-template-columns: 1fr;
   }
 
   .site-footer {
@@ -1510,6 +1874,11 @@ select:focus {
   .account-heading {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .account-heading-actions,
+  .account-heading-actions .button {
+    width: 100%;
   }
 
   .account-pass dl {

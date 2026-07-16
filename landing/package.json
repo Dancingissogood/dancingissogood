@@ -11,12 +11,20 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.16",
+    "@fullcalendar/core": "^6.1.21",
+    "@fullcalendar/interaction": "^6.1.21",
+    "@fullcalendar/luxon3": "^6.1.21",
+    "@fullcalendar/react": "^6.1.21",
+    "@fullcalendar/timegrid": "^6.1.21",
+    "lucide-react": "^0.468.0",
+    "luxon": "^3.7.2",
     "next": "^16.2.10",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/luxon": "^3.7.1",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",

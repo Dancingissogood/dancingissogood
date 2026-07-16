@@ -4,6 +4,7 @@ const accountSchema = z.object({
   email: z.string().email(),
   firstName: z.string().nullable(),
   lastName: z.string().nullable(),
+  role: z.enum(["MEMBER", "ADMIN"]),
   purchases: z.array(
     z.object({
       amountTotalCents: z.number().int().nonnegative(),
