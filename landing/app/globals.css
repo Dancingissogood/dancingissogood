@@ -717,7 +717,7 @@ section[id] {
 
 .public-calendar-shell .fc .fc-timegrid-slot,
 .admin-calendar .fc .fc-timegrid-slot {
-  height: 36px;
+  height: 64px;
 }
 
 .public-calendar-shell .fc-event,
@@ -728,7 +728,10 @@ section[id] {
   border-radius: 4px;
   box-shadow: none;
   color: var(--ink);
-  padding: 3px 5px;
+  container-name: calendar-event;
+  container-type: inline-size;
+  overflow: hidden;
+  padding: 5px;
 }
 
 .public-calendar-shell .fc-event {
@@ -739,29 +742,77 @@ section[id] {
   cursor: grab;
 }
 
-.public-calendar-event,
-.admin-calendar-event {
+.public-calendar-shell .fc-event-main,
+.admin-calendar .fc-event-main {
+  height: 100%;
+}
+
+.calendar-event-content {
+  align-items: center;
   display: grid;
-  gap: 2px;
-  line-height: 1.18;
+  gap: 7px;
+  grid-template-columns: 40px minmax(0, 1fr);
+  height: 100%;
   overflow: hidden;
 }
 
-.public-calendar-event strong,
-.admin-calendar-event strong {
+.calendar-event-image {
+  border-radius: 3px;
+  height: 40px;
+  object-fit: cover;
+  width: 40px;
+}
+
+.calendar-event-copy {
+  align-content: center;
+  display: grid;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.calendar-event-time {
+  color: var(--accent-deep);
+  font-size: 0.57rem;
+  font-weight: 750;
+  line-height: 1.15;
+  margin-bottom: 2px;
+}
+
+.calendar-event-copy strong {
+  display: -webkit-box;
   font-size: 0.7rem;
+  line-height: 1.15;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.calendar-event-instructor {
+  color: var(--muted);
+  font-size: 0.58rem;
+  line-height: 1.15;
+  margin-top: 2px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.public-calendar-event span,
-.admin-calendar-event span {
-  color: var(--muted);
-  font-size: 0.61rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+@container calendar-event (max-width: 110px) {
+  .calendar-event-content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .calendar-event-image {
+    display: none;
+  }
+}
+
+@container calendar-event (max-width: 70px) {
+  .calendar-event-instructor {
+    display: none;
+  }
 }
 
 .calendar-state {

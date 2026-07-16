@@ -7,6 +7,7 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { useCallback, useState } from "react";
 
+import { CalendarEventContent } from "@/components/CalendarEventContent";
 import { classSessionListSchema } from "@/lib/schedule";
 
 const TIME_ZONE = "America/Detroit";
@@ -64,15 +65,8 @@ export function PublicSchedule() {
       <FullCalendar
         allDaySlot={false}
         dayHeaderFormat={{ weekday: "short", day: "numeric" }}
-        eventContent={(eventInfo) => (
-          <div className="public-calendar-event">
-            <strong>{eventInfo.event.title}</strong>
-            {eventInfo.event.extendedProps["instructorName"] ? (
-              <span>{eventInfo.event.extendedProps["instructorName"]}</span>
-            ) : null}
-          </div>
-        )}
-        eventMinHeight={44}
+        eventContent={(eventInfo) => <CalendarEventContent eventInfo={eventInfo} />}
+        eventMinHeight={58}
         eventTimeFormat={{ hour: "numeric", minute: "2-digit", meridiem: "short" }}
         events={loadEvents}
         expandRows

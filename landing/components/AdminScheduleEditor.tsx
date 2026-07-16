@@ -16,6 +16,7 @@ import { DateTime } from "luxon";
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
 
+import { CalendarEventContent } from "@/components/CalendarEventContent";
 import { classMenuItems } from "@/content/site";
 import { classSessionListSchema, classSessionMutationSchema } from "@/lib/schedule";
 import type { ClassSession } from "@/lib/schedule";
@@ -302,17 +303,10 @@ export function AdminScheduleEditor() {
             editable
             eventClassNames={(eventInfo) => eventInfo.event.extendedProps["published"] ? [] : ["schedule-event-unpublished"]}
             eventClick={openExistingSession}
-            eventContent={(eventInfo) => (
-              <div className="admin-calendar-event">
-                <strong>{eventInfo.event.title}</strong>
-                {eventInfo.event.extendedProps["instructorName"] ? (
-                  <span>{eventInfo.event.extendedProps["instructorName"]}</span>
-                ) : null}
-              </div>
-            )}
+            eventContent={(eventInfo) => <CalendarEventContent eventInfo={eventInfo} />}
             eventDurationEditable={false}
             eventDrop={moveSession}
-            eventMinHeight={44}
+            eventMinHeight={58}
             eventStartEditable
             eventTimeFormat={{ hour: "numeric", minute: "2-digit", meridiem: "short" }}
             events={loadEvents}
