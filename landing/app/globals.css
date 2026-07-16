@@ -1689,6 +1689,331 @@ select:focus {
   margin-bottom: var(--section-space);
 }
 
+/* Instructors */
+
+.instructors-hero {
+  color: var(--white);
+  min-height: clamp(560px, 78vh, 760px);
+  overflow: hidden;
+  position: relative;
+}
+
+.instructors-hero > img {
+  object-fit: cover;
+  object-position: center 38%;
+}
+
+.instructors-hero-shade {
+  background: rgba(15, 18, 15, 0.28);
+  inset: 0;
+  position: absolute;
+  z-index: 1;
+}
+
+.instructors-hero-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  margin: 0 auto;
+  min-height: clamp(560px, 78vh, 760px);
+  max-width: var(--content-max);
+  padding: 180px var(--page-padding) 76px;
+  position: relative;
+  z-index: 2;
+}
+
+.instructors-hero .eyebrow {
+  color: #ff9f82;
+}
+
+.instructors-hero h1 {
+  font-size: clamp(5rem, 12vw, 10.5rem);
+  letter-spacing: 0;
+  line-height: 0.86;
+  margin-bottom: 28px;
+}
+
+.instructors-hero-content > p:last-child {
+  color: rgba(255, 255, 255, 0.76);
+  font-size: clamp(1.05rem, 1.7vw, 1.3rem);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 620px;
+}
+
+.instructors-hero-note {
+  bottom: 32px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.75rem;
+  font-weight: 650;
+  margin: 0;
+  position: absolute;
+  right: var(--page-padding);
+  text-transform: uppercase;
+  z-index: 2;
+}
+
+.instructor-introduction {
+  align-items: start;
+  border-bottom: 1px solid var(--line-strong);
+  display: grid;
+  gap: clamp(44px, 8vw, 130px);
+  grid-template-columns: minmax(0, 0.9fr) minmax(340px, 0.72fr);
+}
+
+.instructor-introduction h2 {
+  font-size: clamp(2.8rem, 5vw, 5rem);
+  letter-spacing: 0;
+  max-width: 720px;
+}
+
+.instructor-introduction-copy {
+  border-top: 1px solid var(--line-strong);
+  padding-top: 24px;
+}
+
+.instructor-introduction-copy p {
+  color: var(--muted);
+  font-size: 1.02rem;
+  line-height: 1.72;
+}
+
+.instructor-introduction-copy p:last-child {
+  margin-bottom: 0;
+}
+
+.instructor-roster {
+  display: grid;
+  gap: clamp(58px, 8vw, 112px) clamp(28px, 5vw, 72px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-top: 0;
+}
+
+.instructor-profile {
+  min-width: 0;
+}
+
+.instructor-profile:nth-child(even) {
+  margin-top: 96px;
+}
+
+.instructor-profile-image {
+  aspect-ratio: 4 / 5;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.instructor-profile-image::after {
+  background: rgba(18, 20, 17, 0.1);
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+
+.instructor-profile-image img {
+  object-fit: cover;
+}
+
+.instructor-profile:nth-child(1) .instructor-profile-image img {
+  object-position: 56% center;
+}
+
+.instructor-profile:nth-child(2) .instructor-profile-image img {
+  object-position: 43% center;
+}
+
+.instructor-profile:nth-child(3) .instructor-profile-image img {
+  object-position: center;
+}
+
+.instructor-profile:nth-child(4) .instructor-profile-image img {
+  object-position: 48% center;
+}
+
+.instructor-profile-image > span {
+  align-items: center;
+  background: var(--surface);
+  border-radius: 50%;
+  bottom: 16px;
+  color: var(--ink);
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 750;
+  height: 44px;
+  justify-content: center;
+  left: 16px;
+  position: absolute;
+  width: 44px;
+  z-index: 1;
+}
+
+.instructor-profile-content {
+  padding: 24px 4px 0;
+}
+
+.instructor-profile-status {
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  padding-bottom: 13px;
+}
+
+.instructor-profile-status span,
+.instructor-profile-details span {
+  color: var(--subtle);
+  font-size: 0.67rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.instructor-profile-status strong {
+  color: var(--accent-deep);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.instructor-profile h2 {
+  font-size: clamp(2rem, 3.5vw, 3.4rem);
+  letter-spacing: 0;
+  margin-bottom: 14px;
+}
+
+.instructor-profile-content > p {
+  color: var(--muted);
+  line-height: 1.68;
+  margin-bottom: 26px;
+  max-width: 620px;
+}
+
+.instructor-profile-details {
+  border-top: 1px solid var(--line);
+}
+
+.instructor-profile-details > div {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 110px minmax(0, 1fr);
+  padding: 14px 0;
+}
+
+.instructor-profile-details > div + div {
+  border-top: 1px solid var(--line);
+}
+
+.instructor-profile-details strong {
+  font-size: 0.82rem;
+}
+
+.instructor-profile-details ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.instructor-profile-details li {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+}
+
+.instructor-profile-details li + li::before {
+  color: var(--subtle);
+  content: "/";
+  margin-right: 8px;
+}
+
+.instructor-method {
+  background: var(--sage);
+  display: grid;
+  gap: clamp(56px, 8vw, 132px);
+  grid-template-columns: minmax(0, 0.82fr) minmax(480px, 1fr);
+  padding: var(--section-space) var(--page-padding);
+}
+
+.instructor-method-heading {
+  max-width: 660px;
+}
+
+.instructor-method h2 {
+  font-size: clamp(2.8rem, 5vw, 5rem);
+  letter-spacing: 0;
+}
+
+.instructor-method-points {
+  border-top: 1px solid rgba(23, 23, 20, 0.24);
+}
+
+.instructor-method-points > div {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 36px minmax(150px, 0.48fr) minmax(0, 1fr);
+  padding: 24px 0;
+}
+
+.instructor-method-points > div + div {
+  border-top: 1px solid rgba(23, 23, 20, 0.16);
+}
+
+.instructor-method-points span {
+  color: var(--accent-deep);
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.instructor-method-points h3 {
+  font-size: 1rem;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.instructor-method-points p {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.instructor-cta {
+  align-items: center;
+  background: var(--ink);
+  color: var(--white);
+  display: flex;
+  justify-content: space-between;
+  max-width: none;
+}
+
+.instructor-cta h2 {
+  font-size: clamp(2.7rem, 5vw, 5rem);
+  letter-spacing: 0;
+  max-width: 820px;
+}
+
+.instructor-cta .eyebrow {
+  color: #ff9f82;
+}
+
+.instructor-cta-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 10px;
+  width: min(100%, 260px);
+}
+
+.instructor-cta-secondary {
+  border-color: rgba(255, 255, 255, 0.38);
+  color: var(--white);
+}
+
+.instructor-cta-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 /* Auth, account, and checkout */
 
 .auth-page {
@@ -1873,6 +2198,8 @@ select:focus {
   .section-intro,
   .schedule-section,
   .contact-section,
+  .instructor-introduction,
+  .instructor-method,
   .studio-profile,
   .studio-profile-reverse {
     grid-template-columns: 1fr;
@@ -1894,6 +2221,10 @@ select:focus {
 
   .schedule-heading-row {
     grid-template-columns: minmax(0, 1fr) minmax(240px, 0.65fr);
+  }
+
+  .instructor-method {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1992,6 +2323,41 @@ select:focus {
   .account-pass {
     align-items: start;
     grid-template-columns: 1fr;
+  }
+
+  .instructors-hero-note {
+    display: none;
+  }
+
+  .instructor-introduction {
+    grid-template-columns: 1fr;
+  }
+
+  .instructor-roster {
+    grid-template-columns: 1fr;
+  }
+
+  .instructor-profile:nth-child(even) {
+    margin-top: 0;
+  }
+
+  .instructor-profile-image {
+    aspect-ratio: 5 / 4;
+  }
+
+  .instructor-cta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 38px;
+  }
+
+  .instructor-cta-actions {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .instructor-cta-actions .button {
+    flex: 1 1 0;
   }
 
   .admin-heading {
@@ -2186,6 +2552,50 @@ select:focus {
 
   .legal-document section + section {
     padding-top: 34px;
+  }
+
+  .instructors-hero,
+  .instructors-hero-content {
+    min-height: 560px;
+  }
+
+  .instructors-hero-content {
+    padding: 150px 20px 58px;
+  }
+
+  .instructors-hero h1 {
+    font-size: clamp(4.2rem, 22vw, 6.2rem);
+  }
+
+  .instructors-hero-content > p:last-child {
+    font-size: 1rem;
+  }
+
+  .instructor-profile-image {
+    aspect-ratio: 4 / 5;
+  }
+
+  .instructor-profile-details > div {
+    gap: 7px;
+    grid-template-columns: 1fr;
+  }
+
+  .instructor-method {
+    padding-bottom: 80px;
+    padding-top: 80px;
+  }
+
+  .instructor-method-points > div {
+    gap: 8px 14px;
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .instructor-method-points p {
+    grid-column: 2;
+  }
+
+  .instructor-cta-actions {
+    flex-direction: column;
   }
 
   .studios-hero {

@@ -37,10 +37,20 @@ export type StudioProfile = {
   };
 };
 
+export type InstructorProfile = {
+  role: string;
+  description: string;
+  image: string;
+  imageAlt: string;
+  specialties: string[];
+  teachingFormat: string;
+};
+
 export const navigationItems: NavigationItem[] = [
   { label: "Program", href: "/#program" },
   { label: "Class Menu", href: "/#menu" },
   { label: "Studios", href: "/studios" },
+  { label: "Instructors", href: "/instructors" },
   { label: "Schedule", href: "/#schedule" },
   { label: "Pass", href: "/#pass" },
 ];
@@ -122,6 +132,45 @@ export const classMenuItems: ClassMenuItem[] = [
     description: "Coordination, rhythm, focus, and playful dancer cross-training.",
     image: "/assets/classes/juggling-introduction.jpg",
     imageAlt: "Adult students practicing juggling for coordination",
+  },
+];
+
+export const instructorProfiles: InstructorProfile[] = [
+  {
+    role: "Ballroom & Smooth",
+    description:
+      "Frame, floorcraft, musical phrasing, and partner connection across Waltz, Tango, and smooth dance foundations.",
+    image: "/assets/classes/waltz-rise-fall.jpg",
+    imageAlt: "Ballroom dancers demonstrating waltz technique in a bright studio",
+    specialties: ["Waltz Rise & Fall", "Argentine Tango", "Bolero Basics"],
+    teachingFormat: "Private coaching + group technique",
+  },
+  {
+    role: "Latin & Rhythm",
+    description:
+      "Grounded movement, expressive styling, and musical confidence through Latin body mechanics and rhythm training.",
+    image: "/assets/classes/cuban-motion.jpg",
+    imageAlt: "Dance instructor demonstrating Cuban motion to a student",
+    specialties: ["Cuban Motion", "Latin Arms", "Samba Beats"],
+    teachingFormat: "Technique labs + guided practice",
+  },
+  {
+    role: "Social Dance",
+    description:
+      "Practical lead-and-follow skills, clear timing, and adaptable partner technique for an inviting social floor.",
+    image: "/assets/classes/hustle-fundamentals.jpg",
+    imageAlt: "Partners practicing Hustle turns during a social dance lesson",
+    specialties: ["Hustle Fundamentals", "West Coast Swing", "Partner Connection"],
+    teachingFormat: "Partner sessions + group rotations",
+  },
+  {
+    role: "Mobility & Recovery",
+    description:
+      "Dancer-specific recovery, range of motion, and sustainable movement practices that support the full camp day.",
+    image: "/assets/classes/foam-rolling-stretches.jpg",
+    imageAlt: "Dancer using a foam roller during a mobility and recovery session",
+    specialties: ["Foam Rolling", "Dancer's Stretches", "Wellness & Recovery"],
+    teachingFormat: "Guided recovery + individual support",
   },
 ];
 
