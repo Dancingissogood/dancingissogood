@@ -10,7 +10,7 @@ type SiteHeaderProps = {
   ctaHref?: string;
 };
 
-export function SiteHeader({ ctaHref = "/#contact" }: SiteHeaderProps) {
+export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -71,7 +71,7 @@ export function SiteHeader({ ctaHref = "/#contact" }: SiteHeaderProps) {
           <UserButton />
         </Show>
         <Link className="header-cta" href={ctaHref}>
-          Request the Schedule
+          Buy Pass
         </Link>
       </div>
     </header>
