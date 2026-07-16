@@ -16,6 +16,7 @@ import { DateTime } from "luxon";
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
 
+import { classMenuItems } from "@/content/site";
 import { classSessionListSchema, classSessionMutationSchema } from "@/lib/schedule";
 import type { ClassSession } from "@/lib/schedule";
 
@@ -134,6 +135,20 @@ export function AdminScheduleEditor() {
     setConfirmDelete(false);
     setRequestError(null);
     dialogRef.current?.showModal();
+  }
+
+  function selectClass(title: string) {
+    const selectedClass = classMenuItems.find((classItem) => classItem.title === title);
+
+    if (!selectedClass) {
+      return;
+    }
+
+    setDraft({
+      ...draft,
+      description: selectedClass.description,
+      title: selectedClass.title,
+    });
   }
 
   async function moveSession(change: EventDropArg) {
@@ -333,7 +348,14 @@ export function AdminScheduleEditor() {
 
           <label className="field field-wide">
             <span>Class name</span>
-            <input required maxLength={120} value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} />
+            <select required value={draft.title} onChange={(event) => selectClass(event.target.value)}>
+              <option disabled value="">Select a class</option>
+              {classMenuItems.map((classItem) => (
+                <option key={classItem.title} value={classItem.title}>
+                  {classItem.title}
+                </option>
+              ))}
+            </select>
           </label>
           <div className="schedule-form-grid">
             <label className="field">

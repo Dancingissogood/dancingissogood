@@ -961,6 +961,7 @@ section[id] {
 }
 
 .field input,
+.field select,
 .field textarea {
   background: var(--white);
   border: 1px solid var(--line-strong);
@@ -977,6 +978,7 @@ section[id] {
 }
 
 .field input:focus,
+.field select:focus,
 .field textarea:focus {
   border-color: var(--ink);
   outline: 3px solid rgba(23, 23, 20, 0.08);
