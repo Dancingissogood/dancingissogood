@@ -13,10 +13,11 @@ export default function HomePage() {
       <section className="hero" aria-label="Dance and wellness camp">
         <div className="hero-image">
           <Image
-            src="/assets/dance-camp-hero.png"
+            src="/assets/dance-camp-hero-hd-v2.webp"
             alt="Adults practicing dance and mobility in a bright studio"
             fill
             priority
+            quality={90}
             sizes="100vw"
           />
         </div>

@@ -1,22 +1,22 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
-import { Instrument_Sans, Playfair_Display } from "next/font/google";
+import { Bodoni_Moda, DM_Sans } from "next/font/google";
 
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 
 import "./globals.css";
 
-const instrumentSans = Instrument_Sans({
+const dmSans = DM_Sans({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-instrument-sans",
+  variable: "--font-dm-sans",
 });
 
-const playfairDisplay = Playfair_Display({
+const bodoniModa = Bodoni_Moda({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-playfair-display",
+  variable: "--font-bodoni-moda",
 });
 
 const siteUrl =
@@ -38,9 +38,9 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/assets/dance-camp-hero.png",
-        width: 1717,
-        height: 916,
+        url: "/assets/dance-camp-hero-hd-v2.webp",
+        width: 6868,
+        height: 3664,
         alt: "Adults practicing dance and mobility in a bright studio",
       },
     ],
@@ -54,7 +54,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${instrumentSans.variable} ${playfairDisplay.variable}`}>
+      <body className={`${dmSans.variable} ${bodoniModa.variable}`}>
         <ClerkProvider>
           <SiteHeader />
           {children}

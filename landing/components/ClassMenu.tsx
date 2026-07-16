@@ -16,7 +16,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
               src={item.image}
               alt={item.imageAlt}
               fill
-              sizes="(max-width: 560px) 118px, (max-width: 1100px) 33vw, 20vw"
+              sizes="(max-width: 580px) 117px, (max-width: 1100px) 50vw, 430px"
             />
           </div>
           <div className="menu-card-body">
