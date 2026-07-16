@@ -23,7 +23,7 @@ async function createTestPassProduct() {
   const product = await database.passProduct.create({
     data: {
       accessDays: 3,
-      accessEnds: "1:00 PM",
+      accessEnds: "2:00 PM",
       accessStarts: "9:00 AM",
       name: "Test Pass",
       priceCents: 10_000,

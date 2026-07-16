@@ -63,7 +63,7 @@ export async function createPassCheckoutSession(
           ...(account ? { customer_email: account.email } : {}),
         };
     const checkoutSession = await stripe.checkout.sessions.create({
-      cancel_url: `${config.landingUrl}/#passes`,
+      cancel_url: `${config.landingUrl}/#pass`,
       client_reference_id: purchase.id,
       ...customerParameters,
       line_items: [{ price: stripePrice.id, quantity: 1 }],

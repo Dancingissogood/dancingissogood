@@ -64,7 +64,7 @@ export default async function AccountPage() {
             <h1>{displayName || "Welcome back"}</h1>
             <p>{account.email}</p>
           </div>
-          <Link className="button button-secondary" href="/#passes">
+          <Link className="button button-secondary" href="/#pass">
             Purchase a Pass
           </Link>
         </header>

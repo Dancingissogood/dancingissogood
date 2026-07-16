@@ -4,10 +4,10 @@ import { createStripeClient } from "../stripe.js";
 
 const pass = {
   accessDays: 3,
-  accessEnds: "1:00 PM",
+  accessEnds: "2:00 PM",
   accessStarts: "9:00 AM",
   currency: "usd",
-  description: "Three days of camp access, Monday through Wednesday, 9:00 AM to 1:00 PM.",
+  description: "Three days of camp access, Monday through Wednesday, 9:00 AM to 2:00 PM.",
   name: "Three-Day Camp Pass",
   priceCents: 10_000,
   slug: "three-day-camp-pass",
