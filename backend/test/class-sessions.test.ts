@@ -117,6 +117,18 @@ test("an administrator can create, move, list, and delete a 20-minute class", as
     });
     assert.equal(invalidResponse.statusCode, 400);
 
+    const outsideHoursResponse = await app.inject({
+      headers: { authorization: "Bearer valid-session" },
+      method: "POST",
+      payload: {
+        ...validSessionPayload(`Outside hours ${suffix}`),
+        endsAt: "2026-07-20T12:20:00.000Z",
+        startsAt: "2026-07-20T12:00:00.000Z",
+      },
+      url: "/v1/admin/class-sessions",
+    });
+    assert.equal(outsideHoursResponse.statusCode, 400);
+
     const createResponse = await app.inject({
       headers: { authorization: "Bearer valid-session" },
       method: "POST",

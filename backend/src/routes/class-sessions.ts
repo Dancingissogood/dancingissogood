@@ -9,6 +9,17 @@ import type { IdentityProvider } from "../auth.js";
 
 const SESSION_DURATION_MILLISECONDS = 20 * 60 * 1_000;
 const MAXIMUM_QUERY_RANGE_MILLISECONDS = 93 * 24 * 60 * 60 * 1_000;
+const SCHEDULE_START_MINUTE = 9 * 60;
+const SCHEDULE_END_MINUTE = 14 * 60;
+const easternTimeFormatter = new Intl.DateTimeFormat("en-US", {
+  day: "2-digit",
+  hour: "2-digit",
+  hourCycle: "h23",
+  minute: "2-digit",
+  month: "2-digit",
+  timeZone: "America/Detroit",
+  year: "numeric",
+});
 
 const dateTimeSchema = z.iso.datetime({ offset: true });
 
@@ -45,7 +56,7 @@ const classSessionFieldsSchema = z
   })
   .strict();
 
-const createClassSessionSchema = classSessionFieldsSchema.superRefine(validateDuration);
+const createClassSessionSchema = classSessionFieldsSchema.superRefine(validateSessionTiming);
 const updateClassSessionSchema = classSessionFieldsSchema
   .partial()
   .refine((value) => Object.keys(value).length > 0, "At least one field is required.");
@@ -61,6 +72,46 @@ function validateDuration(
       path: ["endsAt"],
     });
   }
+}
+
+function validateSessionTiming(
+  session: { startsAt: string; endsAt: string },
+  context: z.RefinementCtx,
+) {
+  validateDuration(session, context);
+
+  if (!isWithinScheduleHours(session)) {
+    context.addIssue({
+      code: "custom",
+      message: "Class sessions must run between 9:00 AM and 2:00 PM Eastern Time.",
+      path: ["startsAt"],
+    });
+  }
+}
+
+function isWithinScheduleHours(session: { startsAt: string; endsAt: string }) {
+  const start = getEasternTimeParts(new Date(session.startsAt));
+  const end = getEasternTimeParts(new Date(session.endsAt));
+
+  return (
+    start.date === end.date &&
+    start.minute >= SCHEDULE_START_MINUTE &&
+    end.minute <= SCHEDULE_END_MINUTE
+  );
+}
+
+function getEasternTimeParts(date: Date) {
+  const parts = Object.fromEntries(
+    easternTimeFormatter
+      .formatToParts(date)
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, part.value]),
+  );
+
+  return {
+    date: `${parts["year"]}-${parts["month"]}-${parts["day"]}`,
+    minute: Number(parts["hour"]) * 60 + Number(parts["minute"]),
+  };
 }
 
 function sendAuthorizationFailure(reply: FastifyReply, authorization: AuthorizationResult) {
@@ -216,11 +267,13 @@ export async function registerClassSessionRoutes(
       const endsAt = body.data.endsAt ?? existing.endsAt.toISOString();
       const durationValidation = z
         .object({ startsAt: dateTimeSchema, endsAt: dateTimeSchema })
-        .superRefine(validateDuration)
+        .superRefine(validateSessionTiming)
         .safeParse({ startsAt, endsAt });
 
       if (!durationValidation.success) {
-        return reply.code(400).send({ error: "Class sessions must be exactly 20 minutes." });
+        return reply.code(400).send({
+          error: "Classes must be 20 minutes and run between 9:00 AM and 2:00 PM Eastern Time.",
+        });
       }
 
       const session = await dependencies.database.classSession.update({

@@ -283,7 +283,7 @@ export function AdminScheduleEditor() {
           <FullCalendar
             allDaySlot={false}
             dateClick={(selection: DateClickArg) => openNewSession(selection.date)}
-            dayHeaderFormat={{ weekday: "short", month: "short", day: "numeric" }}
+            dayHeaderFormat={{ weekday: "short", day: "numeric" }}
             editable
             eventClassNames={(eventInfo) => eventInfo.event.extendedProps["published"] ? [] : ["schedule-event-unpublished"]}
             eventClick={openExistingSession}
@@ -305,15 +305,15 @@ export function AdminScheduleEditor() {
             firstDay={1}
             headerToolbar={{ left: "prev,next today", center: "title", right: "" }}
             height="auto"
-            hiddenDays={[0, 4, 5, 6]}
             initialView="timeGridWeek"
             nowIndicator
             plugins={[timeGridPlugin, interactionPlugin, luxonPlugin]}
             ref={calendarRef}
             slotDuration="00:20:00"
+            slotLabelInterval="01:00:00"
             slotLabelFormat={{ hour: "numeric", minute: "2-digit", meridiem: "short" }}
-            slotMaxTime="14:20:00"
-            slotMinTime="07:00:00"
+            slotMaxTime="14:00:00"
+            slotMinTime="09:00:00"
             timeZone={TIME_ZONE}
           />
         </section>

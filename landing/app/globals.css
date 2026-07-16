@@ -557,7 +557,7 @@ section[id] {
 .feature-grid p,
 .day-format li,
 .pass-copy p,
-.schedule-panel p,
+.schedule-heading-row p,
 .contact-section p {
   color: var(--muted);
 }
@@ -575,13 +575,11 @@ section[id] {
 
 .schedule-heading-row {
   align-items: end;
-  background: var(--night);
-  border-radius: 24px;
-  color: var(--white);
+  border-bottom: 1px solid var(--line-strong);
   display: grid;
   gap: clamp(36px, 6vw, 92px);
   grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
-  padding: clamp(32px, 5vw, 62px);
+  padding-bottom: 32px;
 }
 
 .schedule-heading-row h2 {
@@ -590,23 +588,19 @@ section[id] {
 }
 
 .schedule-heading-row p {
-  color: rgba(255, 255, 255, 0.64);
+  color: var(--muted);
   font-size: 1rem;
   margin-top: 24px;
   max-width: 580px;
 }
 
-.schedule-heading-row .eyebrow {
-  color: #ff9f82;
-}
-
 .schedule-summary {
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  border-top: 1px solid var(--line);
 }
 
 .schedule-summary div {
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  border-bottom: 1px solid var(--line);
   display: flex;
   gap: 18px;
   justify-content: space-between;
@@ -614,7 +608,7 @@ section[id] {
 }
 
 .schedule-summary span {
-  color: rgba(255, 255, 255, 0.52);
+  color: var(--subtle);
   font-size: 0.84rem;
   font-weight: 650;
 }
@@ -627,90 +621,135 @@ section[id] {
 
 .public-calendar-shell,
 .admin-calendar {
-  --fc-border-color: rgba(23, 23, 20, 0.12);
-  --fc-button-bg-color: var(--ink);
-  --fc-button-border-color: var(--ink);
-  --fc-button-hover-bg-color: var(--ink-soft);
-  --fc-button-hover-border-color: var(--ink-soft);
-  --fc-button-active-bg-color: var(--accent-deep);
-  --fc-button-active-border-color: var(--accent-deep);
-  --fc-event-bg-color: var(--accent);
-  --fc-event-border-color: var(--accent-deep);
-  --fc-event-text-color: var(--white);
+  --fc-border-color: #dedbd3;
+  --fc-button-bg-color: transparent;
+  --fc-button-border-color: var(--line-strong);
+  --fc-button-text-color: var(--ink);
+  --fc-button-hover-bg-color: var(--surface-soft);
+  --fc-button-hover-border-color: var(--line-strong);
+  --fc-button-active-bg-color: var(--ink);
+  --fc-button-active-border-color: var(--ink);
+  --fc-event-bg-color: #f0ede6;
+  --fc-event-border-color: var(--accent);
+  --fc-event-text-color: var(--ink);
   --fc-now-indicator-color: var(--accent-deep);
-  background: var(--surface);
+  --fc-page-bg-color: var(--white);
+  --fc-today-bg-color: rgba(223, 229, 216, 0.42);
+  background: var(--white);
   border: 1px solid var(--line);
-  border-radius: 24px;
+  border-radius: 8px;
   overflow-x: auto;
-  padding: clamp(20px, 3vw, 36px);
+  padding: clamp(16px, 2vw, 26px);
 }
 
 .public-calendar-shell .fc,
 .admin-calendar .fc {
-  min-width: 720px;
+  color: var(--ink);
+  font-family: var(--font-dm-sans), sans-serif;
+  min-width: 960px;
 }
 
 .public-calendar-shell .fc .fc-toolbar,
 .admin-calendar .fc .fc-toolbar {
   align-items: center;
   gap: 18px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .public-calendar-shell .fc .fc-toolbar-title,
 .admin-calendar .fc .fc-toolbar-title {
-  font-family: var(--font-bodoni-moda), serif;
-  font-size: clamp(1.6rem, 3vw, 2.35rem);
-  font-weight: 500;
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 750;
   letter-spacing: 0;
 }
 
 .public-calendar-shell .fc .fc-button,
 .admin-calendar .fc .fc-button {
-  border-radius: 8px;
+  border-radius: 6px;
   box-shadow: none;
-  min-height: 38px;
-  padding: 0 13px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  min-height: 36px;
+  padding: 0 12px;
   text-transform: capitalize;
+}
+
+.public-calendar-shell .fc .fc-button:focus,
+.admin-calendar .fc .fc-button:focus {
+  box-shadow: 0 0 0 3px rgba(229, 102, 67, 0.18);
+}
+
+.public-calendar-shell .fc .fc-button-primary:not(:disabled):active,
+.public-calendar-shell .fc .fc-button-primary:not(:disabled).fc-button-active,
+.admin-calendar .fc .fc-button-primary:not(:disabled):active,
+.admin-calendar .fc .fc-button-primary:not(:disabled).fc-button-active {
+  color: var(--white);
+}
+
+.public-calendar-shell .fc .fc-scrollgrid,
+.admin-calendar .fc .fc-scrollgrid {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.public-calendar-shell .fc .fc-col-header-cell,
+.admin-calendar .fc .fc-col-header-cell {
+  background: #faf9f6;
 }
 
 .public-calendar-shell .fc .fc-col-header-cell-cushion,
 .admin-calendar .fc .fc-col-header-cell-cushion {
-  font-size: 0.82rem;
+  color: var(--muted);
+  font-size: 0.76rem;
   font-weight: 750;
-  padding: 12px 5px;
+  letter-spacing: 0;
+  padding: 13px 4px;
 }
 
 .public-calendar-shell .fc .fc-timegrid-slot-label-cushion,
 .admin-calendar .fc .fc-timegrid-slot-label-cushion {
   color: var(--subtle);
-  font-size: 0.7rem;
-  padding-right: 10px;
+  font-size: 0.68rem;
+  font-weight: 650;
+  padding-right: 9px;
 }
 
 .public-calendar-shell .fc .fc-timegrid-slot,
 .admin-calendar .fc .fc-timegrid-slot {
-  height: 28px;
+  height: 36px;
 }
 
 .public-calendar-shell .fc-event,
 .admin-calendar .fc-event {
-  border-radius: 5px;
-  cursor: pointer;
-  padding: 2px 4px;
+  background: #f0ede6;
+  border: 0;
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  box-shadow: none;
+  color: var(--ink);
+  padding: 3px 5px;
+}
+
+.public-calendar-shell .fc-event {
+  cursor: default;
+}
+
+.admin-calendar .fc-event {
+  cursor: grab;
 }
 
 .public-calendar-event,
 .admin-calendar-event {
   display: grid;
-  gap: 1px;
-  line-height: 1.2;
+  gap: 2px;
+  line-height: 1.18;
   overflow: hidden;
 }
 
 .public-calendar-event strong,
 .admin-calendar-event strong {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -718,8 +757,8 @@ section[id] {
 
 .public-calendar-event span,
 .admin-calendar-event span {
-  font-size: 0.62rem;
-  opacity: 0.82;
+  color: var(--muted);
+  font-size: 0.61rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -826,13 +865,13 @@ section[id] {
 }
 
 .admin-calendar {
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 12px 32px rgba(36, 31, 24, 0.06);
 }
 
 .admin-calendar .schedule-event-unpublished {
-  --fc-event-bg-color: #77746c;
-  --fc-event-border-color: #5f5c56;
-  opacity: 0.72;
+  background: #f7f6f3;
+  border-left-color: #8c8980;
+  opacity: 0.68;
 }
 
 .admin-access-state {
@@ -1788,7 +1827,6 @@ select:focus {
     -webkit-line-clamp: 4;
   }
 
-  .schedule-heading-row,
   .day-format,
   .price-card,
   .contact-form,
@@ -1808,7 +1846,7 @@ select:focus {
 
   .public-calendar-shell,
   .admin-calendar {
-    border-radius: 18px;
+    border-radius: 8px;
     padding: 16px;
   }
 

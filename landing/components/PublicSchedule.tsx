@@ -63,7 +63,7 @@ export function PublicSchedule() {
     <div className="public-calendar-shell">
       <FullCalendar
         allDaySlot={false}
-        dayHeaderFormat={{ weekday: "short", month: "short", day: "numeric" }}
+        dayHeaderFormat={{ weekday: "short", day: "numeric" }}
         eventContent={(eventInfo) => (
           <div className="public-calendar-event">
             <strong>{eventInfo.event.title}</strong>
@@ -79,14 +79,14 @@ export function PublicSchedule() {
         firstDay={1}
         headerToolbar={{ left: "prev,next today", center: "title", right: "" }}
         height="auto"
-        hiddenDays={[0, 4, 5, 6]}
         initialView="timeGridWeek"
         nowIndicator
         plugins={[timeGridPlugin, interactionPlugin, luxonPlugin]}
         slotDuration="00:20:00"
+        slotLabelInterval="01:00:00"
         slotLabelFormat={{ hour: "numeric", minute: "2-digit", meridiem: "short" }}
-        slotMaxTime="14:20:00"
-        slotMinTime="07:00:00"
+        slotMaxTime="14:00:00"
+        slotMinTime="09:00:00"
         timeZone={TIME_ZONE}
       />
       {isEmpty ? <p className="calendar-state">No classes are posted for this week.</p> : null}

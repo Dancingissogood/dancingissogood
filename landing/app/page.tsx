@@ -90,9 +90,6 @@ export default function HomePage() {
           <h3>Daily format</h3>
           <ol>
             <li>
-              <span>7:00 AM</span> Early private and guided instruction begins.
-            </li>
-            <li>
               <span>9:00 AM</span> Unlimited class access opens.
             </li>
             <li>
