@@ -309,6 +309,33 @@ section[id] {
   position: relative;
 }
 
+@media (min-width: 821px) {
+  .hero,
+  .hero-content {
+    min-height: max(720px, calc(100svh - 32px));
+  }
+
+  .hero {
+    margin: 16px;
+    transition:
+      margin 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      min-height 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .hero-content {
+    transition: min-height 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  body:has(.site-header[data-scrolled="true"]) .hero {
+    margin: var(--hero-gutter);
+  }
+
+  body:has(.site-header[data-scrolled="true"]) .hero,
+  body:has(.site-header[data-scrolled="true"]) .hero-content {
+    min-height: max(720px, calc(100svh - 24px));
+  }
+}
+
 .hero-image,
 .hero-overlay {
   height: 100%;
