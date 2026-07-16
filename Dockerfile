@@ -6,6 +6,7 @@ WORKDIR /app
 ADD --checksum=sha256:e5bb2084ccf45087bda1c9bffdea0eb15ee67f0b91646106e466714f9de3c7e3 \
   https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem \
   /app/certs/rds-global-bundle.pem
+RUN chmod 0444 /app/certs/rds-global-bundle.pem
 
 COPY package.json package-lock.json ./
 COPY backend/package.json backend/package.json
