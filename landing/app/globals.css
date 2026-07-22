@@ -1363,10 +1363,19 @@ section[id] {
   --fc-now-indicator-color: var(--accent-deep);
   --fc-page-bg-color: var(--white);
   --fc-today-bg-color: rgba(223, 229, 216, 0.42);
+  overflow-x: auto;
+}
+
+.public-calendar-shell {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.admin-calendar {
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: 8px;
-  overflow-x: auto;
   padding: clamp(16px, 2vw, 26px);
 }
 
@@ -3449,7 +3458,6 @@ select:focus {
     text-align: left;
   }
 
-  .public-calendar-shell,
   .admin-calendar {
     border-radius: 8px;
     padding: 16px;

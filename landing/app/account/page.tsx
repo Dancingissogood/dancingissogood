@@ -77,40 +77,6 @@ export default async function AccountPage() {
           </div>
         </header>
 
-        <ProfileCalendar />
-
-        {account.processingPayments.length > 0 ? (
-          <section className="account-processing" aria-labelledby="processing-title">
-            <div className="account-section-heading">
-              <h2 id="processing-title">Payment processing</h2>
-              <span>{account.processingPayments.length}</span>
-            </div>
-            <div className="account-pass-list">
-              {account.processingPayments.map((payment) => (
-                <article className="account-pass" key={payment.id}>
-                  <div>
-                    <span className="account-status account-status-processing">Processing</span>
-                    <h3>{payment.pass.name}</h3>
-                    <p>Your pass will appear after Stripe confirms the payment.</p>
-                  </div>
-                  <dl>
-                    <div>
-                      <dt>Started</dt>
-                      <dd>{dateFormatter.format(new Date(payment.createdAt))}</dd>
-                    </div>
-                    <div>
-                      <dt>Amount</dt>
-                      <dd>
-                        {currencyFormatter.format(payment.amountTotalCents / 100)} {payment.currency.toUpperCase()}
-                      </dd>
-                    </div>
-                  </dl>
-                </article>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
         <section className="account-passes" aria-labelledby="passes-title">
           <div className="account-section-heading">
             <h2 id="passes-title">Passes</h2>
@@ -153,6 +119,40 @@ export default async function AccountPage() {
             </div>
           )}
         </section>
+
+        {account.processingPayments.length > 0 ? (
+          <section className="account-processing" aria-labelledby="processing-title">
+            <div className="account-section-heading">
+              <h2 id="processing-title">Payment processing</h2>
+              <span>{account.processingPayments.length}</span>
+            </div>
+            <div className="account-pass-list">
+              {account.processingPayments.map((payment) => (
+                <article className="account-pass" key={payment.id}>
+                  <div>
+                    <span className="account-status account-status-processing">Processing</span>
+                    <h3>{payment.pass.name}</h3>
+                    <p>Your pass will appear after Stripe confirms the payment.</p>
+                  </div>
+                  <dl>
+                    <div>
+                      <dt>Started</dt>
+                      <dd>{dateFormatter.format(new Date(payment.createdAt))}</dd>
+                    </div>
+                    <div>
+                      <dt>Amount</dt>
+                      <dd>
+                        {currencyFormatter.format(payment.amountTotalCents / 100)} {payment.currency.toUpperCase()}
+                      </dd>
+                    </div>
+                  </dl>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        <ProfileCalendar />
       </div>
     </main>
   );
