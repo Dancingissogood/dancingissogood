@@ -64,24 +64,49 @@ resolve_arm64_digest() {
     <<<"${image_index}"
 }
 
+wait_for_image_scan() {
+  local image_digest="$1"
+  local image_tag="$2"
+  local attempt
+  local scan_result
+  local scan_status
+
+  for attempt in $(seq 1 60); do
+    if scan_result="$(aws ecr describe-image-scan-findings \
+      --profile "${AWS_PROFILE_NAME}" \
+      --region "${AWS_REGION_NAME}" \
+      --repository-name "dancingissogood/backend" \
+      --image-id imageDigest="${image_digest}" \
+      --output json 2>&1)"; then
+      scan_status="$(jq -r '.imageScanStatus.status' <<<"${scan_result}")"
+
+      if [[ "${scan_status}" == "COMPLETE" ]]; then
+        printf '%s\n' "${scan_result}"
+        return 0
+      fi
+
+      if [[ "${scan_status}" != "IN_PROGRESS" ]]; then
+        echo "Refusing deployment: ${image_tag} image scan ended with status ${scan_status}." >&2
+        return 1
+      fi
+    elif [[ "${scan_result}" != *"ScanNotFoundException"* ]]; then
+      echo "Unable to read the ${image_tag} image scan: ${scan_result}" >&2
+      return 1
+    fi
+
+    sleep 5
+  done
+
+  echo "Refusing deployment: ${image_tag} image scan did not complete within five minutes." >&2
+  return 1
+}
+
 for image_tag in "runtime-${IMAGE_TAG}" "migration-${IMAGE_TAG}"; do
   image_digest="$(resolve_arm64_digest "${image_tag}")"
+  SCAN_FINDINGS="$(wait_for_image_scan "${image_digest}" "${image_tag}")"
+  CRITICAL_FINDINGS="$(jq -r '.imageScanFindings.findingSeverityCounts.CRITICAL // 0' <<<"${SCAN_FINDINGS}")"
 
-  aws ecr wait image-scan-complete \
-    --profile "${AWS_PROFILE_NAME}" \
-    --region "${AWS_REGION_NAME}" \
-    --repository-name "dancingissogood/backend" \
-    --image-id imageDigest="${image_digest}"
-
-  CRITICAL_FINDINGS="$(aws ecr describe-image-scan-findings \
-    --profile "${AWS_PROFILE_NAME}" \
-    --region "${AWS_REGION_NAME}" \
-    --repository-name "dancingissogood/backend" \
-    --image-id imageDigest="${image_digest}" \
-    --query 'imageScanFindings.findingSeverityCounts.CRITICAL' \
-    --output text)"
-
-  if [[ "${CRITICAL_FINDINGS}" != "None" && "${CRITICAL_FINDINGS}" != "0" ]]; then
+  if [[ "${CRITICAL_FINDINGS}" != "0" ]]; then
     echo "Refusing deployment: ${image_tag} has ${CRITICAL_FINDINGS} critical image findings." >&2
     exit 1
   fi
