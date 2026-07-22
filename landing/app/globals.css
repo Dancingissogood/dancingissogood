@@ -1542,10 +1542,12 @@ section[id] {
   border-radius: 10px;
   box-shadow: 0 20px 60px rgba(18, 17, 14, 0.28);
   color: var(--white);
-  overflow: hidden;
-  pointer-events: none;
+  max-height: calc(100vh - 24px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  pointer-events: auto;
   position: fixed;
-  width: 320px;
+  width: min(320px, calc(100vw - 24px));
   z-index: 50;
 }
 
@@ -1609,6 +1611,52 @@ section[id] {
 
 .calendar-event-popover dd {
   color: rgba(255, 255, 255, 0.86);
+}
+
+.calendar-event-popover-actions {
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  margin-top: 14px;
+  padding-top: 14px;
+}
+
+.calendar-event-popover-action {
+  align-items: center;
+  background: var(--white);
+  border: 1px solid var(--white);
+  border-radius: 6px;
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  font-size: 0.72rem;
+  font-weight: 750;
+  gap: 7px;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 13px;
+  width: 100%;
+}
+
+.calendar-event-popover-action[data-saved="true"] {
+  background: var(--sage);
+  border-color: var(--sage);
+}
+
+.calendar-event-popover-action:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+.calendar-event-popover-action svg {
+  height: 15px;
+  stroke-width: 2;
+  width: 15px;
+}
+
+.calendar-event-popover-error {
+  color: #ffb39d;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  margin: 9px 0 0;
 }
 
 @container calendar-event (max-width: 110px) {

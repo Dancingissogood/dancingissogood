@@ -2,16 +2,18 @@
 
 import type {
   EventApi,
+  EventClickArg,
   EventHoveringArg,
   EventInput,
   EventMountArg,
   EventSourceFuncArg,
 } from "@fullcalendar/core";
+import { useAuth } from "@clerk/nextjs";
 import interactionPlugin from "@fullcalendar/interaction";
 import luxonPlugin from "@fullcalendar/luxon3";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CalendarEventContent } from "@/components/CalendarEventContent";
 import {
@@ -19,12 +21,18 @@ import {
   type CalendarEventDetails,
 } from "@/components/CalendarEventPopover";
 import { classMenuItems } from "@/content/site";
+import {
+  fetchSavedClassSessions,
+  removeSavedClassSession,
+  saveClassSession,
+} from "@/lib/saved-class-sessions-client";
 import { classSessionListSchema } from "@/lib/schedule";
 
 const TIME_ZONE = "America/Detroit";
-const POPOVER_HEIGHT = 340;
+const POPOVER_HEIGHT = 430;
 const POPOVER_WIDTH = 320;
 const VIEWPORT_GAP = 12;
+const POPOVER_HIDE_DELAY = 140;
 const eventInteractionCleanups = new WeakMap<HTMLElement, () => void>();
 const scheduleDateTimeFormatter = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
@@ -41,11 +49,38 @@ const scheduleEndTimeFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 export function PublicSchedule() {
+  const { isLoaded: isAuthLoaded, isSignedIn } = useAuth();
+  const calendarRef = useRef<FullCalendar>(null);
+  const hideTimeoutRef = useRef<number | null>(null);
   const [eventDetails, setEventDetails] = useState<CalendarEventDetails | null>(null);
+  const [savedSessionIds, setSavedSessionIds] = useState<Set<string>>(new Set());
+  const [isSavedStateReady, setIsSavedStateReady] = useState(false);
+  const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
+  const [savedStateError, setSavedStateError] = useState<string | null>(null);
+  const [mutationError, setMutationError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isEmpty, setIsEmpty] = useState(false);
 
+  const cancelHide = useCallback(() => {
+    if (hideTimeoutRef.current !== null) {
+      window.clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+  }, []);
+
+  const hideEventDetails = useCallback(() => {
+    cancelHide();
+    setEventDetails(null);
+    setMutationError(null);
+  }, [cancelHide]);
+
+  const scheduleHide = useCallback(() => {
+    cancelHide();
+    hideTimeoutRef.current = window.setTimeout(hideEventDetails, POPOVER_HIDE_DELAY);
+  }, [cancelHide, hideEventDetails]);
+
   const showEventDetails = useCallback((event: EventApi, element: HTMLElement) => {
+    cancelHide();
     const rect = element.getBoundingClientRect();
     const roomOnRight = window.innerWidth - rect.right;
     const left = roomOnRight >= POPOVER_WIDTH + VIEWPORT_GAP
@@ -58,6 +93,7 @@ export function PublicSchedule() {
     const locationName = event.extendedProps["locationName"];
 
     setEventDetails({
+      classSessionId: event.id,
       classItem: classMenuItems.find((item) => item.title === event.title),
       instructorName: typeof instructorName === "string" && instructorName
         ? instructorName
@@ -72,18 +108,22 @@ export function PublicSchedule() {
       title: event.title,
       top,
     });
-  }, []);
+    setMutationError(null);
+  }, [cancelHide]);
 
   const handleEventMouseEnter = useCallback((eventInfo: EventHoveringArg) => {
     showEventDetails(eventInfo.event, eventInfo.el);
   }, [showEventDetails]);
 
+  const handleEventClick = useCallback((eventInfo: EventClickArg) => {
+    showEventDetails(eventInfo.event, eventInfo.el);
+  }, [showEventDetails]);
+
   const handleEventDidMount = useCallback((eventInfo: EventMountArg) => {
     const showDetails = () => showEventDetails(eventInfo.event, eventInfo.el);
-    const hideDetails = () => setEventDetails(null);
     const handleKeyDown = (keyboardEvent: KeyboardEvent) => {
       if (keyboardEvent.key === "Escape") {
-        hideDetails();
+        hideEventDetails();
         eventInfo.el.blur();
       }
     };
@@ -91,18 +131,30 @@ export function PublicSchedule() {
     eventInfo.el.tabIndex = 0;
     eventInfo.el.setAttribute(
       "aria-label",
-      eventInfo.event.title,
+      `${eventInfo.event.title}. View details and add to your schedule.`,
     );
     eventInfo.el.addEventListener("focus", showDetails);
-    eventInfo.el.addEventListener("blur", hideDetails);
+    eventInfo.el.addEventListener("blur", scheduleHide);
     eventInfo.el.addEventListener("keydown", handleKeyDown);
     eventInteractionCleanups.set(eventInfo.el, () => {
       eventInfo.el.removeEventListener("focus", showDetails);
-      eventInfo.el.removeEventListener("blur", hideDetails);
+      eventInfo.el.removeEventListener("blur", scheduleHide);
       eventInfo.el.removeEventListener("keydown", handleKeyDown);
       eventInteractionCleanups.delete(eventInfo.el);
     });
-  }, [showEventDetails]);
+  }, [hideEventDetails, scheduleHide, showEventDetails]);
+
+  useEffect(() => {
+    calendarRef.current?.getApi().refetchEvents();
+  }, [isSignedIn]);
+
+  useEffect(() => {
+    const refresh = () => calendarRef.current?.getApi().refetchEvents();
+    window.addEventListener("personal-schedule-changed", refresh);
+    return () => window.removeEventListener("personal-schedule-changed", refresh);
+  }, []);
+
+  useEffect(() => () => cancelHide(), [cancelHide]);
 
   const loadEvents = useCallback(
     async (
@@ -112,6 +164,8 @@ export function PublicSchedule() {
     ) => {
       try {
         setError(null);
+        setSavedStateError(null);
+        setIsSavedStateReady(!isSignedIn);
         const query = new URLSearchParams({ from: range.startStr, to: range.endStr });
         const response = await fetch(`/api/class-sessions?${query.toString()}`, {
           cache: "no-store",
@@ -136,6 +190,25 @@ export function PublicSchedule() {
             title: session.title,
           })),
         );
+
+        if (isSignedIn) {
+          try {
+            const selections = await fetchSavedClassSessions(range.startStr, range.endStr);
+            setSavedSessionIds(new Set(selections.map((selection) => selection.session.id)));
+            setIsSavedStateReady(true);
+          } catch (caughtError) {
+            setSavedSessionIds(new Set());
+            setIsSavedStateReady(false);
+            setSavedStateError(
+              caughtError instanceof Error
+                ? caughtError.message
+                : "Your saved classes could not be loaded.",
+            );
+          }
+        } else {
+          setSavedSessionIds(new Set());
+          setIsSavedStateReady(true);
+        }
       } catch (caughtError) {
         const loadError = caughtError instanceof Error
           ? caughtError
@@ -145,8 +218,39 @@ export function PublicSchedule() {
         failure(loadError);
       }
     },
-    [],
+    [isSignedIn],
   );
+
+  async function toggleSavedSession() {
+    if (!eventDetails || !isSignedIn || pendingSessionId) return;
+
+    const sessionId = eventDetails.classSessionId;
+    const isSaved = savedSessionIds.has(sessionId);
+    setPendingSessionId(sessionId);
+    setMutationError(null);
+
+    try {
+      if (isSaved) {
+        await removeSavedClassSession(sessionId);
+        setSavedSessionIds((current) => {
+          const next = new Set(current);
+          next.delete(sessionId);
+          return next;
+        });
+      } else {
+        await saveClassSession(sessionId);
+        setSavedSessionIds((current) => new Set(current).add(sessionId));
+      }
+
+      window.dispatchEvent(new CustomEvent("personal-schedule-changed"));
+    } catch (caughtError) {
+      setMutationError(
+        caughtError instanceof Error ? caughtError.message : "Your schedule could not be updated.",
+      );
+    } finally {
+      setPendingSessionId(null);
+    }
+  }
 
   return (
     <div className="public-calendar-shell">
@@ -154,10 +258,11 @@ export function PublicSchedule() {
         allDaySlot={false}
         dayHeaderFormat={{ weekday: "short", day: "numeric" }}
         eventContent={(eventInfo) => <CalendarEventContent eventInfo={eventInfo} />}
+        eventClick={handleEventClick}
         eventDidMount={handleEventDidMount}
         eventMinHeight={58}
         eventMouseEnter={handleEventMouseEnter}
-        eventMouseLeave={() => setEventDetails(null)}
+        eventMouseLeave={scheduleHide}
         eventTimeFormat={{ hour: "numeric", minute: "2-digit", meridiem: "short" }}
         events={loadEvents}
         expandRows
@@ -167,6 +272,7 @@ export function PublicSchedule() {
         initialView="timeGridWeek"
         nowIndicator
         plugins={[timeGridPlugin, interactionPlugin, luxonPlugin]}
+        ref={calendarRef}
         slotDuration="00:20:00"
         slotLabelInterval="01:00:00"
         slotLabelFormat={{ hour: "numeric", minute: "2-digit", meridiem: "short" }}
@@ -175,7 +281,21 @@ export function PublicSchedule() {
         timeZone={TIME_ZONE}
         eventWillUnmount={(eventInfo) => eventInteractionCleanups.get(eventInfo.el)?.()}
       />
-      {eventDetails ? <CalendarEventPopover details={eventDetails} /> : null}
+      {eventDetails ? (
+        <CalendarEventPopover
+          details={eventDetails}
+          error={mutationError ?? savedStateError}
+          isAuthLoaded={isAuthLoaded}
+          isPending={pendingSessionId === eventDetails.classSessionId}
+          isSaved={savedSessionIds.has(eventDetails.classSessionId)}
+          isSavedStateReady={isSavedStateReady}
+          isSignedIn={Boolean(isSignedIn)}
+          onDismiss={hideEventDetails}
+          onMouseEnter={cancelHide}
+          onMouseLeave={scheduleHide}
+          onToggleSaved={() => void toggleSavedSession()}
+        />
+      ) : null}
       {isEmpty ? <p className="calendar-state">No classes are posted for this week.</p> : null}
       {error ? <p className="calendar-state calendar-error" role="alert">{error}</p> : null}
     </div>
