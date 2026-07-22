@@ -640,6 +640,21 @@ section[id] {
     transform 220ms ease;
 }
 
+.menu-card-open {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  inset: 0;
+  padding: 0;
+  position: absolute;
+  z-index: 3;
+}
+
+.menu-card-open:focus-visible {
+  border-radius: 16px;
+  outline-offset: -4px;
+}
+
 .menu-card:hover {
   box-shadow: 0 24px 50px rgba(34, 29, 22, 0.12);
   transform: translateY(-4px);
@@ -705,6 +720,233 @@ section[id] {
   font-size: 0.94rem;
   line-height: 1.55;
   margin-bottom: 0;
+}
+
+.menu-card-action {
+  align-items: center;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  display: flex;
+  font-size: 0.76rem;
+  font-weight: 700;
+  justify-content: space-between;
+  letter-spacing: 0;
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.menu-card-action svg {
+  height: 15px;
+  stroke-width: 1.8;
+  width: 15px;
+}
+
+.lesson-dialog {
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  height: min(720px, calc(100dvh - 32px));
+  margin: auto;
+  max-height: calc(100dvh - 32px);
+  max-width: min(1080px, calc(100vw - 32px));
+  overflow: visible;
+  padding: 0;
+  width: 100%;
+}
+
+.lesson-dialog::backdrop {
+  background: rgba(16, 18, 16, 0.72);
+  backdrop-filter: blur(7px);
+}
+
+.lesson-dialog-layout {
+  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  box-shadow: 0 28px 90px rgba(10, 12, 10, 0.32);
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.lesson-dialog-close {
+  align-items: center;
+  background: rgba(255, 253, 248, 0.92);
+  border: 1px solid rgba(23, 23, 20, 0.14);
+  border-radius: 50%;
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  height: 40px;
+  justify-content: center;
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+  width: 40px;
+  z-index: 2;
+}
+
+.lesson-dialog-close:hover {
+  background: var(--white);
+  transform: rotate(4deg);
+}
+
+.lesson-dialog-close svg {
+  height: 19px;
+  stroke-width: 1.8;
+  width: 19px;
+}
+
+.lesson-dialog-image {
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.lesson-dialog-image::after {
+  background: linear-gradient(0deg, rgba(18, 20, 18, 0.44), transparent 38%);
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+
+.lesson-dialog-image img {
+  object-fit: cover;
+}
+
+.lesson-dialog-image > span {
+  bottom: 22px;
+  color: var(--white);
+  font-size: 0.74rem;
+  font-weight: 700;
+  left: 24px;
+  letter-spacing: 0;
+  position: absolute;
+  z-index: 1;
+}
+
+.lesson-dialog-content {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: clamp(42px, 5vw, 72px);
+}
+
+.lesson-dialog-content .eyebrow {
+  margin-bottom: 13px;
+}
+
+.lesson-dialog-content h2 {
+  font-size: clamp(2.45rem, 4vw, 4.4rem);
+  margin-bottom: 24px;
+  max-width: 600px;
+}
+
+.lesson-dialog-description {
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 30px;
+}
+
+.lesson-dialog-facts {
+  border-bottom: 1px solid var(--line);
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.lesson-dialog-facts > div {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  padding: 20px 14px 20px 0;
+}
+
+.lesson-dialog-facts > div + div {
+  border-left: 1px solid var(--line);
+  padding-left: 20px;
+}
+
+.lesson-dialog-facts svg {
+  color: var(--accent-deep);
+  grid-row: 1 / 3;
+  height: 16px;
+  margin-top: 2px;
+  stroke-width: 1.8;
+  width: 16px;
+}
+
+.lesson-dialog-facts span {
+  color: var(--subtle);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.lesson-dialog-facts strong {
+  font-size: 0.86rem;
+  font-weight: 650;
+  margin-top: 3px;
+}
+
+.lesson-dialog-highlights {
+  padding: 28px 0 32px;
+}
+
+.lesson-dialog-subheading {
+  align-items: center;
+  display: flex;
+  gap: 9px;
+}
+
+.lesson-dialog-subheading svg {
+  color: var(--accent-deep);
+  height: 17px;
+  stroke-width: 1.8;
+  width: 17px;
+}
+
+.lesson-dialog-subheading h3 {
+  font-size: 1rem;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.lesson-dialog-highlights ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+}
+
+.lesson-dialog-highlights li {
+  background: var(--surface-soft);
+  border: 1px solid rgba(23, 23, 20, 0.08);
+  border-radius: 6px;
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 8px 10px;
+}
+
+.lesson-dialog-cta {
+  align-self: flex-start;
+  gap: 9px;
+  margin-top: auto;
+}
+
+.lesson-dialog-cta svg {
+  height: 17px;
+  stroke-width: 1.8;
+  width: 17px;
 }
 
 .schedule-section {
@@ -2404,6 +2646,25 @@ select:focus {
     top: 70px;
   }
 
+  .lesson-dialog {
+    height: calc(100dvh - 24px);
+    max-height: calc(100dvh - 24px);
+    max-width: calc(100vw - 24px);
+  }
+
+  .lesson-dialog-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(220px, 40dvh) minmax(0, 1fr);
+  }
+
+  .lesson-dialog-content {
+    padding: 34px 28px 32px;
+  }
+
+  .lesson-dialog-content h2 {
+    font-size: clamp(2.2rem, 9vw, 3.5rem);
+  }
+
   .account-cta,
   .auth-link {
     display: none;
@@ -2587,6 +2848,11 @@ select:focus {
     padding: 20px 17px;
   }
 
+  .menu-card-action {
+    margin-top: 16px;
+    padding-top: 13px;
+  }
+
   .menu-time {
     font-size: 0.62rem;
     left: 14px;
@@ -2604,6 +2870,58 @@ select:focus {
     overflow: hidden;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 4;
+  }
+
+  .lesson-dialog {
+    height: calc(100dvh - 14px);
+    max-height: calc(100dvh - 14px);
+    max-width: calc(100vw - 14px);
+  }
+
+  .lesson-dialog-layout {
+    grid-template-rows: minmax(190px, 32dvh) minmax(0, 1fr);
+  }
+
+  .lesson-dialog-close {
+    right: 12px;
+    top: 12px;
+  }
+
+  .lesson-dialog-content {
+    padding: 29px 22px 26px;
+  }
+
+  .lesson-dialog-content h2 {
+    font-size: clamp(2rem, 10vw, 3rem);
+    margin-bottom: 18px;
+  }
+
+  .lesson-dialog-description {
+    font-size: 0.92rem;
+    margin-bottom: 24px;
+  }
+
+  .lesson-dialog-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .lesson-dialog-facts > div,
+  .lesson-dialog-facts > div + div {
+    border-left: 0;
+    padding: 14px 0;
+  }
+
+  .lesson-dialog-facts > div + div {
+    border-top: 1px solid var(--line);
+  }
+
+  .lesson-dialog-highlights {
+    padding: 23px 0 26px;
+  }
+
+  .lesson-dialog-cta {
+    justify-content: center;
+    width: 100%;
   }
 
   .price-card,
