@@ -2,6 +2,7 @@
 
 import {
   CalendarDays,
+  CalendarPlus,
   Clock3,
   Layers3,
   Maximize2,
@@ -13,6 +14,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import type { ClassMenuItem } from "@/content/site";
+import { ClassSessionPicker } from "@/components/ClassSessionPicker";
 
 type ClassMenuProps = {
   classes: ClassMenuItem[];
@@ -20,6 +22,7 @@ type ClassMenuProps = {
 
 export function ClassMenu({ classes }: ClassMenuProps) {
   const [selectedClass, setSelectedClass] = useState<ClassMenuItem | null>(null);
+  const [openToSchedule, setOpenToSchedule] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const dialogLayoutRef = useRef<HTMLDivElement>(null);
   const originCardRef = useRef<HTMLElement | null>(null);
@@ -98,6 +101,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
       activeAnimationRef.current = null;
       dialog.removeAttribute("data-closing");
       dialog.close();
+      setOpenToSchedule(false);
       afterClose?.();
     };
 
@@ -157,6 +161,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
               aria-label={`View details for ${item.title}`}
               onClick={(event) => {
                 originCardRef.current = event.currentTarget.closest<HTMLElement>(".menu-card");
+                setOpenToSchedule(false);
                 setSelectedClass(item);
               }}
             />
@@ -177,6 +182,19 @@ export function ClassMenu({ classes }: ClassMenuProps) {
                 <Maximize2 />
               </span>
             </div>
+            <button
+              className="menu-card-save"
+              type="button"
+              aria-label={`Add a ${item.title} session to your schedule`}
+              onClick={(event) => {
+                originCardRef.current = event.currentTarget.closest<HTMLElement>(".menu-card");
+                setOpenToSchedule(true);
+                setSelectedClass(item);
+              }}
+            >
+              <CalendarPlus aria-hidden="true" />
+              Add class
+            </button>
           </article>
         ))}
       </div>
@@ -251,6 +269,8 @@ export function ClassMenu({ classes }: ClassMenuProps) {
                   ))}
                 </ul>
               </div>
+
+              <ClassSessionPicker autoFocus={openToSchedule} classItem={selectedClass} />
 
               <Link
                 className="button button-primary lesson-dialog-cta"

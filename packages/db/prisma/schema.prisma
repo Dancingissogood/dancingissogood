@@ -49,6 +49,7 @@ model UserProfile {
 
   purchases            PassPurchase[]
   registrations        ClassRegistration[]
+  savedClassSessions   SavedClassSession[]
   createdClassSessions ClassSession[]      @relation("ClassSessionCreatedBy")
   updatedClassSessions ClassSession[]      @relation("ClassSessionUpdatedBy")
 
@@ -121,6 +122,7 @@ model ClassSession {
   updatedAt      DateTime @updatedAt
 
   registrations ClassRegistration[]
+  savedBy       SavedClassSession[]
   createdBy     UserProfile?        @relation("ClassSessionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   updatedBy     UserProfile?        @relation("ClassSessionUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
 
@@ -128,6 +130,20 @@ model ClassSession {
   @@index([published, startsAt])
   @@index([createdById])
   @@index([updatedById])
+}
+
+model SavedClassSession {
+  id             String   @id @default(cuid())
+  userId         String
+  classSessionId String
+  createdAt      DateTime @default(now())
+
+  user         UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classSession ClassSession @relation(fields: [classSessionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, classSessionId])
+  @@index([userId, createdAt])
+  @@index([classSessionId])
 }
 
 model ClassRegistration {

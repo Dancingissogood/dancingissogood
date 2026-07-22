@@ -4,12 +4,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { fetchAccountSummary } from "@/lib/account";
+import { ProfileCalendar } from "@/components/ProfileCalendar";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Account",
-  description: "View your Dancing Is So Good passes and account details.",
+  description: "View your Dancing Is So Good passes, saved classes, and account details.",
 };
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
@@ -75,6 +76,8 @@ export default async function AccountPage() {
             </Link>
           </div>
         </header>
+
+        <ProfileCalendar />
 
         <section className="account-passes" aria-labelledby="passes-title">
           <div className="account-section-heading">
