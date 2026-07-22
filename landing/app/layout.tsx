@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     template: "%s | Dancing Is So Good",
   },
   description:
-    "A six-week dance and wellness camp with 20-minute classes, private and group instruction, and unlimited Monday-Wednesday access from 9 AM to 2 PM.",
+    "A six-week dance and wellness camp with 20-minute classes, private and group instruction, and unlimited Monday-Wednesday access from 9 AM to 2 PM Eastern Time.",
   openGraph: {
     title: "Dancing Is So Good",
     description:

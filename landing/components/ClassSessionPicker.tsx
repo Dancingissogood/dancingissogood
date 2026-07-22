@@ -13,25 +13,10 @@ import {
   removeSavedClassSession,
   saveClassSession,
 } from "@/lib/saved-class-sessions-client";
+import { getTimeZoneDisplayName } from "@/lib/time-zone";
+import { useViewerTimeZone } from "@/lib/use-viewer-time-zone";
 
-const TIME_ZONE = "America/Detroit";
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const monthFormatter = new Intl.DateTimeFormat("en-US", {
-  month: "long",
-  timeZone: TIME_ZONE,
-  year: "numeric",
-});
-const selectedDateFormatter = new Intl.DateTimeFormat("en-US", {
-  day: "numeric",
-  month: "long",
-  timeZone: TIME_ZONE,
-  weekday: "long",
-});
-const timeFormatter = new Intl.DateTimeFormat("en-US", {
-  hour: "numeric",
-  minute: "2-digit",
-  timeZone: TIME_ZONE,
-});
 
 type ClassSessionPickerProps = {
   autoFocus: boolean;
@@ -40,7 +25,30 @@ type ClassSessionPickerProps = {
 
 export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerProps) {
   const { isLoaded, isSignedIn } = useAuth();
-  const [month, setMonth] = useState(() => DateTime.now().setZone(TIME_ZONE).startOf("month"));
+  const timeZone = useViewerTimeZone();
+  const timeZoneName = getTimeZoneDisplayName(timeZone);
+  const [monthOffset, setMonthOffset] = useState(0);
+  const month = useMemo(
+    () => DateTime.now().setZone(timeZone).startOf("month").plus({ months: monthOffset }),
+    [monthOffset, timeZone],
+  );
+  const monthFormatter = useMemo(() => new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    timeZone,
+    year: "numeric",
+  }), [timeZone]);
+  const selectedDateFormatter = useMemo(() => new Intl.DateTimeFormat("en-US", {
+    day: "numeric",
+    month: "long",
+    timeZone,
+    weekday: "long",
+  }), [timeZone]);
+  const timeFormatter = useMemo(() => new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone,
+    timeZoneName: "short",
+  }), [timeZone]);
   const [sessions, setSessions] = useState<ClassSession[]>([]);
   const [savedSessionIds, setSavedSessionIds] = useState<Set<string>>(new Set());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -85,11 +93,11 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
         );
         setSessions(matchingSessions);
         setSelectedDate((currentDate) => {
-          const availableDates = new Set(matchingSessions.map(getSessionDateKey));
+          const availableDates = new Set(matchingSessions.map((session) => getSessionDateKey(session, timeZone)));
           return currentDate && availableDates.has(currentDate)
             ? currentDate
             : matchingSessions[0]
-              ? getSessionDateKey(matchingSessions[0])
+              ? getSessionDateKey(matchingSessions[0], timeZone)
               : null;
         });
 
@@ -112,18 +120,18 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
 
     void loadMonth();
     return () => controller.abort();
-  }, [classItem.title, isSignedIn, range.from, range.to]);
+  }, [classItem.title, isSignedIn, range.from, range.to, timeZone]);
 
   const sessionsByDate = useMemo(() => {
     const grouped = new Map<string, ClassSession[]>();
 
     for (const session of sessions) {
-      const dateKey = getSessionDateKey(session);
+      const dateKey = getSessionDateKey(session, timeZone);
       grouped.set(dateKey, [...(grouped.get(dateKey) ?? []), session]);
     }
 
     return grouped;
-  }, [sessions]);
+  }, [sessions, timeZone]);
   const selectedSessions = selectedDate ? sessionsByDate.get(selectedDate) ?? [] : [];
   const calendarDays = getCalendarDays(month);
 
@@ -162,14 +170,14 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
           <span className="class-session-picker-icon"><CalendarCheck2 aria-hidden="true" /></span>
           <div>
             <h3>Choose a class time</h3>
-            <p>Save individual sessions to your account schedule.</p>
+            <p>Save individual sessions. Times are shown in {timeZoneName}.</p>
           </div>
         </div>
         <div className="mini-calendar-controls">
           <button
             type="button"
             aria-label="Previous month"
-            onClick={() => setMonth((current) => current.minus({ months: 1 }).startOf("month"))}
+            onClick={() => setMonthOffset((current) => current - 1)}
           >
             <ChevronLeft aria-hidden="true" />
           </button>
@@ -177,7 +185,7 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
           <button
             type="button"
             aria-label="Next month"
-            onClick={() => setMonth((current) => current.plus({ months: 1 }).startOf("month"))}
+            onClick={() => setMonthOffset((current) => current + 1)}
           >
             <ChevronRight aria-hidden="true" />
           </button>
@@ -224,7 +232,7 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
         {!isLoading && selectedDate && selectedSessions.length > 0 ? (
           <>
             <strong className="class-session-date">
-              {selectedDateFormatter.format(DateTime.fromISO(selectedDate, { zone: TIME_ZONE }).toJSDate())}
+              {selectedDateFormatter.format(DateTime.fromISO(selectedDate, { zone: timeZone }).toJSDate())}
             </strong>
             <div className="class-session-time-list">
               {selectedSessions.map((session) => {
@@ -280,8 +288,8 @@ function getMonthRange(month: DateTime) {
   } as { from: string; to: string };
 }
 
-function getSessionDateKey(session: ClassSession) {
-  return DateTime.fromISO(session.startsAt).setZone(TIME_ZONE).toISODate() ?? "";
+function getSessionDateKey(session: ClassSession, timeZone: string) {
+  return DateTime.fromISO(session.startsAt).setZone(timeZone).toISODate() ?? "";
 }
 
 function getCalendarDays(month: DateTime) {

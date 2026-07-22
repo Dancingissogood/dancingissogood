@@ -20,8 +20,8 @@ import { CalendarEventContent } from "@/components/CalendarEventContent";
 import { classMenuItems } from "@/content/site";
 import { classSessionListSchema, classSessionMutationSchema } from "@/lib/schedule";
 import type { ClassSession } from "@/lib/schedule";
+import { STUDIO_TIME_ZONE } from "@/lib/time-zone";
 
-const TIME_ZONE = "America/Detroit";
 const SESSION_MINUTES = 20;
 
 type SessionDraft = {
@@ -36,7 +36,7 @@ type SessionDraft = {
 };
 
 const emptyDraft = (): SessionDraft => {
-  const start = DateTime.now().setZone(TIME_ZONE).plus({ days: 1 }).startOf("day").set({ hour: 9 });
+  const start = DateTime.now().setZone(STUDIO_TIME_ZONE).plus({ days: 1 }).startOf("day").set({ hour: 9 });
   return {
     capacity: "",
     date: start.toFormat("yyyy-MM-dd"),
@@ -101,8 +101,8 @@ export function AdminScheduleEditor() {
 
   function openNewSession(date?: Date) {
     const selected = date
-      ? DateTime.fromJSDate(date).setZone(TIME_ZONE)
-      : DateTime.now().setZone(TIME_ZONE).plus({ days: 1 }).startOf("day").set({ hour: 9 });
+      ? DateTime.fromJSDate(date).setZone(STUDIO_TIME_ZONE)
+      : DateTime.now().setZone(STUDIO_TIME_ZONE).plus({ days: 1 }).startOf("day").set({ hour: 9 });
     setDraft({
       ...emptyDraft(),
       date: selected.toFormat("yyyy-MM-dd"),
@@ -121,7 +121,7 @@ export function AdminScheduleEditor() {
       return;
     }
 
-    const startsAt = DateTime.fromISO(session.startsAt).setZone(TIME_ZONE);
+    const startsAt = DateTime.fromISO(session.startsAt).setZone(STUDIO_TIME_ZONE);
     setDraft({
       capacity: session.capacity?.toString() ?? "",
       date: startsAt.toFormat("yyyy-MM-dd"),
@@ -185,7 +185,7 @@ export function AdminScheduleEditor() {
     setIsSaving(true);
     setRequestError(null);
 
-    const startsAt = DateTime.fromISO(`${draft.date}T${draft.time}`, { zone: TIME_ZONE });
+    const startsAt = DateTime.fromISO(`${draft.date}T${draft.time}`, { zone: STUDIO_TIME_ZONE });
 
     if (!startsAt.isValid) {
       setRequestError("Enter a valid class date and time.");
@@ -280,6 +280,7 @@ export function AdminScheduleEditor() {
           <div>
             <p className="eyebrow">Administration</p>
             <h1>Class schedule</h1>
+            <p>All schedule dates and times are entered and displayed in Eastern Time.</p>
           </div>
           <div className="admin-heading-actions">
             <Link className="admin-icon-link" href="/account" title="Account">
@@ -323,7 +324,7 @@ export function AdminScheduleEditor() {
             slotLabelFormat={{ hour: "numeric", minute: "2-digit", meridiem: "short" }}
             slotMaxTime="14:00:00"
             slotMinTime="09:00:00"
-            timeZone={TIME_ZONE}
+            timeZone={STUDIO_TIME_ZONE}
           />
         </section>
       </div>
@@ -357,7 +358,7 @@ export function AdminScheduleEditor() {
               <input required type="date" value={draft.date} onChange={(event) => setDraft({ ...draft, date: event.target.value })} />
             </label>
             <label className="field">
-              <span>Start time</span>
+              <span>Start time (Eastern)</span>
               <input required type="time" step={1_200} value={draft.time} onChange={(event) => setDraft({ ...draft, time: event.target.value })} />
             </label>
             <label className="field">

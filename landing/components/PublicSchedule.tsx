@@ -1,6 +1,7 @@
 "use client";
 
 import type {
+  DatesSetArg,
   EventApi,
   EventClickArg,
   EventHoveringArg,
@@ -13,7 +14,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import luxonPlugin from "@fullcalendar/luxon3";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { CalendarEventContent } from "@/components/CalendarEventContent";
@@ -28,26 +29,37 @@ import {
   saveClassSession,
 } from "@/lib/saved-class-sessions-client";
 import { classSessionListSchema } from "@/lib/schedule";
+import { getStudioHoursInTimeZone } from "@/lib/time-zone";
+import { useViewerTimeZone } from "@/lib/use-viewer-time-zone";
 
-const TIME_ZONE = "America/Detroit";
 const POPOVER_HIDE_DELAY = 220;
 const eventInteractionCleanups = new WeakMap<HTMLElement, () => void>();
-const scheduleDateTimeFormatter = new Intl.DateTimeFormat("en-US", {
-  day: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-  month: "short",
-  timeZone: TIME_ZONE,
-  weekday: "short",
-});
-const scheduleEndTimeFormatter = new Intl.DateTimeFormat("en-US", {
-  hour: "numeric",
-  minute: "2-digit",
-  timeZone: TIME_ZONE,
-});
 
 export function PublicSchedule() {
   const { isLoaded: isAuthLoaded, isSignedIn } = useAuth();
+  const timeZone = useViewerTimeZone();
+  const [visibleRange, setVisibleRange] = useState(() => ({
+    end: new Date(),
+    start: new Date(),
+  }));
+  const calendarHours = useMemo(
+    () => getStudioHoursInTimeZone(timeZone, visibleRange.start, visibleRange.end),
+    [timeZone, visibleRange],
+  );
+  const scheduleDateTimeFormatter = useMemo(() => new Intl.DateTimeFormat("en-US", {
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    month: "short",
+    timeZone,
+    weekday: "short",
+  }), [timeZone]);
+  const scheduleEndTimeFormatter = useMemo(() => new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone,
+    timeZoneName: "short",
+  }), [timeZone]);
   const calendarRef = useRef<FullCalendar>(null);
   const hideTimeoutRef = useRef<number | null>(null);
   const [eventDetails, setEventDetails] = useState<CalendarEventDetails | null>(null);
@@ -104,7 +116,7 @@ export function PublicSchedule() {
       title: event.title,
     });
     setMutationError(null);
-  }, [cancelHide]);
+  }, [cancelHide, scheduleDateTimeFormatter, scheduleEndTimeFormatter]);
 
   const handleEventMouseEnter = useCallback((eventInfo: EventHoveringArg) => {
     showEventDetails(eventInfo.event, eventInfo.el);
@@ -113,6 +125,19 @@ export function PublicSchedule() {
   const handleEventClick = useCallback((eventInfo: EventClickArg) => {
     showEventDetails(eventInfo.event, eventInfo.el);
   }, [showEventDetails]);
+
+  const handleDatesSet = useCallback((dateInfo: DatesSetArg) => {
+    setVisibleRange((current) => {
+      if (
+        current.start.getTime() === dateInfo.start.getTime()
+        && current.end.getTime() === dateInfo.end.getTime()
+      ) {
+        return current;
+      }
+
+      return { end: dateInfo.end, start: dateInfo.start };
+    });
+  }, []);
 
   const handleEventDidMount = useCallback((eventInfo: EventMountArg) => {
     const showDetails = () => showEventDetails(eventInfo.event, eventInfo.el);
@@ -264,6 +289,7 @@ export function PublicSchedule() {
     <div className="public-calendar-shell">
       <FullCalendar
         allDaySlot={false}
+        datesSet={handleDatesSet}
         dayHeaderFormat={{ weekday: "short", day: "numeric" }}
         eventContent={(eventInfo) => <CalendarEventContent eventInfo={eventInfo} />}
         eventClick={handleEventClick}
@@ -284,9 +310,9 @@ export function PublicSchedule() {
         slotDuration="00:20:00"
         slotLabelInterval="01:00:00"
         slotLabelFormat={{ hour: "numeric", minute: "2-digit", meridiem: "short" }}
-        slotMaxTime="14:00:00"
-        slotMinTime="09:00:00"
-        timeZone={TIME_ZONE}
+        slotMaxTime={calendarHours.slotMaxTime}
+        slotMinTime={calendarHours.slotMinTime}
+        timeZone={timeZone}
         eventWillUnmount={(eventInfo) => eventInteractionCleanups.get(eventInfo.el)?.()}
       />
       {eventDetails && typeof document !== "undefined"

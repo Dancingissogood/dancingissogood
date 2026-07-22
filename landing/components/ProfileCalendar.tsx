@@ -1,13 +1,13 @@
 "use client";
 
-import type { EventClickArg, EventInput, EventSourceFuncArg } from "@fullcalendar/core";
+import type { DatesSetArg, EventClickArg, EventInput, EventSourceFuncArg } from "@fullcalendar/core";
 import luxonPlugin from "@fullcalendar/luxon3";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { CalendarDays, Clock3, MapPin, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CalendarEventContent } from "@/components/CalendarEventContent";
 import { classMenuItems } from "@/content/site";
@@ -16,15 +16,30 @@ import {
   fetchSavedClassSessions,
   removeSavedClassSession,
 } from "@/lib/saved-class-sessions-client";
-
-const TIME_ZONE = "America/Detroit";
-const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
-  dateStyle: "full",
-  timeStyle: "short",
-  timeZone: TIME_ZONE,
-});
+import { getStudioHoursInTimeZone, getTimeZoneDisplayName } from "@/lib/time-zone";
+import { useViewerTimeZone } from "@/lib/use-viewer-time-zone";
 
 export function ProfileCalendar() {
+  const timeZone = useViewerTimeZone();
+  const timeZoneName = getTimeZoneDisplayName(timeZone);
+  const [visibleRange, setVisibleRange] = useState(() => ({
+    end: new Date(),
+    start: new Date(),
+  }));
+  const calendarHours = useMemo(
+    () => getStudioHoursInTimeZone(timeZone, visibleRange.start, visibleRange.end),
+    [timeZone, visibleRange],
+  );
+  const dateTimeFormatter = useMemo(() => new Intl.DateTimeFormat("en-US", {
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    month: "long",
+    timeZone,
+    timeZoneName: "short",
+    weekday: "long",
+    year: "numeric",
+  }), [timeZone]);
   const calendarRef = useRef<FullCalendar>(null);
   const [visibleSelections, setVisibleSelections] = useState<SavedClassSession[]>([]);
   const [selected, setSelected] = useState<SavedClassSession | null>(null);
@@ -81,6 +96,19 @@ export function ProfileCalendar() {
     if (isSavedClassSession(selection)) setSelected(selection);
   }
 
+  const handleDatesSet = useCallback((dateInfo: DatesSetArg) => {
+    setVisibleRange((current) => {
+      if (
+        current.start.getTime() === dateInfo.start.getTime()
+        && current.end.getTime() === dateInfo.end.getTime()
+      ) {
+        return current;
+      }
+
+      return { end: dateInfo.end, start: dateInfo.start };
+    });
+  }, []);
+
   async function removeSelected() {
     if (!selected || isRemoving) return;
 
@@ -107,7 +135,10 @@ export function ProfileCalendar() {
       <div className="account-section-heading account-schedule-heading">
         <div>
           <h2 id="my-schedule-title">My schedule</h2>
-          <p>Classes you save appear here. Saving a class does not reserve capacity.</p>
+          <p>
+            Classes you save appear here. Times are shown in {timeZoneName}.{" "}
+            Saving a class does not reserve capacity.
+          </p>
         </div>
         <span>{visibleSelections.length}</span>
       </div>
@@ -115,6 +146,7 @@ export function ProfileCalendar() {
       <div className="public-calendar-shell profile-calendar-shell">
         <FullCalendar
           allDaySlot={false}
+          datesSet={handleDatesSet}
           dayHeaderFormat={{ weekday: "short", day: "numeric" }}
           eventClick={selectEvent}
           eventContent={(eventInfo) => <CalendarEventContent eventInfo={eventInfo} />}
@@ -132,9 +164,9 @@ export function ProfileCalendar() {
           slotDuration="00:20:00"
           slotLabelInterval="01:00:00"
           slotLabelFormat={{ hour: "numeric", minute: "2-digit", meridiem: "short" }}
-          slotMaxTime="14:00:00"
-          slotMinTime="09:00:00"
-          timeZone={TIME_ZONE}
+          slotMaxTime={calendarHours.slotMaxTime}
+          slotMinTime={calendarHours.slotMinTime}
+          timeZone={timeZone}
         />
       </div>
 

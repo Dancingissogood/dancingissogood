@@ -62,7 +62,7 @@ export const navigationItems: NavigationItem[] = [
 export const quickFacts: QuickFact[] = [
   { label: "Days", value: "Mon-Wed" },
   { label: "Class Length", value: "20 min" },
-  { label: "Daily Hours", value: "9 AM-2 PM" },
+  { label: "Daily Hours", value: "9 AM-2 PM ET" },
   { label: "3-Day Pass", value: "$100" },
 ];
 

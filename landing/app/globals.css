@@ -1731,6 +1731,11 @@ section[id] {
   margin-bottom: 0;
 }
 
+.admin-heading > div:first-child > p:last-child {
+  color: var(--muted);
+  margin: 10px 0 0;
+}
+
 .admin-heading-actions {
   align-items: center;
   display: flex;

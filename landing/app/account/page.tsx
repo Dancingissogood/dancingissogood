@@ -99,7 +99,7 @@ export default async function AccountPage() {
                     <h3>{purchase.pass.name}</h3>
                     <p>
                       {purchase.pass.accessDays}-day access, {purchase.pass.accessStarts} to{" "}
-                      {purchase.pass.accessEnds}
+                      {purchase.pass.accessEnds} Eastern Time
                     </p>
                   </div>
                   <dl>

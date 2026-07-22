@@ -6,6 +6,7 @@ import { CheckoutButton } from "@/components/CheckoutButton";
 import { ContactForm } from "@/components/ContactForm";
 import { QuickFacts } from "@/components/QuickFacts";
 import { PublicSchedule } from "@/components/PublicSchedule";
+import { ViewerTimeZoneLabel } from "@/components/ViewerTimeZoneLabel";
 import { classMenuItems, quickFacts } from "@/content/site";
 
 export default function HomePage() {
@@ -28,8 +29,8 @@ export default function HomePage() {
           <h1>Six weeks of dance, movement, and wellness.</h1>
           <p className="hero-copy">
             Train with professional instructors Monday through Wednesday from 9 AM to
-            2 PM. Choose dance, mobility, rhythm, recovery, and wellness classes in
-            focused 20-minute sessions.
+            2 PM Eastern Time. Choose dance, mobility, rhythm, recovery, and wellness
+            classes in focused 20-minute sessions.
           </p>
           <div className="hero-actions">
             <Link className="button button-primary" href="#pass">
@@ -47,7 +48,7 @@ export default function HomePage() {
       <section id="program" className="section section-intro">
         <div className="section-heading">
           <p className="eyebrow">Monday through Wednesday</p>
-          <h2>Train from 9 AM to 2 PM at your own pace.</h2>
+          <h2>Train from 9 AM to 2 PM Eastern Time at your own pace.</h2>
         </div>
         <div className="intro-copy">
           <p>
@@ -75,17 +76,17 @@ export default function HomePage() {
         <div className="schedule-heading-row">
           <div>
             <p className="eyebrow">Class schedule</p>
-            <h2>See every class from 9 AM to 2 PM.</h2>
+            <h2>See every class in your local time.</h2>
             <p>
-              Check class times for Monday, Tuesday, and Wednesday. Your pass includes
-              unlimited access throughout the daily class window.
+              Check the calendar for each session&apos;s local date and time. Your pass
+              includes unlimited access during the studio&apos;s Monday-Wednesday class window.
             </p>
           </div>
           <div className="schedule-summary" aria-label="Schedule details">
-            <div><span>Days</span><strong>Monday-Wednesday</strong></div>
+            <div><span>Studio days</span><strong>Monday-Wednesday, Eastern</strong></div>
             <div><span>Class length</span><strong>20 minutes</strong></div>
-            <div><span>Access</span><strong>Unlimited, 9 AM-2 PM</strong></div>
-            <div><span>Time zone</span><strong>Eastern Time</strong></div>
+            <div><span>Studio hours</span><strong>9 AM-2 PM Eastern</strong></div>
+            <div><span>Calendar times</span><strong><ViewerTimeZoneLabel /></strong></div>
           </div>
         </div>
         <PublicSchedule />
@@ -98,13 +99,16 @@ export default function HomePage() {
           <p>
             The 3-day pass includes classes on Monday, Tuesday, and Wednesday.
             Come for a focused block, return for favorite classes, or train through
-            the full 9 AM to 2 PM window.
+            the full 9 AM to 2 PM Eastern Time window.
           </p>
         </div>
         <aside className="price-card" aria-label="Three day pass price">
           <span className="price-label">3-Day Pass</span>
           <strong>$100</strong>
-          <p>Unlimited class access between 9 AM and 2 PM, Monday through Wednesday.</p>
+          <p>
+            Unlimited class access between 9 AM and 2 PM Eastern Time, Monday through
+            Wednesday.
+          </p>
           <CheckoutButton
             className="button button-primary pass-purchase-button"
             passSlug="three-day-camp-pass"
