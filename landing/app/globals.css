@@ -755,20 +755,53 @@ section[id] {
 }
 
 .lesson-dialog::backdrop {
+  animation: lesson-backdrop-in 420ms ease both;
   background: rgba(16, 18, 16, 0.72);
   backdrop-filter: blur(7px);
 }
 
+.lesson-dialog[data-closing="true"]::backdrop {
+  animation: lesson-backdrop-out 340ms ease both;
+}
+
+@keyframes lesson-backdrop-in {
+  from {
+    backdrop-filter: blur(0);
+    background: rgba(16, 18, 16, 0);
+  }
+
+  to {
+    backdrop-filter: blur(7px);
+    background: rgba(16, 18, 16, 0.72);
+  }
+}
+
+@keyframes lesson-backdrop-out {
+  from {
+    backdrop-filter: blur(7px);
+    background: rgba(16, 18, 16, 0.72);
+  }
+
+  to {
+    backdrop-filter: blur(0);
+    background: rgba(16, 18, 16, 0);
+  }
+}
+
 .lesson-dialog-layout {
   background: var(--surface);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  border-radius: 8px;
+  border: 1px solid rgba(23, 23, 20, 0.1);
+  border-radius: 18px;
   box-shadow: 0 28px 90px rgba(10, 12, 10, 0.32);
   display: grid;
+  gap: 7px;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   height: 100%;
   overflow: hidden;
+  padding: 7px;
   position: relative;
+  transform-origin: center;
+  will-change: opacity, transform;
 }
 
 .lesson-dialog-close {
@@ -803,6 +836,7 @@ section[id] {
 }
 
 .lesson-dialog-image {
+  border-radius: 13px;
   min-height: 0;
   overflow: hidden;
   position: relative;
@@ -820,13 +854,19 @@ section[id] {
 }
 
 .lesson-dialog-image > span {
-  bottom: 22px;
-  color: var(--white);
-  font-size: 0.74rem;
-  font-weight: 700;
-  left: 24px;
-  letter-spacing: 0;
+  background: rgba(255, 253, 248, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  bottom: 18px;
+  color: var(--ink);
+  font-size: 0.68rem;
+  font-weight: 750;
+  left: 18px;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  padding: 8px 10px;
   position: absolute;
+  text-transform: uppercase;
   z-index: 1;
 }
 
@@ -834,7 +874,7 @@ section[id] {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  padding: clamp(42px, 5vw, 72px);
+  padding: clamp(40px, 4.5vw, 66px);
 }
 
 .lesson-dialog-content .eyebrow {
@@ -3117,6 +3157,10 @@ select:focus {
   *::after {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .lesson-dialog::backdrop {
+    animation-duration: 0.01ms !important;
   }
 
   body:has(.site-header[data-scrolled="true"]) .hero-image img {

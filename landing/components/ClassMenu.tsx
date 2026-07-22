@@ -21,6 +21,10 @@ type ClassMenuProps = {
 export function ClassMenu({ classes }: ClassMenuProps) {
   const [selectedClass, setSelectedClass] = useState<ClassMenuItem | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const dialogLayoutRef = useRef<HTMLDivElement>(null);
+  const originCardRef = useRef<HTMLElement | null>(null);
+  const activeAnimationRef = useRef<Animation | null>(null);
+  const isClosingRef = useRef(false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -28,6 +32,40 @@ export function ClassMenu({ classes }: ClassMenuProps) {
     if (!selectedClass || !dialog || dialog.open) return;
 
     dialog.showModal();
+
+    const layout = dialogLayoutRef.current;
+    const origin = originCardRef.current;
+
+    if (!layout || !origin || prefersReducedMotion()) return;
+
+    const originRect = origin.getBoundingClientRect();
+    const layoutRect = layout.getBoundingClientRect();
+    const transform = getCardTransform(originRect, layoutRect);
+
+    activeAnimationRef.current = layout.animate(
+      [
+        {
+          opacity: 0.32,
+          transform,
+        },
+        {
+          opacity: 1,
+          transform: "translate3d(0, 0, 0) scale(1, 1)",
+        },
+      ],
+      {
+        duration: 520,
+        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+      },
+    );
+
+    activeAnimationRef.current.addEventListener(
+      "finish",
+      () => {
+        activeAnimationRef.current = null;
+      },
+      { once: true },
+    );
   }, [selectedClass]);
 
   useEffect(() => {
@@ -37,19 +75,74 @@ export function ClassMenu({ classes }: ClassMenuProps) {
     document.body.style.overflow = "hidden";
 
     return () => {
+      activeAnimationRef.current?.cancel();
+      activeAnimationRef.current = null;
       document.body.style.overflow = previousOverflow;
     };
   }, [selectedClass]);
 
-  const closeDialog = () => {
+  const closeDialog = (afterClose?: () => void) => {
     const dialog = dialogRef.current;
+    const layout = dialogLayoutRef.current;
 
-    if (dialog?.open) {
-      dialog.close();
+    if (!dialog?.open) {
+      setSelectedClass(null);
+      afterClose?.();
       return;
     }
 
-    setSelectedClass(null);
+    if (isClosingRef.current) return;
+
+    const finishClosing = () => {
+      isClosingRef.current = false;
+      activeAnimationRef.current = null;
+      dialog.removeAttribute("data-closing");
+      dialog.close();
+      afterClose?.();
+    };
+
+    if (!layout || prefersReducedMotion()) {
+      finishClosing();
+      return;
+    }
+
+    isClosingRef.current = true;
+    dialog.setAttribute("data-closing", "true");
+
+    const origin = originCardRef.current;
+
+    if (!origin) {
+      finishClosing();
+      return;
+    }
+
+    const layoutRect = layout.getBoundingClientRect();
+    const originRect = origin.getBoundingClientRect();
+    const targetTransform = getCardTransform(originRect, layoutRect);
+    const currentStyle = window.getComputedStyle(layout);
+    const currentOpacity = currentStyle.opacity;
+    const currentTransform = currentStyle.transform;
+
+    activeAnimationRef.current?.cancel();
+
+    activeAnimationRef.current = layout.animate(
+      [
+        {
+          opacity: currentOpacity,
+          transform: currentTransform,
+        },
+        {
+          opacity: 0.18,
+          transform: targetTransform,
+        },
+      ],
+      {
+        duration: 360,
+        easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+      },
+    );
+
+    activeAnimationRef.current.addEventListener("finish", finishClosing, { once: true });
   };
 
   return (
@@ -62,7 +155,10 @@ export function ClassMenu({ classes }: ClassMenuProps) {
               type="button"
               aria-haspopup="dialog"
               aria-label={`View details for ${item.title}`}
-              onClick={() => setSelectedClass(item)}
+              onClick={(event) => {
+                originCardRef.current = event.currentTarget.closest<HTMLElement>(".menu-card");
+                setSelectedClass(item);
+              }}
             />
             <div className="menu-card-image">
               <Image
@@ -91,17 +187,24 @@ export function ClassMenu({ classes }: ClassMenuProps) {
           ref={dialogRef}
           aria-labelledby="lesson-dialog-title"
           aria-describedby="lesson-dialog-description"
-          onClose={() => setSelectedClass(null)}
+          onCancel={(event) => {
+            event.preventDefault();
+            closeDialog();
+          }}
+          onClose={() => {
+            isClosingRef.current = false;
+            setSelectedClass(null);
+          }}
           onClick={(event) => {
             if (event.target === event.currentTarget) closeDialog();
           }}
         >
-          <div className="lesson-dialog-layout">
+          <div className="lesson-dialog-layout" ref={dialogLayoutRef}>
             <button
               className="lesson-dialog-close"
               type="button"
               aria-label="Close lesson details"
-              onClick={closeDialog}
+              onClick={() => closeDialog()}
             >
               <X aria-hidden="true" />
             </button>
@@ -152,7 +255,12 @@ export function ClassMenu({ classes }: ClassMenuProps) {
               <Link
                 className="button button-primary lesson-dialog-cta"
                 href="#schedule"
-                onClick={closeDialog}
+                onClick={(event) => {
+                  event.preventDefault();
+                  closeDialog(() => {
+                    window.location.hash = "schedule";
+                  });
+                }}
               >
                 <CalendarDays aria-hidden="true" />
                 View the schedule
@@ -163,4 +271,17 @@ export function ClassMenu({ classes }: ClassMenuProps) {
       ) : null}
     </>
   );
+}
+
+function getCardTransform(origin: DOMRect, target: DOMRect) {
+  const translateX = origin.left + origin.width / 2 - (target.left + target.width / 2);
+  const translateY = origin.top + origin.height / 2 - (target.top + target.height / 2);
+  const scaleX = Math.max(origin.width / target.width, 0.08);
+  const scaleY = Math.max(origin.height / target.height, 0.08);
+
+  return `translate3d(${translateX}px, ${translateY}px, 0) scale(${scaleX}, ${scaleY})`;
+}
+
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
