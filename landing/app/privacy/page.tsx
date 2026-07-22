@@ -37,11 +37,6 @@ export default function PrivacyPolicyPage() {
               payment records.
             </li>
             <li>
-              <strong>Class information:</strong> class reservations, attendance or
-              cancellation status, and the pass used for a reservation when those
-              features are available.
-            </li>
-            <li>
               <strong>Communications:</strong> your name, contact information, areas of
               interest, and anything else you include when requesting information or
               contacting us.
@@ -73,7 +68,7 @@ export default function PrivacyPolicyPage() {
             <li>Create, authenticate, secure, and support user accounts.</li>
             <li>Process pass purchases and maintain accurate transaction records.</li>
             <li>Connect guest purchases to an account using a verified email address.</li>
-            <li>Display account details, passes, schedules, and registrations.</li>
+            <li>Display account details, passes, and schedules.</li>
             <li>Administer classes and communicate schedule or service changes.</li>
             <li>Respond to questions, support requests, and requests for information.</li>
             <li>Detect fraud, abuse, security incidents, and technical failures.</li>

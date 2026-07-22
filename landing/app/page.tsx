@@ -24,19 +24,19 @@ export default function HomePage() {
         </div>
         <div className="hero-overlay" />
         <div className="hero-content">
-          <p className="eyebrow">Six-week dance and wellness camp</p>
-          <h1>A rotating class menu for movement, rhythm, and recovery.</h1>
+          <p className="eyebrow">Dance and wellness camp</p>
+          <h1>Six weeks of dance, movement, and wellness.</h1>
           <p className="hero-copy">
-            Train Monday through Wednesday with professional instructors across dance
-            technique, mobility, rhythm, wellness, and recovery. Each day is built
-            from focused 20-minute sessions.
+            Train with professional instructors Monday through Wednesday from 9 AM to
+            2 PM. Choose dance, mobility, rhythm, recovery, and wellness classes in
+            focused 20-minute sessions.
           </p>
           <div className="hero-actions">
             <Link className="button button-primary" href="#pass">
-              Reserve the 3-Day Pass
+              Buy the 3-Day Pass
             </Link>
             <Link className="button button-secondary" href="#menu">
-              Explore the Menu
+              View Classes
             </Link>
           </div>
         </div>
@@ -46,26 +46,27 @@ export default function HomePage() {
 
       <section id="program" className="section section-intro">
         <div className="section-heading">
-          <p className="eyebrow">The concept</p>
-          <h2>A studio camp served like a daily specials menu.</h2>
+          <p className="eyebrow">Monday through Wednesday</p>
+          <h2>Train from 9 AM to 2 PM at your own pace.</h2>
         </div>
         <div className="intro-copy">
           <p>
-            Each six-week camp has a live menu shaped by the instructors teaching
-            that week. Students can choose technique refreshers, private coaching,
-            group sessions, recovery work, rhythm training, and wellness education.
+            Camp days include dance technique, private coaching, group instruction,
+            mobility, rhythm training, recovery, and wellness education. Each class
+            runs for 20 minutes.
           </p>
           <p>
-            The offering changes as teacher specialties and availability change.
-            Every camp week feels curated, practical, and fresh.
+            Attend a focused block or stay through the full class window. Instructors
+            teach within their specialties, so schedules may change from one camp week
+            to the next.
           </p>
         </div>
       </section>
 
       <section id="menu" className="section menu-section">
         <div className="section-heading">
-          <p className="eyebrow">Studio menu</p>
-          <h2>Choose your next 20-minute section.</h2>
+          <p className="eyebrow">Classes</p>
+          <h2>Dance, mobility, rhythm, and recovery in 20 minutes.</h2>
         </div>
         <ClassMenu classes={classMenuItems} />
       </section>
@@ -73,11 +74,11 @@ export default function HomePage() {
       <section id="schedule" className="section schedule-section">
         <div className="schedule-heading-row">
           <div>
-            <p className="eyebrow">Current schedule</p>
-            <h2>Build your camp days from the live class menu.</h2>
+            <p className="eyebrow">Class schedule</p>
+            <h2>See every class from 9 AM to 2 PM.</h2>
             <p>
-              Browse the classes currently available across Monday, Tuesday, and Wednesday.
-              Your pass includes unlimited access throughout the 9 AM to 2 PM class window.
+              Check class times for Monday, Tuesday, and Wednesday. Your pass includes
+              unlimited access throughout the daily class window.
             </p>
           </div>
           <div className="schedule-summary" aria-label="Schedule details">
@@ -95,9 +96,9 @@ export default function HomePage() {
           <p className="eyebrow">Camp pass</p>
           <h2>Three days of movement, technique, and wellness for $100.</h2>
           <p>
-            The 3-day pass gives you access to the rotating class menu across
-            Monday, Tuesday, and Wednesday. Come for a focused block, drop into
-            favorite sections, or train through the full 9 AM to 2 PM window.
+            The 3-day pass includes classes on Monday, Tuesday, and Wednesday.
+            Come for a focused block, return for favorite classes, or train through
+            the full 9 AM to 2 PM window.
           </p>
         </div>
         <aside className="price-card" aria-label="Three day pass price">
@@ -113,15 +114,15 @@ export default function HomePage() {
 
       <section className="section instructor-section">
         <div className="section-heading">
-          <p className="eyebrow">Instruction model</p>
-          <h2>Professional instruction with room to choose your pace.</h2>
+          <p className="eyebrow">What to expect</p>
+          <h2>Professional guidance across dance and wellness.</h2>
         </div>
         <div className="feature-grid">
           <div>
-            <h3>Rotating specialists</h3>
+            <h3>Specialist instructors</h3>
             <p>
-              Class offerings shift with teacher specialties, guest instructors,
-              and weekly availability.
+              Learn each discipline from instructors with relevant professional
+              experience.
             </p>
           </div>
           <div>
@@ -129,7 +130,7 @@ export default function HomePage() {
             <p>Move between targeted personal coaching and the energy of group instruction.</p>
           </div>
           <div>
-            <h3>Whole-dancer training</h3>
+            <h3>Dance and wellness</h3>
             <p>
               Dance technique pairs with recovery, meditation, rhythm, nutrition,
               and wellness.
@@ -140,11 +141,11 @@ export default function HomePage() {
 
       <section id="contact" className="section contact-section">
         <div>
-          <p className="eyebrow">Join the next camp</p>
-          <h2>Get the next schedule menu.</h2>
+          <p className="eyebrow">Camp updates</p>
+          <h2>Receive upcoming camp dates and class schedules.</h2>
           <p>
-            Share your details and we will send the upcoming class menu, camp
-            dates, and pass information.
+            Share your details to receive upcoming dates, class times, and pass
+            information.
           </p>
         </div>
         <ContactForm />

@@ -8,7 +8,7 @@ import { instructorProfiles } from "@/content/site";
 export const metadata: Metadata = {
   title: "Instructors",
   description:
-    "Meet the rotating dance, rhythm, mobility, and wellness specialists shaping each Dancing Is So Good camp.",
+    "Learn from dance, rhythm, mobility, and wellness instructors at Dancing Is So Good.",
 };
 
 export default function InstructorsPage() {
@@ -25,30 +25,30 @@ export default function InstructorsPage() {
         />
         <div className="instructors-hero-shade" />
         <div className="instructors-hero-content">
-          <p className="eyebrow">Teaching roster</p>
+          <p className="eyebrow">Dance and wellness</p>
           <h1 id="instructors-title">Instructors</h1>
           <p>
-            A rotating team of dance, rhythm, mobility, and wellness specialists
-            shapes every camp menu.
+            Learn dance technique, rhythm, mobility, and recovery from professional
+            instructors across each camp week.
           </p>
         </div>
-        <p className="instructors-hero-note">Professional instruction. Twenty-minute focus.</p>
+        <p className="instructors-hero-note">Dance, mobility, rhythm, and recovery.</p>
       </section>
 
       <section className="section instructor-introduction">
         <div>
-          <p className="eyebrow">A living roster</p>
-          <h2>The teachers change as the menu evolves.</h2>
+          <p className="eyebrow">Professional instruction</p>
+          <h2>Focused teaching across every discipline.</h2>
         </div>
         <div className="instructor-introduction-copy">
           <p>
-            Each six-week camp brings together specialists around the classes they
-            teach best. That keeps instruction focused and lets the schedule respond
-            to guest teachers, studio availability, and the needs of the group.
+            Dance, rhythm, mobility, and wellness classes are taught by instructors
+            with experience in each subject. Every 20-minute session centers on a
+            specific skill students can practice immediately.
           </p>
           <p>
-            Instructor names, full biographies, and confirmed teaching dates will be
-            added as each camp roster is finalized.
+            Private coaching provides individual correction, while group classes build
+            confidence through guided practice with other students.
           </p>
         </div>
       </section>
@@ -57,14 +57,14 @@ export default function InstructorsPage() {
 
       <section className="instructor-method" aria-labelledby="instructor-method-title">
         <div className="instructor-method-heading">
-          <p className="eyebrow">The teaching model</p>
-          <h2 id="instructor-method-title">Specialists where they matter most.</h2>
+          <p className="eyebrow">Instruction</p>
+          <h2 id="instructor-method-title">Focused coaching in every class.</h2>
         </div>
         <div className="instructor-method-points">
           <div>
             <span>01</span>
-            <h3>Rotating expertise</h3>
-            <p>Teachers enter the schedule around their strongest disciplines.</p>
+            <h3>Specialist teaching</h3>
+            <p>Each instructor teaches within their strongest disciplines.</p>
           </div>
           <div>
             <span>02</span>
@@ -73,7 +73,7 @@ export default function InstructorsPage() {
           </div>
           <div>
             <span>03</span>
-            <h3>Connected training</h3>
+            <h3>Cross-training</h3>
             <p>Dance technique works alongside rhythm, mobility, and recovery.</p>
           </div>
         </div>
@@ -81,8 +81,8 @@ export default function InstructorsPage() {
 
       <section className="section instructor-cta">
         <div>
-          <p className="eyebrow">Plan your camp</p>
-          <h2>Follow the instructors into the live class menu.</h2>
+          <p className="eyebrow">Choose your classes</p>
+          <h2>Find instruction that matches your goals.</h2>
         </div>
         <div className="instructor-cta-actions">
           <Link className="button button-primary" href="/#schedule">

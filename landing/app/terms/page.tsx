@@ -53,7 +53,7 @@ export default function TermsOfServicePage() {
         <section>
           <h2>3. Programs, schedules, and availability</h2>
           <p>
-            Class menus rotate based on instructor specialties, studio availability,
+            Class schedules may change based on instructor specialties, studio availability,
             enrollment, safety, and operational needs. Published schedules, instructors,
             locations, class descriptions, capacities, and times may change. We may add,
             substitute, reschedule, relocate, or cancel a class or program when reasonably

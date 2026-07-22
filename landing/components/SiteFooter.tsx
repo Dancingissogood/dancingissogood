@@ -10,7 +10,7 @@ export function SiteFooter() {
           <span className="brand-mark brand-mark-footer">DG</span>
           <div>
             <p>Dancing Is So Good</p>
-            <span>Dance, wellness, rhythm, and recovery in one rotating studio menu.</span>
+            <span>Six-week dance and wellness camp. Monday-Wednesday, 9 AM-2 PM.</span>
           </div>
         </div>
         <Link className="footer-schedule-link" href="/#contact">

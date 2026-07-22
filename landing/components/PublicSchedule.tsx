@@ -68,7 +68,7 @@ export function PublicSchedule() {
         : undefined,
       timeLabel: event.start
         ? `${scheduleDateTimeFormatter.format(event.start)}${event.end ? ` - ${scheduleEndTimeFormatter.format(event.end)}` : ""}`
-        : "Time to be announced",
+        : "Time unavailable",
       title: event.title,
       top,
     });
@@ -91,7 +91,7 @@ export function PublicSchedule() {
     eventInfo.el.tabIndex = 0;
     eventInfo.el.setAttribute(
       "aria-label",
-      `${eventInfo.event.title}. Focus for class details.`,
+      eventInfo.event.title,
     );
     eventInfo.el.addEventListener("focus", showDetails);
     eventInfo.el.addEventListener("blur", hideDetails);

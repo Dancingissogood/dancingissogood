@@ -8,7 +8,7 @@ type InstructorRosterProps = {
 
 export function InstructorRoster({ instructors }: InstructorRosterProps) {
   return (
-    <section className="section instructor-roster" aria-label="Instructor roster">
+    <section className="section instructor-roster" aria-label="Instruction specialties">
       {instructors.map((instructor, index) => {
         const sequence = String(index + 1).padStart(2, "0");
 
@@ -24,15 +24,11 @@ export function InstructorRoster({ instructors }: InstructorRosterProps) {
               <span>{sequence}</span>
             </div>
             <div className="instructor-profile-content">
-              <div className="instructor-profile-status">
-                <span>Instructor name</span>
-                <strong>To be announced</strong>
-              </div>
               <h2>{instructor.role}</h2>
               <p>{instructor.description}</p>
               <div className="instructor-profile-details">
                 <div>
-                  <span>Teaching format</span>
+                  <span>Class format</span>
                   <strong>{instructor.teachingFormat}</strong>
                 </div>
                 <div>

@@ -52,7 +52,7 @@ export type InstructorProfile = {
 
 export const navigationItems: NavigationItem[] = [
   { label: "Program", href: "/#program" },
-  { label: "Class Menu", href: "/#menu" },
+  { label: "Classes", href: "/#menu" },
   { label: "Studios", href: "/studios" },
   { label: "Instructors", href: "/instructors" },
   { label: "Schedule", href: "/#schedule" },
@@ -61,8 +61,8 @@ export const navigationItems: NavigationItem[] = [
 
 export const quickFacts: QuickFact[] = [
   { label: "Days", value: "Mon-Wed" },
-  { label: "Class Blocks", value: "20 min" },
-  { label: "Open Window", value: "9 AM-2 PM" },
+  { label: "Class Length", value: "20 min" },
+  { label: "Daily Hours", value: "9 AM-2 PM" },
   { label: "3-Day Pass", value: "$100" },
 ];
 
@@ -72,7 +72,7 @@ export const classMenuItems: ClassMenuItem[] = [
     duration: "20 min",
     description: "Release work and dancer-specific stretches for cleaner movement.",
     details:
-      "A guided recovery section designed to ease common areas of dancer tension and prepare the body for the next class. Learn how to use pressure, breath, and active mobility without forcing range of motion.",
+      "Ease common areas of dancer tension and prepare the body for the next class. Learn how to use pressure, breath, and active mobility without forcing range of motion.",
     category: "Mobility & recovery",
     level: "All levels",
     highlights: ["Lower-body release", "Active flexibility", "Recovery technique"],
@@ -84,7 +84,7 @@ export const classMenuItems: ClassMenuItem[] = [
     duration: "20 min",
     description: "Connection, posture, walking technique, and musical response.",
     details:
-      "Build the grounded, attentive movement that gives Argentine Tango its character. This focused section connects individual balance with clear partner communication and responsive musical choices.",
+      "Build the grounded, attentive movement that gives Argentine Tango its character. Connect individual balance with clear partner communication and responsive musical choices.",
     category: "Partner dance",
     level: "All levels",
     highlights: ["Tango walk", "Partner connection", "Musical phrasing"],
@@ -96,7 +96,7 @@ export const classMenuItems: ClassMenuItem[] = [
     duration: "20 min",
     description: "Foot pressure, frame, timing, and controlled rise through movement.",
     details:
-      "Explore how the feet, knees, and body work together to create smooth elevation and lowering. The section breaks rise and fall into practical mechanics that can be carried into partnered Waltz movement.",
+      "Explore how the feet, knees, and body work together to create smooth elevation and lowering. Break rise and fall into practical mechanics that carry into partnered Waltz movement.",
     category: "Ballroom technique",
     level: "All levels",
     highlights: ["Foot pressure", "Body flight", "Controlled lowering"],
@@ -132,7 +132,7 @@ export const classMenuItems: ClassMenuItem[] = [
     duration: "20 min",
     description: "Pulse, bounce, foot rhythm, and musical timing for Samba basics.",
     details:
-      "Find the rhythmic engine behind Samba through pulse, bounce, and compact foot patterns. This section develops coordination gradually so the music and movement begin to feel connected.",
+      "Find the rhythmic engine behind Samba through pulse, bounce, and compact foot patterns. Develop coordination gradually so the music and movement begin to feel connected.",
     category: "Rhythm training",
     level: "All levels",
     highlights: ["Samba pulse", "Bounce action", "Rhythmic footwork"],
@@ -156,7 +156,7 @@ export const classMenuItems: ClassMenuItem[] = [
     duration: "20 min",
     description: "Lead-follow connection, turns, timing, and social dance confidence.",
     details:
-      "Learn a compact set of Hustle fundamentals that can be used immediately on a social floor. The section balances personal timing with comfortable partner connection and clearly led turns.",
+      "Learn a compact set of Hustle fundamentals that can be used immediately on a social floor. Balance personal timing with comfortable partner connection and clearly led turns.",
     category: "Social dance",
     level: "Beginner friendly",
     highlights: ["Core timing", "Lead and follow", "Foundational turns"],
@@ -281,7 +281,7 @@ export const studioProfiles: StudioProfile[] = [
         value: "108 Pearl St, Ypsilanti, MI",
       },
       {
-        label: "Program mix",
+        label: "Classes and activities",
         value: "Social dance, yoga, outdoor adventures, and wellness education",
       },
     ],

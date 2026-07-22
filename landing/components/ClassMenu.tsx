@@ -173,7 +173,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
               <h3>{item.title}</h3>
               <p>{item.description}</p>
               <span className="menu-card-action" aria-hidden="true">
-                View lesson
+                View class
                 <Maximize2 />
               </span>
             </div>
@@ -221,7 +221,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
             </div>
 
             <div className="lesson-dialog-content">
-              <p className="eyebrow">Class menu</p>
+              <p className="eyebrow">Class details</p>
               <h2 id="lesson-dialog-title">{selectedClass.title}</h2>
               <p id="lesson-dialog-description" className="lesson-dialog-description">
                 {selectedClass.details}
@@ -235,7 +235,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
                 </div>
                 <div>
                   <Layers3 aria-hidden="true" />
-                  <span>Experience</span>
+                  <span>Level</span>
                   <strong>{selectedClass.level}</strong>
                 </div>
               </div>
