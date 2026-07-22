@@ -1,18 +1,25 @@
 "use client";
 
-import { Show, SignInButton, SignUpButton } from "@clerk/nextjs";
+import { SignInButton, SignUpButton, useAuth } from "@clerk/nextjs";
+import { CalendarDays } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { navigationItems } from "@/content/site";
 import { AccountMenu } from "@/components/AccountMenu";
+import { navigationItems } from "@/content/site";
+import { fetchAccountNavigationState } from "@/lib/account-navigation";
 
 type SiteHeaderProps = {
   ctaHref?: string;
 };
 
+type AccountActionState = "loading" | "has-pass" | "no-pass" | "unavailable";
+
 export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
+  const { isLoaded, isSignedIn } = useAuth();
+  const navigationRequestRef = useRef(0);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [accountAction, setAccountAction] = useState<AccountActionState>("loading");
 
   useEffect(() => {
     let animationFrame = 0;
@@ -35,6 +42,44 @@ export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
     };
   }, []);
 
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) {
+      return;
+    }
+
+    let active = true;
+
+    async function loadAccountAction() {
+      const requestId = ++navigationRequestRef.current;
+      setAccountAction("loading");
+
+      try {
+        const account = await fetchAccountNavigationState();
+
+        if (active && requestId === navigationRequestRef.current) {
+          setAccountAction(account.hasUsablePass ? "has-pass" : "no-pass");
+        }
+      } catch {
+        if (active && requestId === navigationRequestRef.current) {
+          setAccountAction("unavailable");
+        }
+      }
+    }
+
+    const refreshAccountAction = () => void loadAccountAction();
+
+    void loadAccountAction();
+    window.addEventListener("focus", refreshAccountAction);
+    window.addEventListener("pass-status-changed", refreshAccountAction);
+
+    return () => {
+      active = false;
+      navigationRequestRef.current += 1;
+      window.removeEventListener("focus", refreshAccountAction);
+      window.removeEventListener("pass-status-changed", refreshAccountAction);
+    };
+  }, [isLoaded, isSignedIn]);
+
   return (
     <header
       className="site-header"
@@ -52,25 +97,43 @@ export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
           </Link>
         ))}
       </nav>
-      <div className="header-actions">
-        <Show when="signed-out">
-          <SignInButton mode="modal">
-            <button className="auth-link" type="button">
-              Sign In
-            </button>
-          </SignInButton>
-          <SignUpButton mode="modal">
-            <button className="account-cta" type="button">
-              Create Account
-            </button>
-          </SignUpButton>
-        </Show>
-        <Show when="signed-in">
-          <AccountMenu />
-        </Show>
-        <Link className="header-cta" href={ctaHref}>
-          Buy Pass
-        </Link>
+      <div className="header-actions" aria-live="polite">
+        {isLoaded && !isSignedIn ? (
+          <>
+            <SignInButton mode="modal">
+              <button className="auth-link" type="button">
+                Sign In
+              </button>
+            </SignInButton>
+            <SignUpButton mode="modal">
+              <button className="account-cta" type="button">
+                Create Account
+              </button>
+            </SignUpButton>
+          </>
+        ) : null}
+        {isLoaded && isSignedIn ? <AccountMenu /> : null}
+        {!isLoaded || (isSignedIn && accountAction === "loading") ? (
+          <span
+            aria-busy="true"
+            aria-label="Loading account action"
+            className="header-cta header-cta-loading"
+            role="status"
+          />
+        ) : isSignedIn && accountAction === "has-pass" ? (
+          <Link className="header-cta" href="/account#my-schedule">
+            <CalendarDays aria-hidden="true" />
+            My Schedule
+          </Link>
+        ) : isSignedIn && accountAction === "unavailable" ? (
+          <Link className="header-cta" href="/account">
+            My Account
+          </Link>
+        ) : (
+          <Link className="header-cta" href={ctaHref}>
+            Buy Pass
+          </Link>
+        )}
       </div>
     </header>
   );

@@ -108,3 +108,16 @@ export async function getAccountSummary(database: DatabaseClient, userId: string
       .map(serializePurchase),
   };
 }
+
+export async function getAccountNavigationState(database: DatabaseClient, userId: string) {
+  const usablePass = await database.passPurchase.findFirst({
+    select: { id: true },
+    where: {
+      OR: [{ passStatus: null }, { passStatus: "ACTIVE" }],
+      status: "PAID",
+      userId,
+    },
+  });
+
+  return { hasUsablePass: usablePass !== null };
+}

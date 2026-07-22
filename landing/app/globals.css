@@ -377,8 +377,26 @@ section[id] {
 .header-cta {
   background: var(--ink);
   color: var(--white);
+  gap: 7px;
   min-height: 40px;
   padding: 0 17px;
+}
+
+.header-cta svg {
+  height: 16px;
+  stroke-width: 1.8;
+  width: 16px;
+}
+
+.header-cta-loading {
+  background: var(--surface-soft);
+  border-color: var(--line);
+  cursor: default;
+  min-width: 102px;
+}
+
+.header-cta-loading:hover {
+  transform: none;
 }
 
 .header-cta:hover,

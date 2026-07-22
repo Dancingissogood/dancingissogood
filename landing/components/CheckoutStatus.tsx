@@ -35,7 +35,12 @@ export function CheckoutStatus() {
           return;
         }
 
-        setState(payload.paymentStatus === "paid" ? "complete" : "processing");
+        const nextState = payload.paymentStatus === "paid" ? "complete" : "processing";
+        setState(nextState);
+
+        if (nextState === "complete") {
+          window.dispatchEvent(new CustomEvent("pass-status-changed"));
+        }
       } catch {
         setState("unavailable");
       }

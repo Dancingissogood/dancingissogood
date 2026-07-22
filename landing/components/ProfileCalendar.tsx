@@ -103,7 +103,7 @@ export function ProfileCalendar() {
     : undefined;
 
   return (
-    <section className="account-schedule" aria-labelledby="my-schedule-title">
+    <section id="my-schedule" className="account-schedule" aria-labelledby="my-schedule-title">
       <div className="account-section-heading account-schedule-heading">
         <div>
           <h2 id="my-schedule-title">My schedule</h2>

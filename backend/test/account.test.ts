@@ -26,9 +26,12 @@ test("account route requires an authenticated Clerk identity", async () => {
 
   try {
     const response = await app.inject({ method: "GET", url: "/v1/account" });
+    const navigationResponse = await app.inject({ method: "GET", url: "/v1/account/navigation" });
 
     assert.equal(response.statusCode, 401);
     assert.deepEqual(response.json(), { error: "Authentication required." });
+    assert.equal(navigationResponse.statusCode, 401);
+    assert.deepEqual(navigationResponse.json(), { error: "Authentication required." });
   } finally {
     await app.close();
   }
@@ -128,6 +131,43 @@ test("account synchronization claims only paid guest purchases for the verified 
     assert.equal(synchronizedProfile.stripeCustomerId, stripeCustomerId);
     assert.equal(claimedPaidPurchase.userId, synchronizedProfile.id);
     assert.equal(unclaimedPendingPurchase.userId, profile.id);
+
+    const navigationResponse = await app.inject({
+      headers: { authorization: "Bearer valid-session" },
+      method: "GET",
+      url: "/v1/account/navigation",
+    });
+
+    assert.equal(navigationResponse.statusCode, 200);
+    assert.deepEqual(navigationResponse.json(), { hasUsablePass: true });
+
+    await database.passPurchase.update({
+      data: { passStatus: "ACTIVE" },
+      where: { id: paidPurchase.id },
+    });
+
+    const activePassNavigationResponse = await app.inject({
+      headers: { authorization: "Bearer valid-session" },
+      method: "GET",
+      url: "/v1/account/navigation",
+    });
+
+    assert.equal(activePassNavigationResponse.statusCode, 200);
+    assert.deepEqual(activePassNavigationResponse.json(), { hasUsablePass: true });
+
+    await database.passPurchase.update({
+      data: { passStatus: "USED" },
+      where: { id: paidPurchase.id },
+    });
+
+    const usedPassNavigationResponse = await app.inject({
+      headers: { authorization: "Bearer valid-session" },
+      method: "GET",
+      url: "/v1/account/navigation",
+    });
+
+    assert.equal(usedPassNavigationResponse.statusCode, 200);
+    assert.deepEqual(usedPassNavigationResponse.json(), { hasUsablePass: false });
   } finally {
     await database.passPurchase.deleteMany({ where: { passProductId: product.id } });
     await database.userProfile.deleteMany({ where: { clerkUserId } });
