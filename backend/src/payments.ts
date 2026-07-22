@@ -113,11 +113,12 @@ export async function processStripeEvent(
         const purchaseId = session.metadata?.passPurchaseId ?? session.client_reference_id;
 
         if (purchaseId) {
-          if (
-            event.type === "checkout.session.completed" &&
-            session.payment_status === "paid"
-          ) {
-            await markPurchasePaid(transaction, purchaseId, session, event.created);
+          if (event.type === "checkout.session.completed") {
+            if (session.payment_status === "paid") {
+              await markPurchasePaid(transaction, purchaseId, session, event.created);
+            } else if (session.payment_status === "unpaid") {
+              await markPurchaseProcessing(transaction, purchaseId, session);
+            }
           }
 
           if (event.type === "checkout.session.async_payment_succeeded") {
@@ -127,6 +128,13 @@ export async function processStripeEvent(
           if (event.type === "checkout.session.async_payment_failed") {
             await transaction.passPurchase.updateMany({
               data: { status: "FAILED" },
+              where: { id: purchaseId, status: { in: ["PENDING", "PROCESSING"] } },
+            });
+          }
+
+          if (event.type === "checkout.session.expired") {
+            await transaction.passPurchase.updateMany({
+              data: { status: "CANCELED" },
               where: { id: purchaseId, status: "PENDING" },
             });
           }
@@ -151,8 +159,27 @@ function isCheckoutSessionEvent(event: Stripe.Event): boolean {
   return (
     event.type === "checkout.session.async_payment_failed" ||
     event.type === "checkout.session.async_payment_succeeded" ||
-    event.type === "checkout.session.completed"
+    event.type === "checkout.session.completed" ||
+    event.type === "checkout.session.expired"
   );
+}
+
+async function markPurchaseProcessing(
+  database: Pick<DatabaseClient, "passPurchase">,
+  purchaseId: string,
+  session: Stripe.Checkout.Session,
+): Promise<void> {
+  await database.passPurchase.updateMany({
+    data: {
+      purchaserEmail: session.customer_details?.email ?? session.customer_email,
+      status: "PROCESSING",
+      stripeCheckoutSessionId: session.id,
+      stripeCustomerId: typeof session.customer === "string" ? session.customer : null,
+      stripePaymentIntentId:
+        typeof session.payment_intent === "string" ? session.payment_intent : null,
+    },
+    where: { id: purchaseId, status: "PENDING" },
+  });
 }
 
 async function markPurchasePaid(
@@ -161,7 +188,7 @@ async function markPurchasePaid(
   session: Stripe.Checkout.Session,
   eventCreatedAt: number,
 ): Promise<void> {
-  await database.passPurchase.update({
+  await database.passPurchase.updateMany({
     data: {
       paidAt: new Date(eventCreatedAt * 1_000),
       purchaserEmail: session.customer_details?.email ?? session.customer_email,
@@ -171,7 +198,7 @@ async function markPurchasePaid(
       stripePaymentIntentId:
         typeof session.payment_intent === "string" ? session.payment_intent : null,
     },
-    where: { id: purchaseId },
+    where: { id: purchaseId, status: { in: ["PENDING", "PROCESSING"] } },
   });
 }
 

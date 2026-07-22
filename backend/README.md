@@ -37,8 +37,9 @@ Checkout endpoints:
 Before production, configure the backend with `LANDING_URL`, `CORS_ORIGINS`, a
 restricted Stripe server-side key, and the webhook signing secret. Register a
 Stripe webhook for `checkout.session.completed`,
-`checkout.session.async_payment_succeeded`, and
-`checkout.session.async_payment_failed` at `/v1/webhooks/stripe`.
+`checkout.session.async_payment_succeeded`,
+`checkout.session.async_payment_failed`, and `checkout.session.expired` at
+`/v1/webhooks/stripe`.
 
 Health endpoints:
 

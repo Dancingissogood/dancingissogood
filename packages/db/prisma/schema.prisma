@@ -9,6 +9,7 @@ datasource db {
 
 enum PurchaseStatus {
   PENDING
+  PROCESSING
   PAID
   CANCELED
   REFUNDED

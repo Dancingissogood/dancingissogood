@@ -7,6 +7,7 @@ import Stripe from "stripe";
 
 import type { IdentityProvider } from "../src/auth.js";
 import { buildApp } from "../src/app.js";
+import { processStripeEvent } from "../src/payments.js";
 
 const webhookSecret = process.env["STRIPE_WEBHOOK_SECRET"];
 const stripeSecretKey = process.env["STRIPE_SECRET_KEY"];
@@ -61,6 +62,39 @@ function createStripeMock() {
     getCheckoutParameters: () => checkoutParameters,
     stripe,
   };
+}
+
+function createCheckoutEvent(
+  type:
+    | "checkout.session.async_payment_failed"
+    | "checkout.session.async_payment_succeeded"
+    | "checkout.session.completed"
+    | "checkout.session.expired",
+  purchaseId: string,
+  sessionId: string,
+  paymentStatus: "paid" | "unpaid",
+) {
+  return {
+    api_version: "2026-06-24.dahlia",
+    created: Math.floor(Date.now() / 1_000),
+    data: {
+      object: {
+        customer: `cus_${purchaseId}`,
+        customer_details: { email: "dancer@example.com" },
+        id: sessionId,
+        metadata: { passPurchaseId: purchaseId },
+        object: "checkout.session",
+        payment_intent: `pi_${purchaseId}`,
+        payment_status: paymentStatus,
+      },
+    },
+    id: `evt_${randomUUID().replaceAll("-", "")}`,
+    livemode: false,
+    object: "event",
+    pending_webhooks: 1,
+    request: null,
+    type,
+  } as unknown as Stripe.Event;
 }
 
 test("checkout derives the amount from the server-owned Stripe price", async () => {
@@ -216,5 +250,99 @@ test("Stripe webhook verifies its signature and processes a payment event once",
     await database.passPurchase.delete({ where: { id: purchase.id } });
     await database.passProduct.delete({ where: { id: product.id } });
     await app.close();
+  }
+});
+
+test("Stripe events distinguish processing, failed, expired, and paid checkout outcomes", async () => {
+  const { database, product } = await createTestPassProduct();
+  const purchases = await Promise.all(
+    ["succeeds", "fails", "expires", "already-paid"].map((label) =>
+      database.passPurchase.create({
+        data: {
+          amountTotalCents: product.priceCents,
+          currency: product.currency,
+          passProductId: product.id,
+          purchaserEmail: `${label}@example.com`,
+          ...(label === "already-paid" ? { paidAt: new Date(), status: "PAID" as const } : {}),
+        },
+      }),
+    ),
+  );
+  const [succeeds, fails, expires, alreadyPaid] = purchases;
+
+  try {
+    const succeedsSessionId = `cs_test_${randomUUID().replaceAll("-", "")}`;
+    await processStripeEvent(
+      database,
+      createCheckoutEvent("checkout.session.completed", succeeds.id, succeedsSessionId, "unpaid"),
+    );
+    assert.equal(
+      (await database.passPurchase.findUniqueOrThrow({ where: { id: succeeds.id } })).status,
+      "PROCESSING",
+    );
+    await processStripeEvent(
+      database,
+      createCheckoutEvent("checkout.session.async_payment_succeeded", succeeds.id, succeedsSessionId, "paid"),
+    );
+    assert.equal(
+      (await database.passPurchase.findUniqueOrThrow({ where: { id: succeeds.id } })).status,
+      "PAID",
+    );
+
+    const failsSessionId = `cs_test_${randomUUID().replaceAll("-", "")}`;
+    await processStripeEvent(
+      database,
+      createCheckoutEvent("checkout.session.completed", fails.id, failsSessionId, "unpaid"),
+    );
+    await processStripeEvent(
+      database,
+      createCheckoutEvent("checkout.session.async_payment_failed", fails.id, failsSessionId, "unpaid"),
+    );
+    assert.equal(
+      (await database.passPurchase.findUniqueOrThrow({ where: { id: fails.id } })).status,
+      "FAILED",
+    );
+
+    await processStripeEvent(
+      database,
+      createCheckoutEvent(
+        "checkout.session.expired",
+        expires.id,
+        `cs_test_${randomUUID().replaceAll("-", "")}`,
+        "unpaid",
+      ),
+    );
+    assert.equal(
+      (await database.passPurchase.findUniqueOrThrow({ where: { id: expires.id } })).status,
+      "CANCELED",
+    );
+
+    await processStripeEvent(
+      database,
+      createCheckoutEvent(
+        "checkout.session.expired",
+        alreadyPaid.id,
+        `cs_test_${randomUUID().replaceAll("-", "")}`,
+        "unpaid",
+      ),
+    );
+    assert.equal(
+      (await database.passPurchase.findUniqueOrThrow({ where: { id: alreadyPaid.id } })).status,
+      "PAID",
+    );
+  } finally {
+    await database.paymentEvent.deleteMany({
+      where: {
+        OR: purchases.map((purchase) => ({
+          payload: {
+            equals: purchase.id,
+            path: ["data", "object", "metadata", "passPurchaseId"],
+          },
+        })),
+      },
+    });
+    await database.passPurchase.deleteMany({ where: { id: { in: purchases.map((purchase) => purchase.id) } } });
+    await database.passProduct.delete({ where: { id: product.id } });
+    await database.$disconnect();
   }
 });

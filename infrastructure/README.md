@@ -59,6 +59,7 @@ terraform -chdir=infrastructure/terraform output api_elastic_ip
 checkout.session.completed
 checkout.session.async_payment_succeeded
 checkout.session.async_payment_failed
+checkout.session.expired
 ```
 
 6. Store live credentials without putting them in Terraform state or shell history. This also creates the runtime database credential once without printing it:

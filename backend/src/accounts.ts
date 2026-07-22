@@ -71,9 +71,28 @@ export async function getAccountSummary(database: DatabaseClient, userId: string
       purchases: {
         include: { passProduct: true },
         orderBy: { createdAt: "desc" },
+        where: { status: { in: ["PAID", "PROCESSING", "REFUNDED"] } },
       },
     },
     where: { id: userId },
+  });
+
+  const serializePurchase = (purchase: (typeof user.purchases)[number]) => ({
+    amountTotalCents: purchase.amountTotalCents,
+    createdAt: purchase.createdAt.toISOString(),
+    currency: purchase.currency,
+    id: purchase.id,
+    paidAt: purchase.paidAt?.toISOString() ?? null,
+    pass: {
+      accessDays: purchase.passProduct.accessDays,
+      accessEnds: purchase.passProduct.accessEnds,
+      accessStarts: purchase.passProduct.accessStarts,
+      name: purchase.passProduct.name,
+    },
+    passStatus: purchase.passStatus,
+    status: purchase.status,
+    validFrom: purchase.validFrom?.toISOString() ?? null,
+    validUntil: purchase.validUntil?.toISOString() ?? null,
   });
 
   return {
@@ -81,22 +100,11 @@ export async function getAccountSummary(database: DatabaseClient, userId: string
     firstName: user.firstName,
     lastName: user.lastName,
     role: user.role,
-    purchases: user.purchases.map((purchase) => ({
-      amountTotalCents: purchase.amountTotalCents,
-      createdAt: purchase.createdAt.toISOString(),
-      currency: purchase.currency,
-      id: purchase.id,
-      paidAt: purchase.paidAt?.toISOString() ?? null,
-      pass: {
-        accessDays: purchase.passProduct.accessDays,
-        accessEnds: purchase.passProduct.accessEnds,
-        accessStarts: purchase.passProduct.accessStarts,
-        name: purchase.passProduct.name,
-      },
-      passStatus: purchase.passStatus,
-      status: purchase.status,
-      validFrom: purchase.validFrom?.toISOString() ?? null,
-      validUntil: purchase.validUntil?.toISOString() ?? null,
-    })),
+    processingPayments: user.purchases
+      .filter((purchase) => purchase.status === "PROCESSING")
+      .map(serializePurchase),
+    purchases: user.purchases
+      .filter((purchase) => purchase.status === "PAID" || purchase.status === "REFUNDED")
+      .map(serializePurchase),
   };
 }

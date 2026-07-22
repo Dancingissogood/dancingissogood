@@ -49,6 +49,9 @@ test("account synchronization claims only paid guest purchases for the verified 
       slug: `account-test-pass-${suffix}`,
     },
   });
+  const profile = await database.userProfile.create({
+    data: { clerkUserId, email: "dancer@example.com" },
+  });
   const paidPurchase = await database.passPurchase.create({
     data: {
       amountTotalCents: product.priceCents,
@@ -66,6 +69,16 @@ test("account synchronization claims only paid guest purchases for the verified 
       currency: product.currency,
       passProductId: product.id,
       purchaserEmail: "dancer@example.com",
+      userId: profile.id,
+    },
+  });
+  const processingPurchase = await database.passPurchase.create({
+    data: {
+      amountTotalCents: product.priceCents,
+      currency: product.currency,
+      passProductId: product.id,
+      status: "PROCESSING",
+      userId: profile.id,
     },
   });
   const app = await buildApp({
@@ -95,8 +108,16 @@ test("account synchronization claims only paid guest purchases for the verified 
     assert.equal(account.role, "MEMBER");
     assert.equal(account.purchases.length, 1);
     assert.equal(account.purchases[0].id, paidPurchase.id);
+    assert.equal(account.processingPayments.length, 1);
+    assert.equal(account.processingPayments[0].id, processingPurchase.id);
+    assert.equal(
+      [...account.purchases, ...account.processingPayments].some(
+        (purchase: { id: string }) => purchase.id === pendingPurchase.id,
+      ),
+      false,
+    );
 
-    const profile = await database.userProfile.findUniqueOrThrow({ where: { clerkUserId } });
+    const synchronizedProfile = await database.userProfile.findUniqueOrThrow({ where: { clerkUserId } });
     const claimedPaidPurchase = await database.passPurchase.findUniqueOrThrow({
       where: { id: paidPurchase.id },
     });
@@ -104,9 +125,9 @@ test("account synchronization claims only paid guest purchases for the verified 
       where: { id: pendingPurchase.id },
     });
 
-    assert.equal(profile.stripeCustomerId, stripeCustomerId);
-    assert.equal(claimedPaidPurchase.userId, profile.id);
-    assert.equal(unclaimedPendingPurchase.userId, null);
+    assert.equal(synchronizedProfile.stripeCustomerId, stripeCustomerId);
+    assert.equal(claimedPaidPurchase.userId, synchronizedProfile.id);
+    assert.equal(unclaimedPendingPurchase.userId, profile.id);
   } finally {
     await database.passPurchase.deleteMany({ where: { passProductId: product.id } });
     await database.userProfile.deleteMany({ where: { clerkUserId } });

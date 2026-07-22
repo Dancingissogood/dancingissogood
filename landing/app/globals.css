@@ -2802,7 +2802,8 @@ select:focus {
   flex: 0 0 auto;
 }
 
-.account-passes {
+.account-passes,
+.account-processing {
   padding-top: 46px;
 }
 
@@ -3015,6 +3016,7 @@ select:focus {
 }
 
 .account-status-pending,
+.account-status-processing,
 .account-status-failed,
 .account-status-canceled,
 .account-status-refunded {
