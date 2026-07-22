@@ -14,6 +14,7 @@ import luxonPlugin from "@fullcalendar/luxon3";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { CalendarEventContent } from "@/components/CalendarEventContent";
 import {
@@ -29,10 +30,7 @@ import {
 import { classSessionListSchema } from "@/lib/schedule";
 
 const TIME_ZONE = "America/Detroit";
-const POPOVER_HEIGHT = 430;
-const POPOVER_WIDTH = 320;
-const VIEWPORT_GAP = 12;
-const POPOVER_HIDE_DELAY = 140;
+const POPOVER_HIDE_DELAY = 220;
 const eventInteractionCleanups = new WeakMap<HTMLElement, () => void>();
 const scheduleDateTimeFormatter = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
@@ -82,23 +80,21 @@ export function PublicSchedule() {
   const showEventDetails = useCallback((event: EventApi, element: HTMLElement) => {
     cancelHide();
     const rect = element.getBoundingClientRect();
-    const roomOnRight = window.innerWidth - rect.right;
-    const left = roomOnRight >= POPOVER_WIDTH + VIEWPORT_GAP
-      ? rect.right + VIEWPORT_GAP
-      : Math.max(VIEWPORT_GAP, rect.left - POPOVER_WIDTH - VIEWPORT_GAP);
-    const top = rect.bottom + VIEWPORT_GAP + POPOVER_HEIGHT <= window.innerHeight
-      ? rect.bottom + VIEWPORT_GAP
-      : Math.max(VIEWPORT_GAP, rect.top - POPOVER_HEIGHT - VIEWPORT_GAP);
     const instructorName = event.extendedProps["instructorName"];
     const locationName = event.extendedProps["locationName"];
 
     setEventDetails({
+      anchor: {
+        bottom: rect.bottom,
+        left: rect.left,
+        right: rect.right,
+        top: rect.top,
+      },
       classSessionId: event.id,
       classItem: classMenuItems.find((item) => item.title === event.title),
       instructorName: typeof instructorName === "string" && instructorName
         ? instructorName
         : undefined,
-      left,
       locationName: typeof locationName === "string" && locationName
         ? locationName
         : undefined,
@@ -106,7 +102,6 @@ export function PublicSchedule() {
         ? `${scheduleDateTimeFormatter.format(event.start)}${event.end ? ` - ${scheduleEndTimeFormatter.format(event.end)}` : ""}`
         : "Time unavailable",
       title: event.title,
-      top,
     });
     setMutationError(null);
   }, [cancelHide]);
@@ -155,6 +150,19 @@ export function PublicSchedule() {
   }, []);
 
   useEffect(() => () => cancelHide(), [cancelHide]);
+
+  useEffect(() => {
+    if (!eventDetails) return;
+
+    const dismissForViewportChange = () => hideEventDetails();
+    window.addEventListener("resize", dismissForViewportChange);
+    window.addEventListener("scroll", dismissForViewportChange, true);
+
+    return () => {
+      window.removeEventListener("resize", dismissForViewportChange);
+      window.removeEventListener("scroll", dismissForViewportChange, true);
+    };
+  }, [eventDetails, hideEventDetails]);
 
   const loadEvents = useCallback(
     async (
@@ -281,21 +289,24 @@ export function PublicSchedule() {
         timeZone={TIME_ZONE}
         eventWillUnmount={(eventInfo) => eventInteractionCleanups.get(eventInfo.el)?.()}
       />
-      {eventDetails ? (
-        <CalendarEventPopover
-          details={eventDetails}
-          error={mutationError ?? savedStateError}
-          isAuthLoaded={isAuthLoaded}
-          isPending={pendingSessionId === eventDetails.classSessionId}
-          isSaved={savedSessionIds.has(eventDetails.classSessionId)}
-          isSavedStateReady={isSavedStateReady}
-          isSignedIn={Boolean(isSignedIn)}
-          onDismiss={hideEventDetails}
-          onMouseEnter={cancelHide}
-          onMouseLeave={scheduleHide}
-          onToggleSaved={() => void toggleSavedSession()}
-        />
-      ) : null}
+      {eventDetails && typeof document !== "undefined"
+        ? createPortal(
+          <CalendarEventPopover
+            details={eventDetails}
+            error={mutationError ?? savedStateError}
+            isAuthLoaded={isAuthLoaded}
+            isPending={pendingSessionId === eventDetails.classSessionId}
+            isSaved={savedSessionIds.has(eventDetails.classSessionId)}
+            isSavedStateReady={isSavedStateReady}
+            isSignedIn={Boolean(isSignedIn)}
+            onDismiss={hideEventDetails}
+            onMouseEnter={cancelHide}
+            onMouseLeave={scheduleHide}
+            onToggleSaved={() => void toggleSavedSession()}
+          />,
+          document.body,
+        )
+        : null}
       {isEmpty ? <p className="calendar-state">No classes are posted for this week.</p> : null}
       {error ? <p className="calendar-state calendar-error" role="alert">{error}</p> : null}
     </div>

@@ -3,19 +3,27 @@
 import { SignInButton } from "@clerk/nextjs";
 import { Check, Plus } from "lucide-react";
 import Image from "next/image";
+import { useLayoutEffect, useRef, useState } from "react";
 
 import type { ClassMenuItem } from "@/content/site";
 
 export type CalendarEventDetails = {
+  anchor: {
+    bottom: number;
+    left: number;
+    right: number;
+    top: number;
+  };
   classSessionId: string;
   classItem?: ClassMenuItem;
   instructorName?: string;
-  left: number;
   locationName?: string;
   timeLabel: string;
   title: string;
-  top: number;
 };
+
+const VIEWPORT_MARGIN = 12;
+const ANCHOR_GAP = 8;
 
 type CalendarEventPopoverProps = {
   details: CalendarEventDetails;
@@ -44,6 +52,29 @@ export function CalendarEventPopover({
   onMouseLeave,
   onToggleSaved,
 }: CalendarEventPopoverProps) {
+  const popoverRef = useRef<HTMLElement>(null);
+  const [position, setPosition] = useState({ left: VIEWPORT_MARGIN, top: VIEWPORT_MARGIN });
+
+  useLayoutEffect(() => {
+    const popover = popoverRef.current;
+    if (!popover) return;
+
+    const { height, width } = popover.getBoundingClientRect();
+    const maximumLeft = Math.max(VIEWPORT_MARGIN, window.innerWidth - width - VIEWPORT_MARGIN);
+    const maximumTop = Math.max(VIEWPORT_MARGIN, window.innerHeight - height - VIEWPORT_MARGIN);
+    const roomOnRight = details.anchor.right + ANCHOR_GAP + width <= window.innerWidth - VIEWPORT_MARGIN;
+    const preferredLeft = roomOnRight
+      ? details.anchor.right + ANCHOR_GAP
+      : details.anchor.left - width - ANCHOR_GAP;
+    const centeredTop = details.anchor.top
+      + (details.anchor.bottom - details.anchor.top - height) / 2;
+
+    setPosition({
+      left: Math.min(Math.max(preferredLeft, VIEWPORT_MARGIN), maximumLeft),
+      top: Math.min(Math.max(centeredTop, VIEWPORT_MARGIN), maximumTop),
+    });
+  }, [details, error, isAuthLoaded, isSavedStateReady, isSignedIn]);
+
   const saveButton = (
     <button
       className="calendar-event-popover-action"
@@ -61,8 +92,9 @@ export function CalendarEventPopover({
     <aside
       aria-label={`${details.title} class details`}
       className="calendar-event-popover"
+      ref={popoverRef}
       role="dialog"
-      style={{ left: details.left, top: details.top }}
+      style={{ left: position.left, top: position.top }}
       onBlurCapture={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) onMouseLeave();
       }}
@@ -73,8 +105,8 @@ export function CalendarEventPopover({
           onDismiss();
         }
       }}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      onPointerEnter={onMouseEnter}
+      onPointerLeave={onMouseLeave}
     >
       {details.classItem ? (
         <div className="calendar-event-popover-image">
