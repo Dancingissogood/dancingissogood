@@ -128,7 +128,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
       if (sharedTransitionRef.current !== transition) return;
 
       sharedTransitionRef.current = null;
-      dialogRef.current?.removeAttribute("data-shared-transition");
+      dialogRef.current?.setAttribute("data-shared-transition", "open");
       setIsSharedTransitioning(false);
     };
 
@@ -313,6 +313,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
             if (event.target === event.currentTarget) closeDialog();
           }}
         >
+          <div className="lesson-dialog-shade" aria-hidden="true" />
           <div className="lesson-dialog-layout" ref={dialogLayoutRef}>
             <button
               className="lesson-dialog-close"
@@ -419,6 +420,7 @@ function setCardViewTransitionNames(card: HTMLElement, enabled: boolean) {
   const transitionParts = [
     [card, "lesson-card-shell"],
     [card.querySelector<HTMLElement>(".menu-card-image"), "lesson-card-image"],
+    [card.querySelector<HTMLElement>(".menu-card-body"), "lesson-card-content"],
     [card.querySelector<HTMLElement>(".menu-card-title-row h3"), "lesson-card-title"],
     [card.querySelector<HTMLElement>(".menu-card-subtext-row p"), "lesson-card-description"],
   ] as const;

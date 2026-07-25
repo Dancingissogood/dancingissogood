@@ -937,6 +937,8 @@ section[id] {
 
 .lesson-dialog[data-shared-transition]::backdrop {
   animation: none;
+  backdrop-filter: none;
+  background: transparent;
 }
 
 ::view-transition-old(root),
@@ -945,12 +947,9 @@ section[id] {
   mix-blend-mode: normal;
 }
 
-::view-transition-old(root) {
-  opacity: 0;
-}
-
 ::view-transition-group(lesson-card-shell),
 ::view-transition-group(lesson-card-image),
+::view-transition-group(lesson-card-content),
 ::view-transition-group(lesson-card-title),
 ::view-transition-group(lesson-card-description) {
   animation-duration: 420ms;
@@ -971,15 +970,22 @@ section[id] {
   z-index: 2;
 }
 
+::view-transition-group(lesson-card-content) {
+  overflow: clip;
+  z-index: 3;
+}
+
 ::view-transition-group(lesson-card-title),
 ::view-transition-group(lesson-card-description) {
-  z-index: 3;
+  z-index: 4;
 }
 
 ::view-transition-old(lesson-card-shell),
 ::view-transition-new(lesson-card-shell),
 ::view-transition-old(lesson-card-image),
 ::view-transition-new(lesson-card-image),
+::view-transition-old(lesson-card-content),
+::view-transition-new(lesson-card-content),
 ::view-transition-old(lesson-card-title),
 ::view-transition-new(lesson-card-title),
 ::view-transition-old(lesson-card-description),
@@ -987,52 +993,39 @@ section[id] {
   mix-blend-mode: normal;
 }
 
-::view-transition-group(lesson-card-details),
-::view-transition-group(lesson-card-category),
-::view-transition-group(lesson-card-image-label),
-::view-transition-group(lesson-card-close) {
+::view-transition-group(lesson-card-backdrop) {
   animation-duration: 420ms;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-  z-index: 4;
+  z-index: 0;
 }
 
-::view-transition-new(lesson-card-details),
-::view-transition-new(lesson-card-category),
-::view-transition-new(lesson-card-image-label),
-::view-transition-new(lesson-card-close) {
-  animation: lesson-card-content-in 240ms 110ms ease-out both;
+::view-transition-new(lesson-card-backdrop) {
+  animation: lesson-card-backdrop-in 220ms ease-out both;
   mix-blend-mode: normal;
 }
 
-::view-transition-old(lesson-card-details),
-::view-transition-old(lesson-card-category),
-::view-transition-old(lesson-card-image-label),
-::view-transition-old(lesson-card-close) {
-  animation: lesson-card-content-out 120ms ease-in both;
+::view-transition-old(lesson-card-backdrop) {
+  animation: lesson-card-backdrop-out 180ms ease-in both;
   mix-blend-mode: normal;
 }
 
-@keyframes lesson-card-content-in {
+@keyframes lesson-card-backdrop-in {
   from {
     opacity: 0;
-    transform: translateY(7px);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
-@keyframes lesson-card-content-out {
+@keyframes lesson-card-backdrop-out {
   from {
     opacity: 1;
-    transform: translateY(0);
   }
 
   to {
     opacity: 0;
-    transform: translateY(5px);
   }
 }
 
@@ -1060,6 +1053,20 @@ section[id] {
   }
 }
 
+.lesson-dialog-shade {
+  display: none;
+}
+
+.lesson-dialog[data-shared-transition] .lesson-dialog-shade {
+  background: rgba(16, 18, 16, 0.72);
+  display: block;
+  inset: 0;
+  pointer-events: none;
+  position: fixed;
+  view-transition-name: lesson-card-backdrop;
+  z-index: 0;
+}
+
 .lesson-dialog-layout {
   background: var(--surface);
   border: 1px solid rgba(23, 23, 20, 0.1);
@@ -1074,6 +1081,7 @@ section[id] {
   position: relative;
   transform-origin: center;
   will-change: transform;
+  z-index: 1;
 }
 
 .lesson-dialog[data-shared-transition] .lesson-dialog-layout {
@@ -1098,10 +1106,6 @@ section[id] {
     transform 160ms ease;
   width: 40px;
   z-index: 2;
-}
-
-.lesson-dialog[data-shared-transition] .lesson-dialog-close {
-  view-transition-name: lesson-card-close;
 }
 
 .lesson-dialog-close:hover {
@@ -1154,10 +1158,6 @@ section[id] {
   z-index: 1;
 }
 
-.lesson-dialog[data-shared-transition] .lesson-dialog-image > span {
-  view-transition-name: lesson-card-image-label;
-}
-
 .lesson-dialog-content {
   display: flex;
   flex-direction: column;
@@ -1165,12 +1165,12 @@ section[id] {
   padding: clamp(40px, 4.5vw, 66px);
 }
 
-.lesson-dialog-content .eyebrow {
-  margin-bottom: 13px;
+.lesson-dialog[data-shared-transition] .lesson-dialog-content {
+  view-transition-name: lesson-card-content;
 }
 
-.lesson-dialog[data-shared-transition] .lesson-dialog-content > .eyebrow {
-  view-transition-name: lesson-card-category;
+.lesson-dialog-content .eyebrow {
+  margin-bottom: 13px;
 }
 
 .lesson-dialog-content h2 {
@@ -1205,10 +1205,6 @@ section[id] {
   display: flex;
   flex: 1;
   flex-direction: column;
-}
-
-.lesson-dialog[data-shared-transition] .lesson-dialog-details {
-  view-transition-name: lesson-card-details;
 }
 
 .lesson-dialog-facts {
