@@ -3310,8 +3310,12 @@ select:focus {
     --section-space: 80px;
   }
 
+  html {
+    background: var(--surface);
+  }
+
   .site-header {
-    background: rgba(255, 253, 248, 0.94);
+    background: var(--surface);
     border-left: 0;
     border-radius: 0;
     border-right: 0;
@@ -3331,7 +3335,7 @@ select:focus {
   }
 
   .site-header[data-scrolled="true"] {
-    background: rgba(255, 253, 248, 0.94);
+    background: var(--surface);
     border-radius: 0;
     box-shadow: 0 8px 30px rgba(22, 20, 16, 0.07);
     left: 0;

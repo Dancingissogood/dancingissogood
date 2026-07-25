@@ -1,5 +1,5 @@
 import { ClerkProvider } from "@clerk/nextjs";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, DM_Sans } from "next/font/google";
 
 import { SiteFooter } from "@/components/SiteFooter";
@@ -45,6 +45,13 @@ export const metadata: Metadata = {
       },
     ],
   },
+};
+
+export const viewport: Viewport = {
+  initialScale: 1,
+  themeColor: "#fffdf8",
+  viewportFit: "cover",
+  width: "device-width",
 };
 
 export default function RootLayout({
