@@ -766,6 +766,21 @@ section[id] {
     transform 220ms ease;
 }
 
+.menu-card-open {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  inset: 0;
+  padding: 0;
+  position: absolute;
+  z-index: 3;
+}
+
+.menu-card-open:focus-visible {
+  border-radius: 16px;
+  outline-offset: -4px;
+}
+
 .menu-card:hover {
   box-shadow: 0 24px 50px rgba(34, 29, 22, 0.12);
   transform: translateY(-4px);
@@ -818,10 +833,12 @@ section[id] {
   height: 38px;
   justify-content: center;
   padding: 0;
+  position: relative;
   transition:
     background-color 160ms ease,
     color 160ms ease;
   width: 38px;
+  z-index: 4;
 }
 
 .menu-card-expand:hover {
@@ -868,13 +885,16 @@ section[id] {
   font-size: 0.7rem;
   font-weight: 700;
   gap: 6px;
+  height: 32px;
   line-height: 1;
-  min-height: 38px;
-  padding: 0 10px;
+  min-height: 32px;
+  padding: 0 9px;
+  position: relative;
   transition:
     background-color 160ms ease,
     border-color 160ms ease,
     color 160ms ease;
+  z-index: 4;
 }
 
 .menu-card-save:hover {
@@ -3492,7 +3512,6 @@ select:focus {
   .icon-button,
   .lesson-dialog-close,
   .menu-card-expand,
-  .menu-card-save,
   .profile-selection-remove,
   .class-session-save {
     min-height: 44px;

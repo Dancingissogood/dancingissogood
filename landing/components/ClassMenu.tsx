@@ -154,6 +154,17 @@ export function ClassMenu({ classes }: ClassMenuProps) {
       <div className="menu-grid">
         {classes.map((item) => (
           <article className="menu-card" key={item.title}>
+            <button
+              className="menu-card-open"
+              type="button"
+              aria-haspopup="dialog"
+              aria-label={`View details for ${item.title}`}
+              onClick={(event) => {
+                originCardRef.current = event.currentTarget.closest<HTMLElement>(".menu-card");
+                setOpenToSchedule(false);
+                setSelectedClass(item);
+              }}
+            />
             <div className="menu-card-image">
               <Image
                 src={item.image}
