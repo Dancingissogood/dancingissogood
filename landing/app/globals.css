@@ -931,6 +931,55 @@ section[id] {
   animation: lesson-backdrop-out 340ms ease both;
 }
 
+.lesson-dialog[data-shared-transition]::backdrop {
+  animation: none;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 480ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  mix-blend-mode: normal;
+}
+
+::view-transition-group(lesson-card-shell),
+::view-transition-group(lesson-card-image),
+::view-transition-group(lesson-card-title),
+::view-transition-group(lesson-card-description) {
+  animation-duration: 480ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-group(lesson-card-shell) {
+  background: var(--surface);
+  border-radius: 18px;
+  box-shadow: 0 28px 90px rgba(10, 12, 10, 0.24);
+  overflow: clip;
+  z-index: 1;
+}
+
+::view-transition-group(lesson-card-image) {
+  border-radius: 13px;
+  overflow: clip;
+  z-index: 2;
+}
+
+::view-transition-group(lesson-card-title),
+::view-transition-group(lesson-card-description) {
+  z-index: 3;
+}
+
+::view-transition-old(lesson-card-shell),
+::view-transition-new(lesson-card-shell),
+::view-transition-old(lesson-card-image),
+::view-transition-new(lesson-card-image),
+::view-transition-old(lesson-card-title),
+::view-transition-new(lesson-card-title),
+::view-transition-old(lesson-card-description),
+::view-transition-new(lesson-card-description) {
+  mix-blend-mode: normal;
+}
+
 @keyframes lesson-backdrop-in {
   from {
     backdrop-filter: blur(0);
@@ -971,6 +1020,10 @@ section[id] {
   will-change: transform;
 }
 
+.lesson-dialog[data-shared-transition] .lesson-dialog-layout {
+  view-transition-name: lesson-card-shell;
+}
+
 .lesson-dialog-close {
   align-items: center;
   background: rgba(255, 253, 248, 0.92);
@@ -986,6 +1039,7 @@ section[id] {
   top: 18px;
   transition:
     background-color 160ms ease,
+    opacity 180ms ease,
     transform 160ms ease;
   width: 40px;
   z-index: 2;
@@ -1007,6 +1061,10 @@ section[id] {
   min-height: 0;
   overflow: hidden;
   position: relative;
+}
+
+.lesson-dialog[data-shared-transition] .lesson-dialog-image {
+  view-transition-name: lesson-card-image;
 }
 
 .lesson-dialog-image::after {
@@ -1034,6 +1092,9 @@ section[id] {
   padding: 8px 10px;
   position: absolute;
   text-transform: uppercase;
+  transition:
+    opacity 180ms ease,
+    transform 220ms ease;
   z-index: 1;
 }
 
@@ -1054,11 +1115,49 @@ section[id] {
   max-width: 600px;
 }
 
+.lesson-dialog[data-shared-transition] .lesson-dialog-content h2 {
+  view-transition-name: lesson-card-title;
+}
+
 .lesson-dialog-description {
   color: var(--muted);
   font-size: 1rem;
-  line-height: 1.7;
+  line-height: 1.55;
+  margin-bottom: 17px;
+}
+
+.lesson-dialog-details-copy {
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.65;
   margin-bottom: 30px;
+}
+
+.lesson-dialog[data-shared-transition] .lesson-dialog-description {
+  view-transition-name: lesson-card-description;
+}
+
+.lesson-dialog-content > .eyebrow,
+.lesson-dialog-details-copy,
+.lesson-dialog-facts,
+.lesson-dialog-highlights,
+.class-session-picker {
+  transition:
+    opacity 180ms ease,
+    transform 220ms ease;
+}
+
+.lesson-dialog[data-shared-transition] .lesson-dialog-close,
+.lesson-dialog[data-shared-transition] .lesson-dialog-image > span,
+.lesson-dialog[data-shared-transition] .lesson-dialog-content > .eyebrow,
+.lesson-dialog[data-shared-transition] .lesson-dialog-details-copy,
+.lesson-dialog[data-shared-transition] .lesson-dialog-facts,
+.lesson-dialog[data-shared-transition] .lesson-dialog-highlights,
+.lesson-dialog[data-shared-transition] .class-session-picker,
+.lesson-dialog[data-shared-transition] .lesson-dialog-cta {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
 }
 
 .lesson-dialog-facts {
@@ -1417,6 +1516,12 @@ section[id] {
   align-self: flex-start;
   gap: 9px;
   margin-top: auto;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    opacity 180ms ease,
+    transform 220ms ease;
 }
 
 .lesson-dialog-cta svg {
@@ -3824,6 +3929,11 @@ select:focus {
 
   .lesson-dialog-description {
     font-size: 0.92rem;
+    margin-bottom: 14px;
+  }
+
+  .lesson-dialog-details-copy {
+    font-size: 0.86rem;
     margin-bottom: 24px;
   }
 

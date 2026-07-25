@@ -12,6 +12,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 
 import type { ClassMenuItem } from "@/content/site";
 import { ClassSessionPicker } from "@/components/ClassSessionPicker";
@@ -23,10 +24,12 @@ type ClassMenuProps = {
 export function ClassMenu({ classes }: ClassMenuProps) {
   const [selectedClass, setSelectedClass] = useState<ClassMenuItem | null>(null);
   const [openToSchedule, setOpenToSchedule] = useState(false);
+  const [isSharedTransitioning, setIsSharedTransitioning] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const dialogLayoutRef = useRef<HTMLDivElement>(null);
   const originCardRef = useRef<HTMLElement | null>(null);
   const activeAnimationRef = useRef<Animation | null>(null);
+  const sharedTransitionRef = useRef<ViewTransition | null>(null);
   const isClosingRef = useRef(false);
 
   useEffect(() => {
@@ -84,6 +87,52 @@ export function ClassMenu({ classes }: ClassMenuProps) {
     };
   }, [selectedClass]);
 
+  const openClass = (
+    item: ClassMenuItem,
+    trigger: HTMLElement,
+    shouldOpenToSchedule: boolean,
+  ) => {
+    const origin = trigger.closest<HTMLElement>(".menu-card");
+    originCardRef.current = origin;
+
+    if (!origin || !supportsSharedViewTransitions()) {
+      setOpenToSchedule(shouldOpenToSchedule);
+      setSelectedClass(item);
+      return;
+    }
+
+    setCardViewTransitionNames(origin, true);
+    sharedTransitionRef.current?.skipTransition();
+
+    const transition = document.startViewTransition(() => {
+      setCardViewTransitionNames(origin, false);
+
+      flushSync(() => {
+        setIsSharedTransitioning(true);
+        setOpenToSchedule(shouldOpenToSchedule);
+        setSelectedClass(item);
+      });
+
+      const dialog = dialogRef.current;
+      dialog?.setAttribute("data-shared-transition", "opening");
+
+      if (dialog && !dialog.open) {
+        dialog.showModal();
+      }
+    });
+    sharedTransitionRef.current = transition;
+
+    const finishOpening = () => {
+      if (sharedTransitionRef.current !== transition) return;
+
+      sharedTransitionRef.current = null;
+      dialogRef.current?.removeAttribute("data-shared-transition");
+      setIsSharedTransitioning(false);
+    };
+
+    void transition.finished.then(finishOpening, finishOpening);
+  };
+
   const closeDialog = (afterClose?: () => void) => {
     const dialog = dialogRef.current;
     const layout = dialogLayoutRef.current;
@@ -95,6 +144,42 @@ export function ClassMenu({ classes }: ClassMenuProps) {
     }
 
     if (isClosingRef.current) return;
+
+    const origin = originCardRef.current;
+
+    if (origin && supportsSharedViewTransitions()) {
+      isClosingRef.current = true;
+      dialog.setAttribute("data-shared-transition", "closing");
+      sharedTransitionRef.current?.skipTransition();
+
+      const transition = document.startViewTransition(() => {
+        flushSync(() => {
+          dialog.close();
+          setIsSharedTransitioning(false);
+          setOpenToSchedule(false);
+          setSelectedClass(null);
+        });
+
+        setCardViewTransitionNames(origin, true);
+      });
+      sharedTransitionRef.current = transition;
+
+      const clearDestinationNames = () => {
+        setCardViewTransitionNames(origin, false);
+      };
+      const finishSharedClose = () => {
+        if (sharedTransitionRef.current !== transition) return;
+
+        sharedTransitionRef.current = null;
+        clearDestinationNames();
+        isClosingRef.current = false;
+        afterClose?.();
+      };
+
+      void transition.ready.then(clearDestinationNames, clearDestinationNames);
+      void transition.finished.then(finishSharedClose, finishSharedClose);
+      return;
+    }
 
     const finishClosing = () => {
       isClosingRef.current = false;
@@ -112,8 +197,6 @@ export function ClassMenu({ classes }: ClassMenuProps) {
 
     isClosingRef.current = true;
     dialog.setAttribute("data-closing", "true");
-
-    const origin = originCardRef.current;
 
     if (!origin) {
       finishClosing();
@@ -160,9 +243,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
               aria-haspopup="dialog"
               aria-label={`View details for ${item.title}`}
               onClick={(event) => {
-                originCardRef.current = event.currentTarget.closest<HTMLElement>(".menu-card");
-                setOpenToSchedule(false);
-                setSelectedClass(item);
+                openClass(item, event.currentTarget, false);
               }}
             />
             <div className="menu-card-image">
@@ -183,9 +264,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
                   aria-label={`View details for ${item.title}`}
                   title="View class details"
                   onClick={(event) => {
-                    originCardRef.current = event.currentTarget.closest<HTMLElement>(".menu-card");
-                    setOpenToSchedule(false);
-                    setSelectedClass(item);
+                    openClass(item, event.currentTarget, false);
                   }}
                 >
                   <Maximize2 aria-hidden="true" />
@@ -198,9 +277,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
                   type="button"
                   aria-label={`Add a ${item.title} session to your schedule`}
                   onClick={(event) => {
-                    originCardRef.current = event.currentTarget.closest<HTMLElement>(".menu-card");
-                    setOpenToSchedule(true);
-                    setSelectedClass(item);
+                    openClass(item, event.currentTarget, true);
                   }}
                 >
                   <Plus aria-hidden="true" />
@@ -254,7 +331,8 @@ export function ClassMenu({ classes }: ClassMenuProps) {
             <div className="lesson-dialog-content">
               <p className="eyebrow">{selectedClass.category}</p>
               <h2 id="lesson-dialog-title">{selectedClass.title}</h2>
-              <p id="lesson-dialog-description" className="lesson-dialog-description">
+              <p className="lesson-dialog-description">{selectedClass.description}</p>
+              <p id="lesson-dialog-description" className="lesson-dialog-details-copy">
                 {selectedClass.details}
               </p>
 
@@ -283,7 +361,10 @@ export function ClassMenu({ classes }: ClassMenuProps) {
                 </ul>
               </div>
 
-              <ClassSessionPicker autoFocus={openToSchedule} classItem={selectedClass} />
+              <ClassSessionPicker
+                autoFocus={openToSchedule && !isSharedTransitioning}
+                classItem={selectedClass}
+              />
 
               <Link
                 className="button button-primary lesson-dialog-cta"
@@ -320,4 +401,23 @@ function getCardMorph(origin: DOMRect, target: DOMRect) {
 
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function supportsSharedViewTransitions() {
+  return typeof document.startViewTransition === "function" && !prefersReducedMotion();
+}
+
+function setCardViewTransitionNames(card: HTMLElement, enabled: boolean) {
+  const transitionParts = [
+    [card, "lesson-card-shell"],
+    [card.querySelector<HTMLElement>(".menu-card-image"), "lesson-card-image"],
+    [card.querySelector<HTMLElement>(".menu-card-title-row h3"), "lesson-card-title"],
+    [card.querySelector<HTMLElement>(".menu-card-subtext-row p"), "lesson-card-description"],
+  ] as const;
+
+  transitionParts.forEach(([element, name]) => {
+    if (element) {
+      element.style.viewTransitionName = enabled ? name : "";
+    }
+  });
 }
