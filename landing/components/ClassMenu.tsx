@@ -60,7 +60,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
         },
       ],
       {
-        duration: 480,
+        duration: 420,
         easing: "cubic-bezier(0.22, 1, 0.36, 1)",
       },
     );
@@ -96,6 +96,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
     originCardRef.current = origin;
 
     if (!origin || !supportsSharedViewTransitions()) {
+      setOriginCardExpanded(origin, true);
       setOpenToSchedule(shouldOpenToSchedule);
       setSelectedClass(item);
       return;
@@ -106,6 +107,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
 
     const transition = document.startViewTransition(() => {
       setCardViewTransitionNames(origin, false);
+      setOriginCardExpanded(origin, true);
 
       flushSync(() => {
         setIsSharedTransitioning(true);
@@ -138,6 +140,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
     const layout = dialogLayoutRef.current;
 
     if (!dialog?.open) {
+      setOriginCardExpanded(originCardRef.current, false);
       setSelectedClass(null);
       afterClose?.();
       return;
@@ -160,6 +163,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
           setSelectedClass(null);
         });
 
+        setOriginCardExpanded(origin, false);
         setCardViewTransitionNames(origin, true);
       });
       sharedTransitionRef.current = transition;
@@ -186,6 +190,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
       activeAnimationRef.current = null;
       dialog.removeAttribute("data-closing");
       dialog.close();
+      setOriginCardExpanded(origin, false);
       setOpenToSchedule(false);
       afterClose?.();
     };
@@ -224,7 +229,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
         },
       ],
       {
-        duration: 360,
+        duration: 320,
         easing: "cubic-bezier(0.4, 0, 0.2, 1)",
       },
     );
@@ -301,6 +306,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
           }}
           onClose={() => {
             isClosingRef.current = false;
+            setOriginCardExpanded(originCardRef.current, false);
             setSelectedClass(null);
           }}
           onClick={(event) => {
@@ -332,53 +338,55 @@ export function ClassMenu({ classes }: ClassMenuProps) {
               <p className="eyebrow">{selectedClass.category}</p>
               <h2 id="lesson-dialog-title">{selectedClass.title}</h2>
               <p className="lesson-dialog-description">{selectedClass.description}</p>
-              <p id="lesson-dialog-description" className="lesson-dialog-details-copy">
-                {selectedClass.details}
-              </p>
+              <div className="lesson-dialog-details">
+                <p id="lesson-dialog-description" className="lesson-dialog-details-copy">
+                  {selectedClass.details}
+                </p>
 
-              <div className="lesson-dialog-facts" aria-label="Lesson details">
-                <div>
-                  <Clock3 aria-hidden="true" />
-                  <span>Duration</span>
-                  <strong>{selectedClass.duration}</strong>
+                <div className="lesson-dialog-facts" aria-label="Lesson details">
+                  <div>
+                    <Clock3 aria-hidden="true" />
+                    <span>Duration</span>
+                    <strong>{selectedClass.duration}</strong>
+                  </div>
+                  <div>
+                    <Layers3 aria-hidden="true" />
+                    <span>Level</span>
+                    <strong>{selectedClass.level}</strong>
+                  </div>
                 </div>
-                <div>
-                  <Layers3 aria-hidden="true" />
-                  <span>Level</span>
-                  <strong>{selectedClass.level}</strong>
+
+                <div className="lesson-dialog-highlights">
+                  <div className="lesson-dialog-subheading">
+                    <Sparkles aria-hidden="true" />
+                    <h3>Inside the class</h3>
+                  </div>
+                  <ul>
+                    {selectedClass.highlights.map((highlight) => (
+                      <li key={highlight}>{highlight}</li>
+                    ))}
+                  </ul>
                 </div>
+
+                <ClassSessionPicker
+                  autoFocus={openToSchedule && !isSharedTransitioning}
+                  classItem={selectedClass}
+                />
+
+                <Link
+                  className="button button-primary lesson-dialog-cta"
+                  href="#schedule"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    closeDialog(() => {
+                      window.location.hash = "schedule";
+                    });
+                  }}
+                >
+                  <CalendarDays aria-hidden="true" />
+                  Full Schedule
+                </Link>
               </div>
-
-              <div className="lesson-dialog-highlights">
-                <div className="lesson-dialog-subheading">
-                  <Sparkles aria-hidden="true" />
-                  <h3>Inside the class</h3>
-                </div>
-                <ul>
-                  {selectedClass.highlights.map((highlight) => (
-                    <li key={highlight}>{highlight}</li>
-                  ))}
-                </ul>
-              </div>
-
-              <ClassSessionPicker
-                autoFocus={openToSchedule && !isSharedTransitioning}
-                classItem={selectedClass}
-              />
-
-              <Link
-                className="button button-primary lesson-dialog-cta"
-                href="#schedule"
-                onClick={(event) => {
-                  event.preventDefault();
-                  closeDialog(() => {
-                    window.location.hash = "schedule";
-                  });
-                }}
-              >
-                <CalendarDays aria-hidden="true" />
-                Full Schedule
-              </Link>
             </div>
           </div>
         </dialog>
@@ -420,4 +428,12 @@ function setCardViewTransitionNames(card: HTMLElement, enabled: boolean) {
       element.style.viewTransitionName = enabled ? name : "";
     }
   });
+}
+
+function setOriginCardExpanded(card: HTMLElement | null, expanded: boolean) {
+  if (expanded) {
+    card?.setAttribute("data-expanded", "true");
+  } else {
+    card?.removeAttribute("data-expanded");
+  }
 }

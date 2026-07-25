@@ -766,6 +766,10 @@ section[id] {
     transform 220ms ease;
 }
 
+.menu-card[data-expanded="true"] {
+  visibility: hidden;
+}
+
 .menu-card-open {
   background: transparent;
   border: 0;
@@ -937,16 +941,19 @@ section[id] {
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 480ms;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation: none;
   mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  opacity: 0;
 }
 
 ::view-transition-group(lesson-card-shell),
 ::view-transition-group(lesson-card-image),
 ::view-transition-group(lesson-card-title),
 ::view-transition-group(lesson-card-description) {
-  animation-duration: 480ms;
+  animation-duration: 420ms;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -978,6 +985,55 @@ section[id] {
 ::view-transition-old(lesson-card-description),
 ::view-transition-new(lesson-card-description) {
   mix-blend-mode: normal;
+}
+
+::view-transition-group(lesson-card-details),
+::view-transition-group(lesson-card-category),
+::view-transition-group(lesson-card-image-label),
+::view-transition-group(lesson-card-close) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 4;
+}
+
+::view-transition-new(lesson-card-details),
+::view-transition-new(lesson-card-category),
+::view-transition-new(lesson-card-image-label),
+::view-transition-new(lesson-card-close) {
+  animation: lesson-card-content-in 240ms 110ms ease-out both;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(lesson-card-details),
+::view-transition-old(lesson-card-category),
+::view-transition-old(lesson-card-image-label),
+::view-transition-old(lesson-card-close) {
+  animation: lesson-card-content-out 120ms ease-in both;
+  mix-blend-mode: normal;
+}
+
+@keyframes lesson-card-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lesson-card-content-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(5px);
+  }
 }
 
 @keyframes lesson-backdrop-in {
@@ -1039,10 +1095,13 @@ section[id] {
   top: 18px;
   transition:
     background-color 160ms ease,
-    opacity 180ms ease,
     transform 160ms ease;
   width: 40px;
   z-index: 2;
+}
+
+.lesson-dialog[data-shared-transition] .lesson-dialog-close {
+  view-transition-name: lesson-card-close;
 }
 
 .lesson-dialog-close:hover {
@@ -1092,10 +1151,11 @@ section[id] {
   padding: 8px 10px;
   position: absolute;
   text-transform: uppercase;
-  transition:
-    opacity 180ms ease,
-    transform 220ms ease;
   z-index: 1;
+}
+
+.lesson-dialog[data-shared-transition] .lesson-dialog-image > span {
+  view-transition-name: lesson-card-image-label;
 }
 
 .lesson-dialog-content {
@@ -1107,6 +1167,10 @@ section[id] {
 
 .lesson-dialog-content .eyebrow {
   margin-bottom: 13px;
+}
+
+.lesson-dialog[data-shared-transition] .lesson-dialog-content > .eyebrow {
+  view-transition-name: lesson-card-category;
 }
 
 .lesson-dialog-content h2 {
@@ -1137,27 +1201,14 @@ section[id] {
   view-transition-name: lesson-card-description;
 }
 
-.lesson-dialog-content > .eyebrow,
-.lesson-dialog-details-copy,
-.lesson-dialog-facts,
-.lesson-dialog-highlights,
-.class-session-picker {
-  transition:
-    opacity 180ms ease,
-    transform 220ms ease;
+.lesson-dialog-details {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 }
 
-.lesson-dialog[data-shared-transition] .lesson-dialog-close,
-.lesson-dialog[data-shared-transition] .lesson-dialog-image > span,
-.lesson-dialog[data-shared-transition] .lesson-dialog-content > .eyebrow,
-.lesson-dialog[data-shared-transition] .lesson-dialog-details-copy,
-.lesson-dialog[data-shared-transition] .lesson-dialog-facts,
-.lesson-dialog[data-shared-transition] .lesson-dialog-highlights,
-.lesson-dialog[data-shared-transition] .class-session-picker,
-.lesson-dialog[data-shared-transition] .lesson-dialog-cta {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(8px);
+.lesson-dialog[data-shared-transition] .lesson-dialog-details {
+  view-transition-name: lesson-card-details;
 }
 
 .lesson-dialog-facts {
@@ -1516,12 +1567,6 @@ section[id] {
   align-self: flex-start;
   gap: 9px;
   margin-top: auto;
-  transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease,
-    opacity 180ms ease,
-    transform 220ms ease;
 }
 
 .lesson-dialog-cta svg {
