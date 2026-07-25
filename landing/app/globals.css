@@ -968,7 +968,7 @@ section[id] {
   padding: 7px;
   position: relative;
   transform-origin: center;
-  will-change: opacity, transform;
+  will-change: transform;
 }
 
 .lesson-dialog-close {

@@ -43,21 +43,21 @@ export function ClassMenu({ classes }: ClassMenuProps) {
 
     const originRect = origin.getBoundingClientRect();
     const layoutRect = layout.getBoundingClientRect();
-    const transform = getCardTransform(originRect, layoutRect);
+    const morph = getCardMorph(originRect, layoutRect);
 
     activeAnimationRef.current = layout.animate(
       [
         {
-          opacity: 0.32,
-          transform,
+          borderRadius: morph.borderRadius,
+          transform: morph.transform,
         },
         {
-          opacity: 1,
+          borderRadius: "18px",
           transform: "translate3d(0, 0, 0) scale(1, 1)",
         },
       ],
       {
-        duration: 520,
+        duration: 480,
         easing: "cubic-bezier(0.22, 1, 0.36, 1)",
       },
     );
@@ -122,9 +122,9 @@ export function ClassMenu({ classes }: ClassMenuProps) {
 
     const layoutRect = layout.getBoundingClientRect();
     const originRect = origin.getBoundingClientRect();
-    const targetTransform = getCardTransform(originRect, layoutRect);
+    const targetMorph = getCardMorph(originRect, layoutRect);
     const currentStyle = window.getComputedStyle(layout);
-    const currentOpacity = currentStyle.opacity;
+    const currentBorderRadius = currentStyle.borderRadius;
     const currentTransform = currentStyle.transform;
 
     activeAnimationRef.current?.cancel();
@@ -132,12 +132,12 @@ export function ClassMenu({ classes }: ClassMenuProps) {
     activeAnimationRef.current = layout.animate(
       [
         {
-          opacity: currentOpacity,
+          borderRadius: currentBorderRadius,
           transform: currentTransform,
         },
         {
-          opacity: 0.18,
-          transform: targetTransform,
+          borderRadius: targetMorph.borderRadius,
+          transform: targetMorph.transform,
         },
       ],
       {
@@ -306,13 +306,16 @@ export function ClassMenu({ classes }: ClassMenuProps) {
   );
 }
 
-function getCardTransform(origin: DOMRect, target: DOMRect) {
+function getCardMorph(origin: DOMRect, target: DOMRect) {
   const translateX = origin.left + origin.width / 2 - (target.left + target.width / 2);
   const translateY = origin.top + origin.height / 2 - (target.top + target.height / 2);
   const scaleX = Math.max(origin.width / target.width, 0.08);
   const scaleY = Math.max(origin.height / target.height, 0.08);
 
-  return `translate3d(${translateX}px, ${translateY}px, 0) scale(${scaleX}, ${scaleY})`;
+  return {
+    borderRadius: `${18 / scaleX}px / ${18 / scaleY}px`,
+    transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scaleX}, ${scaleY})`,
+  };
 }
 
 function prefersReducedMotion() {
