@@ -2,10 +2,10 @@
 
 import {
   CalendarDays,
-  CalendarPlus,
   Clock3,
   Layers3,
   Maximize2,
+  Plus,
   Sparkles,
   X,
 } from "lucide-react";
@@ -203,7 +203,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
                     setSelectedClass(item);
                   }}
                 >
-                  <CalendarPlus aria-hidden="true" />
+                  <Plus aria-hidden="true" />
                   Add class
                 </button>
               </div>
