@@ -1,7 +1,7 @@
 "use client";
 
 import { SignInButton, SignUpButton, useAuth } from "@clerk/nextjs";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Menu, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -17,9 +17,20 @@ type AccountActionState = "loading" | "has-pass" | "no-pass" | "unavailable";
 
 export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
   const { isLoaded, isSignedIn } = useAuth();
+  const mobileMenuRef = useRef<HTMLDialogElement>(null);
   const navigationRequestRef = useRef(0);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [accountAction, setAccountAction] = useState<AccountActionState>("loading");
+
+  function openMobileMenu() {
+    mobileMenuRef.current?.showModal();
+    setIsMobileMenuOpen(true);
+  }
+
+  function closeMobileMenu() {
+    mobileMenuRef.current?.close();
+  }
 
   useEffect(() => {
     let animationFrame = 0;
@@ -134,7 +145,69 @@ export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
             Buy Pass
           </Link>
         )}
+        <button
+          aria-controls="mobile-navigation"
+          aria-expanded={isMobileMenuOpen}
+          aria-label="Open menu"
+          className="mobile-menu-button"
+          type="button"
+          onClick={openMobileMenu}
+        >
+          <Menu aria-hidden="true" />
+        </button>
       </div>
+      <dialog
+        aria-label="Main menu"
+        className="mobile-nav-dialog"
+        id="mobile-navigation"
+        ref={mobileMenuRef}
+        onCancel={() => setIsMobileMenuOpen(false)}
+        onClose={() => setIsMobileMenuOpen(false)}
+      >
+        <div className="mobile-nav-heading">
+          <Link className="brand" href="/" onClick={closeMobileMenu}>
+            <span className="brand-mark">DG</span>
+            <span>Dancing Is So Good</span>
+          </Link>
+          <button
+            aria-label="Close menu"
+            className="mobile-menu-button mobile-menu-close"
+            type="button"
+            onClick={closeMobileMenu}
+          >
+            <X aria-hidden="true" />
+          </button>
+        </div>
+        <nav className="mobile-nav-links" aria-label="Mobile menu">
+          {navigationItems.map((item) => (
+            <Link key={item.href} href={item.href} onClick={closeMobileMenu}>
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="mobile-nav-account">
+          {isLoaded && isSignedIn ? (
+            <Link className="mobile-nav-account-link" href="/account" onClick={closeMobileMenu}>
+              <UserRound aria-hidden="true" />
+              My Account
+            </Link>
+          ) : null}
+          {isLoaded && !isSignedIn ? (
+            <>
+              <SignInButton mode="modal">
+                <button className="button mobile-nav-sign-in" type="button" onClick={closeMobileMenu}>
+                  Sign In
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="button mobile-nav-create-account" type="button" onClick={closeMobileMenu}>
+                  Create Account
+                </button>
+              </SignUpButton>
+            </>
+          ) : null}
+        </div>
+      </dialog>
     </header>
   );
 }

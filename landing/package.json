@@ -13,12 +13,13 @@
     "@clerk/nextjs": "^7.5.16",
     "@fullcalendar/core": "^6.1.21",
     "@fullcalendar/interaction": "^6.1.21",
+    "@fullcalendar/list": "^6.1.21",
     "@fullcalendar/luxon3": "^6.1.21",
     "@fullcalendar/react": "^6.1.21",
     "@fullcalendar/timegrid": "^6.1.21",
     "lucide-react": "^0.468.0",
     "luxon": "^3.7.2",
-    "next": "^16.2.10",
+    "next": "^16.2.11",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "zod": "^4.4.3"
@@ -29,7 +30,7 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "eslint": "9.39.4",
-    "eslint-config-next": "^16.2.10",
+    "eslint-config-next": "^16.2.11",
     "typescript": "6.0.3"
   }
 }

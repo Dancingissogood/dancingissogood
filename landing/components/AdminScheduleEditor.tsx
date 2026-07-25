@@ -14,13 +14,14 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import { CalendarPlus, UserRound, X } from "lucide-react";
 import { DateTime } from "luxon";
 import Link from "next/link";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CalendarEventContent } from "@/components/CalendarEventContent";
 import { classMenuItems } from "@/content/site";
 import { classSessionListSchema, classSessionMutationSchema } from "@/lib/schedule";
 import type { ClassSession } from "@/lib/schedule";
 import { STUDIO_TIME_ZONE } from "@/lib/time-zone";
+import { useMediaQuery } from "@/lib/use-media-query";
 
 const SESSION_MINUTES = 20;
 
@@ -50,6 +51,7 @@ const emptyDraft = (): SessionDraft => {
 };
 
 export function AdminScheduleEditor() {
+  const isMobileCalendar = useMediaQuery("(max-width: 820px)");
   const calendarRef = useRef<FullCalendar>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [draft, setDraft] = useState<SessionDraft>(emptyDraft);
@@ -59,6 +61,15 @@ export function AdminScheduleEditor() {
   const [isSaving, setIsSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const sessionsRef = useRef(new Map<string, ClassSession>());
+
+  useEffect(() => {
+    const calendar = calendarRef.current?.getApi();
+    const nextView = isMobileCalendar ? "timeGridDay" : "timeGridWeek";
+
+    if (calendar && calendar.view.type !== nextView) {
+      calendar.changeView(nextView);
+    }
+  }, [isMobileCalendar]);
 
   const refetchEvents = () => calendarRef.current?.getApi().refetchEvents();
 
@@ -313,9 +324,11 @@ export function AdminScheduleEditor() {
             events={loadEvents}
             expandRows
             firstDay={1}
-            headerToolbar={{ left: "prev,next today", center: "title", right: "" }}
+            headerToolbar={isMobileCalendar
+              ? { left: "prev,next", center: "title", right: "today" }
+              : { left: "prev,next today", center: "title", right: "" }}
             height="auto"
-            initialView="timeGridWeek"
+            initialView={isMobileCalendar ? "timeGridDay" : "timeGridWeek"}
             nowIndicator
             plugins={[timeGridPlugin, interactionPlugin, luxonPlugin]}
             ref={calendarRef}

@@ -1,7 +1,7 @@
 "use client";
 
 import { SignInButton } from "@clerk/nextjs";
-import { Check, Plus } from "lucide-react";
+import { Check, Plus, X } from "lucide-react";
 import Image from "next/image";
 import { useLayoutEffect, useRef, useState } from "react";
 
@@ -108,6 +108,14 @@ export function CalendarEventPopover({
       onPointerEnter={onMouseEnter}
       onPointerLeave={onMouseLeave}
     >
+      <button
+        aria-label="Close class details"
+        className="calendar-event-popover-close"
+        type="button"
+        onClick={onDismiss}
+      >
+        <X aria-hidden="true" />
+      </button>
       {details.classItem ? (
         <div className="calendar-event-popover-image">
           <Image

@@ -1,6 +1,7 @@
 "use client";
 
 import type { DatesSetArg, EventClickArg, EventInput, EventSourceFuncArg } from "@fullcalendar/core";
+import listPlugin from "@fullcalendar/list";
 import luxonPlugin from "@fullcalendar/luxon3";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -17,9 +18,11 @@ import {
   removeSavedClassSession,
 } from "@/lib/saved-class-sessions-client";
 import { getStudioHoursInTimeZone, getTimeZoneDisplayName } from "@/lib/time-zone";
+import { useMediaQuery } from "@/lib/use-media-query";
 import { useViewerTimeZone } from "@/lib/use-viewer-time-zone";
 
 export function ProfileCalendar() {
+  const isMobileCalendar = useMediaQuery("(max-width: 820px)");
   const timeZone = useViewerTimeZone();
   const timeZoneName = getTimeZoneDisplayName(timeZone);
   const [visibleRange, setVisibleRange] = useState(() => ({
@@ -91,6 +94,15 @@ export function ProfileCalendar() {
     return () => window.removeEventListener("personal-schedule-changed", refresh);
   }, []);
 
+  useEffect(() => {
+    const calendar = calendarRef.current?.getApi();
+    const nextView = isMobileCalendar ? "listWeek" : "timeGridWeek";
+
+    if (calendar && calendar.view.type !== nextView) {
+      calendar.changeView(nextView);
+    }
+  }, [isMobileCalendar]);
+
   function selectEvent(eventInfo: EventClickArg) {
     const selection = eventInfo.event.extendedProps["selection"];
     if (isSavedClassSession(selection)) setSelected(selection);
@@ -155,11 +167,13 @@ export function ProfileCalendar() {
           events={loadEvents}
           expandRows
           firstDay={1}
-          headerToolbar={{ left: "prev,next today", center: "title", right: "" }}
+          headerToolbar={isMobileCalendar
+            ? { left: "prev,next", center: "title", right: "today" }
+            : { left: "prev,next today", center: "title", right: "" }}
           height="auto"
-          initialView="timeGridWeek"
+          initialView={isMobileCalendar ? "listWeek" : "timeGridWeek"}
           nowIndicator
-          plugins={[timeGridPlugin, luxonPlugin]}
+          plugins={[timeGridPlugin, listPlugin, luxonPlugin]}
           ref={calendarRef}
           slotDuration="00:20:00"
           slotLabelInterval="01:00:00"
@@ -174,7 +188,7 @@ export function ProfileCalendar() {
         <div className="profile-calendar-empty">
           <CalendarDays aria-hidden="true" />
           <div>
-            <h3>No saved classes this week</h3>
+            <h3>No saved classes for these dates</h3>
             <p>Choose a class and save the time that works for you.</p>
           </div>
           <Link className="button button-secondary" href="/#menu">Browse Classes</Link>

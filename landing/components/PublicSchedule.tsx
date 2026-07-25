@@ -11,6 +11,7 @@ import type {
 } from "@fullcalendar/core";
 import { useAuth } from "@clerk/nextjs";
 import interactionPlugin from "@fullcalendar/interaction";
+import listPlugin from "@fullcalendar/list";
 import luxonPlugin from "@fullcalendar/luxon3";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -30,6 +31,7 @@ import {
 } from "@/lib/saved-class-sessions-client";
 import { classSessionListSchema } from "@/lib/schedule";
 import { getStudioHoursInTimeZone } from "@/lib/time-zone";
+import { useMediaQuery } from "@/lib/use-media-query";
 import { useViewerTimeZone } from "@/lib/use-viewer-time-zone";
 
 const POPOVER_HIDE_DELAY = 220;
@@ -37,6 +39,7 @@ const eventInteractionCleanups = new WeakMap<HTMLElement, () => void>();
 
 export function PublicSchedule() {
   const { isLoaded: isAuthLoaded, isSignedIn } = useAuth();
+  const isMobileCalendar = useMediaQuery("(max-width: 820px)");
   const timeZone = useViewerTimeZone();
   const [visibleRange, setVisibleRange] = useState(() => ({
     end: new Date(),
@@ -167,6 +170,15 @@ export function PublicSchedule() {
   useEffect(() => {
     calendarRef.current?.getApi().refetchEvents();
   }, [isSignedIn]);
+
+  useEffect(() => {
+    const calendar = calendarRef.current?.getApi();
+    const nextView = isMobileCalendar ? "listWeek" : "timeGridWeek";
+
+    if (calendar && calendar.view.type !== nextView) {
+      calendar.changeView(nextView);
+    }
+  }, [isMobileCalendar]);
 
   useEffect(() => {
     const refresh = () => calendarRef.current?.getApi().refetchEvents();
@@ -301,11 +313,13 @@ export function PublicSchedule() {
         events={loadEvents}
         expandRows
         firstDay={1}
-        headerToolbar={{ left: "prev,next today", center: "title", right: "" }}
+        headerToolbar={isMobileCalendar
+          ? { left: "prev,next", center: "title", right: "today" }
+          : { left: "prev,next today", center: "title", right: "" }}
         height="auto"
-        initialView="timeGridWeek"
+        initialView={isMobileCalendar ? "listWeek" : "timeGridWeek"}
         nowIndicator
-        plugins={[timeGridPlugin, interactionPlugin, luxonPlugin]}
+        plugins={[timeGridPlugin, listPlugin, interactionPlugin, luxonPlugin]}
         ref={calendarRef}
         slotDuration="00:20:00"
         slotLabelInterval="01:00:00"
@@ -333,7 +347,7 @@ export function PublicSchedule() {
           document.body,
         )
         : null}
-      {isEmpty ? <p className="calendar-state">No classes are posted for this week.</p> : null}
+      {isEmpty ? <p className="calendar-state">No classes are posted for the selected dates.</p> : null}
       {error ? <p className="calendar-state calendar-error" role="alert">{error}</p> : null}
     </div>
   );
