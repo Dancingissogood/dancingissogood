@@ -5,7 +5,7 @@ export const STUDIO_TIME_ZONE = "America/Detroit";
 export function getTimeZoneDisplayName(timeZone: string, date = new Date()) {
   const timeZonePart = new Intl.DateTimeFormat("en-US", {
     timeZone,
-    timeZoneName: "long",
+    timeZoneName: "short",
   }).formatToParts(date).find((part) => part.type === "timeZoneName");
 
   return timeZonePart?.value ?? timeZone;

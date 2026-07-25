@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Account",
-  description: "View your Dancing Is So Good passes, saved classes, and account details.",
+  description: "Your passes, classes, and account at Dancing Is So Good.",
 };
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
@@ -44,8 +44,8 @@ export default async function AccountPage() {
       <main className="account-page">
         <section className="account-shell account-state" aria-labelledby="account-title">
           <p className="eyebrow">Your account</p>
-          <h1 id="account-title">Account details are temporarily unavailable.</h1>
-          <p>Please try again shortly.</p>
+          <h1 id="account-title">We can&apos;t open your account right now.</h1>
+          <p>Try again in a moment.</p>
           <Link className="button button-primary" href="/account">
             Try Again
           </Link>
@@ -72,7 +72,7 @@ export default async function AccountPage() {
               </Link>
             ) : null}
             <Link className="button button-secondary" href="/#pass">
-              Purchase a Pass
+              Buy a Pass
             </Link>
           </div>
         </header>
@@ -86,7 +86,7 @@ export default async function AccountPage() {
           {account.purchases.length === 0 ? (
             <div className="account-empty">
               <h3>No passes yet</h3>
-              <p>Purchased passes will appear here.</p>
+              <p>Your next camp pass will appear here.</p>
             </div>
           ) : (
             <div className="account-pass-list">
@@ -98,8 +98,8 @@ export default async function AccountPage() {
                     </span>
                     <h3>{purchase.pass.name}</h3>
                     <p>
-                      {purchase.pass.accessDays}-day access, {purchase.pass.accessStarts} to{" "}
-                      {purchase.pass.accessEnds} Eastern Time
+                      {purchase.pass.accessDays}-day pass, {purchase.pass.accessStarts}-
+                      {purchase.pass.accessEnds} ET
                     </p>
                   </div>
                   <dl>
@@ -123,7 +123,7 @@ export default async function AccountPage() {
         {account.processingPayments.length > 0 ? (
           <section className="account-processing" aria-labelledby="processing-title">
             <div className="account-section-heading">
-              <h2 id="processing-title">Payment processing</h2>
+              <h2 id="processing-title">Pending payments</h2>
               <span>{account.processingPayments.length}</span>
             </div>
             <div className="account-pass-list">
@@ -132,7 +132,7 @@ export default async function AccountPage() {
                   <div>
                     <span className="account-status account-status-processing">Processing</span>
                     <h3>{payment.pass.name}</h3>
-                    <p>Your pass will appear after Stripe confirms the payment.</p>
+                    <p>Your pass will appear as soon as the payment clears.</p>
                   </div>
                   <dl>
                     <div>

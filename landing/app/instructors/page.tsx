@@ -8,7 +8,7 @@ import { instructorProfiles } from "@/content/site";
 export const metadata: Metadata = {
   title: "Instructors",
   description:
-    "Learn from dance, rhythm, mobility, and wellness instructors at Dancing Is So Good.",
+    "Meet the dance, rhythm, mobility, and recovery instructors at Dancing Is So Good.",
 };
 
 export default function InstructorsPage() {
@@ -25,30 +25,30 @@ export default function InstructorsPage() {
         />
         <div className="instructors-hero-shade" />
         <div className="instructors-hero-content">
-          <p className="eyebrow">Dance and wellness</p>
+          <p className="eyebrow">Meet the team</p>
           <h1 id="instructors-title">Instructors</h1>
           <p>
-            Learn dance technique, rhythm, mobility, and recovery from professional
-            instructors across each camp week.
+            Specialists in ballroom, Latin, social dance, mobility, rhythm, and recovery.
           </p>
         </div>
-        <p className="instructors-hero-note">Dance, mobility, rhythm, and recovery.</p>
+        <p className="instructors-hero-note">Technique with feeling.</p>
       </section>
 
       <section className="section instructor-introduction">
         <div>
-          <p className="eyebrow">Professional instruction</p>
-          <h2>Focused teaching across every discipline.</h2>
+          <p className="eyebrow">On the floor</p>
+          <h2>Great teaching changes how movement feels.</h2>
         </div>
         <div className="instructor-introduction-copy">
           <p>
-            Dance, rhythm, mobility, and wellness classes are taught by instructors
-            with experience in each subject. Every 20-minute session centers on a
-            specific skill students can practice immediately.
+            Our instructors bring professional experience and a point of view to every
+            class. You&apos;ll work on the details that make movement feel clearer,
+            stronger, and more musical.
           </p>
           <p>
-            Private coaching provides individual correction, while group classes build
-            confidence through guided practice with other students.
+            Choose the focus of private coaching or join the momentum of a group class.
+            Either way, there is room to ask questions, try again, and make the
+            movement your own.
           </p>
         </div>
       </section>
@@ -57,32 +57,32 @@ export default function InstructorsPage() {
 
       <section className="instructor-method" aria-labelledby="instructor-method-title">
         <div className="instructor-method-heading">
-          <p className="eyebrow">Instruction</p>
-          <h2 id="instructor-method-title">Focused coaching in every class.</h2>
+          <p className="eyebrow">How we teach</p>
+          <h2 id="instructor-method-title">Specific, personal, and made to move.</h2>
         </div>
         <div className="instructor-method-points">
           <div>
             <span>01</span>
-            <h3>Specialist teaching</h3>
-            <p>Each instructor teaches within their strongest disciplines.</p>
+            <h3>Deep expertise</h3>
+            <p>Learn from instructors who know the style from the inside.</p>
           </div>
           <div>
             <span>02</span>
             <h3>Personal attention</h3>
-            <p>Private and group formats create room for focused correction.</p>
+            <p>Get useful corrections without losing the joy of the class.</p>
           </div>
           <div>
             <span>03</span>
-            <h3>Cross-training</h3>
-            <p>Dance technique works alongside rhythm, mobility, and recovery.</p>
+            <h3>Whole-body training</h3>
+            <p>Technique, rhythm, mobility, and recovery work together.</p>
           </div>
         </div>
       </section>
 
       <section className="section instructor-cta">
         <div>
-          <p className="eyebrow">Choose your classes</p>
-          <h2>Find instruction that matches your goals.</h2>
+          <p className="eyebrow">Join us</p>
+          <h2>Meet us on the floor.</h2>
         </div>
         <div className="instructor-cta-actions">
           <Link className="button button-primary" href="/#schedule">

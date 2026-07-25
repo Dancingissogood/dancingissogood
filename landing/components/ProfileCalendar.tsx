@@ -148,8 +148,7 @@ export function ProfileCalendar() {
         <div>
           <h2 id="my-schedule-title">My schedule</h2>
           <p>
-            Classes you save appear here. Times are shown in {timeZoneName}.{" "}
-            Saving a class does not reserve capacity.
+            Times in {timeZoneName}. Saved classes are plans, not reservations.
           </p>
         </div>
         <span>{visibleSelections.length}</span>
@@ -188,10 +187,10 @@ export function ProfileCalendar() {
         <div className="profile-calendar-empty">
           <CalendarDays aria-hidden="true" />
           <div>
-            <h3>No saved classes for these dates</h3>
-            <p>Choose a class and save the time that works for you.</p>
+            <h3>Nothing saved for these dates</h3>
+            <p>Find a class that feels right and add it here.</p>
           </div>
-          <Link className="button button-secondary" href="/#menu">Browse Classes</Link>
+          <Link className="button button-secondary" href="/#menu">Explore Classes</Link>
         </div>
       ) : null}
 

@@ -50,20 +50,20 @@ export function CheckoutStatus() {
   }, [sessionId]);
 
   if (!sessionId || state === "unavailable") {
-    return <p>We could not confirm this checkout session. Contact us for help with your pass.</p>;
+    return <p>We couldn&apos;t confirm this payment. Contact us for help with your pass.</p>;
   }
 
   if (state === "loading") {
-    return <p>Confirming your checkout.</p>;
+    return <p>Confirming payment...</p>;
   }
 
   if (state === "complete") {
-    return <p>Your payment was received. Your 3-day pass is ready for camp scheduling.</p>;
+    return <p>Payment confirmed. Your 3-day pass is ready.</p>;
   }
 
   if (state === "processing") {
-    return <p>Your payment is still processing. We will confirm your pass once it clears.</p>;
+    return <p>Your payment is processing. Your pass will appear as soon as it clears.</p>;
   }
 
-  return <p>We could not confirm this checkout session. Contact us for help with your pass.</p>;
+  return <p>We couldn&apos;t confirm this payment. Contact us for help with your pass.</p>;
 }

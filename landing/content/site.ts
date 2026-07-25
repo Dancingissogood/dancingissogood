@@ -70,9 +70,9 @@ export const classMenuItems: ClassMenuItem[] = [
   {
     title: "Foam Rolling & Dancer's Stretches",
     duration: "20 min",
-    description: "Release work and dancer-specific stretches for cleaner movement.",
+    description: "Roll out, open up, and leave feeling ready to dance.",
     details:
-      "Ease common areas of dancer tension and prepare the body for the next class. Learn how to use pressure, breath, and active mobility without forcing range of motion.",
+      "Target the calves, hips, back, and shoulders with guided foam rolling and dancer-focused stretching. A practical reset before class or a restorative finish to the day.",
     category: "Mobility & recovery",
     level: "All levels",
     highlights: ["Lower-body release", "Active flexibility", "Recovery technique"],
@@ -82,9 +82,9 @@ export const classMenuItems: ClassMenuItem[] = [
   {
     title: "Argentine Tango Proficiency",
     duration: "20 min",
-    description: "Connection, posture, walking technique, and musical response.",
+    description: "Grounded walks, close connection, and unmistakable Tango character.",
     details:
-      "Build the grounded, attentive movement that gives Argentine Tango its character. Connect individual balance with clear partner communication and responsive musical choices.",
+      "Settle into the walk, refine your posture, and find a clearer connection with your partner. Musical phrasing gives every step somewhere to go.",
     category: "Partner dance",
     level: "All levels",
     highlights: ["Tango walk", "Partner connection", "Musical phrasing"],
@@ -94,9 +94,9 @@ export const classMenuItems: ClassMenuItem[] = [
   {
     title: "Waltz Rise & Fall",
     duration: "20 min",
-    description: "Foot pressure, frame, timing, and controlled rise through movement.",
+    description: "Stronger feet, smoother flight, and effortless-looking elevation.",
     details:
-      "Explore how the feet, knees, and body work together to create smooth elevation and lowering. Break rise and fall into practical mechanics that carry into partnered Waltz movement.",
+      "Feel rise and fall from the floor up. Foot pressure, knees, and body flight come together for a Waltz that moves with ease.",
     category: "Ballroom technique",
     level: "All levels",
     highlights: ["Foot pressure", "Body flight", "Controlled lowering"],
@@ -106,9 +106,9 @@ export const classMenuItems: ClassMenuItem[] = [
   {
     title: "Cuban Motion",
     duration: "20 min",
-    description: "Grounded weight transfer, hip action, and Latin body mechanics.",
+    description: "Find the grounded rhythm that brings Latin dancing to life.",
     details:
-      "Develop Cuban motion from the floor upward through deliberate weight changes and coordinated body action. The class emphasizes usable mechanics rather than decorative movement alone.",
+      "Cuban Motion starts with the floor. Build clear weight changes, natural hip action, and coordinated movement you can carry into every Latin dance.",
     category: "Latin technique",
     level: "All levels",
     highlights: ["Weight transfer", "Hip action", "Body coordination"],
@@ -118,9 +118,9 @@ export const classMenuItems: ClassMenuItem[] = [
   {
     title: "Latin Arms",
     duration: "20 min",
-    description: "Arm styling, hand lines, transitions, and upper-body confidence.",
+    description: "Expressive lines that belong to the whole body.",
     details:
-      "Turn arm styling into a connected part of the whole body. Practice clear pathways, intentional hand shapes, and transitions that complement rhythm without interrupting balance or timing.",
+      "Shape confident arm pathways, hands, and transitions without losing timing or balance. Styling becomes part of the movement, not something added afterward.",
     category: "Styling",
     level: "All levels",
     highlights: ["Arm pathways", "Hand shaping", "Movement transitions"],
@@ -130,9 +130,9 @@ export const classMenuItems: ClassMenuItem[] = [
   {
     title: "Samba Beats",
     duration: "20 min",
-    description: "Pulse, bounce, foot rhythm, and musical timing for Samba basics.",
+    description: "Catch the pulse, settle into the bounce, and let the rhythm lead.",
     details:
-      "Find the rhythmic engine behind Samba through pulse, bounce, and compact foot patterns. Develop coordination gradually so the music and movement begin to feel connected.",
+      "Explore Samba's unmistakable energy through bounce action, compact footwork, and musical timing. We build the rhythm first, then let the movement grow.",
     category: "Rhythm training",
     level: "All levels",
     highlights: ["Samba pulse", "Bounce action", "Rhythmic footwork"],
@@ -142,9 +142,9 @@ export const classMenuItems: ClassMenuItem[] = [
   {
     title: "Latin & Smooth Rhythms",
     duration: "20 min",
-    description: "Timing drills for Latin, smooth, and social dance patterns.",
+    description: "Hear the difference. Move with confidence.",
     details:
-      "Train the ability to recognize, count, and move through contrasting musical structures. Short drills connect what you hear to practical foot timing across several ballroom and social dance styles.",
+      "Shift between Latin drive and Smooth flow with timing drills that sharpen your ear and your feet. A musicality workout for every style.",
     category: "Musicality",
     level: "All levels",
     highlights: ["Beat recognition", "Timing changes", "Cross-style drills"],
@@ -154,9 +154,9 @@ export const classMenuItems: ClassMenuItem[] = [
   {
     title: "Hustle Fundamentals",
     duration: "20 min",
-    description: "Lead-follow connection, turns, timing, and social dance confidence.",
+    description: "Easy timing, clear turns, and instant social-floor confidence.",
     details:
-      "Learn a compact set of Hustle fundamentals that can be used immediately on a social floor. Balance personal timing with comfortable partner connection and clearly led turns.",
+      "Build the timing, lead-and-follow connection, and foundational turns that make Hustle feel natural. Practical, upbeat, and ready for the social floor.",
     category: "Social dance",
     level: "Beginner friendly",
     highlights: ["Core timing", "Lead and follow", "Foundational turns"],
@@ -166,9 +166,9 @@ export const classMenuItems: ClassMenuItem[] = [
   {
     title: "Adult Barre",
     duration: "20 min",
-    description: "Ballet-based strength, balance, posture, and alignment work.",
+    description: "Classic barre work for strength, posture, and balance.",
     details:
-      "Use accessible ballet barre exercises to organize posture, strengthen the legs, and improve balance. Every movement is taught through functional alignment with options for different ranges and experience levels.",
+      "Strengthen the legs, organize posture, and find steadier balance through accessible ballet barre exercises. Every movement can meet you at your level.",
     category: "Strength & alignment",
     level: "All levels",
     highlights: ["Postural alignment", "Leg strength", "Balance control"],
@@ -178,9 +178,9 @@ export const classMenuItems: ClassMenuItem[] = [
   {
     title: "Juggling Introduction",
     duration: "20 min",
-    description: "Coordination, rhythm, focus, and playful dancer cross-training.",
+    description: "A playful reset for rhythm, focus, and coordination.",
     details:
-      "Approach juggling as a practical coordination exercise, beginning with simple tosses and repeatable patterns. The work challenges visual tracking, timing, and relaxed focus in a low-pressure format.",
+      "Start with simple tosses and build a repeatable pattern at your own pace. It is lighthearted cross-training for timing, visual focus, and relaxed concentration.",
     category: "Coordination",
     level: "No experience needed",
     highlights: ["Basic tosses", "Visual tracking", "Rhythmic coordination"],
@@ -193,38 +193,38 @@ export const instructorProfiles: InstructorProfile[] = [
   {
     role: "Ballroom & Smooth",
     description:
-      "Frame, floorcraft, musical phrasing, and partner connection across Waltz, Tango, and smooth dance foundations.",
+      "Move with greater ease and connection through Waltz, Tango, and Smooth foundations.",
     image: "/assets/classes/waltz-rise-fall.jpg",
     imageAlt: "Ballroom dancers demonstrating waltz technique in a bright studio",
     specialties: ["Waltz Rise & Fall", "Argentine Tango", "Bolero Basics"],
-    teachingFormat: "Private coaching + group technique",
+    teachingFormat: "Private coaching and group classes",
   },
   {
     role: "Latin & Rhythm",
     description:
-      "Grounded movement, expressive styling, and musical confidence through Latin body mechanics and rhythm training.",
+      "Find grounded movement, expressive styling, and a more confident relationship with the music.",
     image: "/assets/classes/cuban-motion.jpg",
     imageAlt: "Dance instructor demonstrating Cuban motion to a student",
     specialties: ["Cuban Motion", "Latin Arms", "Samba Beats"],
-    teachingFormat: "Technique labs + guided practice",
+    teachingFormat: "Technique classes and guided practice",
   },
   {
     role: "Social Dance",
     description:
-      "Practical lead-and-follow skills, clear timing, and adaptable partner technique for an inviting social floor.",
+      "Build comfortable lead-and-follow skills, clear timing, and confidence for the social floor.",
     image: "/assets/classes/hustle-fundamentals.jpg",
     imageAlt: "Partners practicing Hustle turns during a social dance lesson",
     specialties: ["Hustle Fundamentals", "West Coast Swing", "Partner Connection"],
-    teachingFormat: "Partner sessions + group rotations",
+    teachingFormat: "Partner sessions and group classes",
   },
   {
     role: "Mobility & Recovery",
     description:
-      "Dancer-specific recovery, range of motion, and sustainable movement practices that support the full camp day.",
+      "Recover well, move more freely, and build habits that support a full day of dancing.",
     image: "/assets/classes/foam-rolling-stretches.jpg",
     imageAlt: "Dancer using a foam roller during a mobility and recovery session",
     specialties: ["Foam Rolling", "Dancer's Stretches", "Wellness & Recovery"],
-    teachingFormat: "Guided recovery + individual support",
+    teachingFormat: "Guided recovery and personal support",
   },
 ];
 
@@ -233,7 +233,7 @@ export const studioProfiles: StudioProfile[] = [
     name: "Belleville Lake Dance Company",
     locationLabel: "Belleville, Michigan",
     description:
-      "Belleville Lake Dance Company offers dance programming across styles including jazz, tap, ballet, hip-hop, ballroom, and acro. The studio is based at 500 E. Huron River Drive in Belleville.",
+      "A welcoming Belleville studio where dancers of all ages can grow through jazz, tap, ballet, hip-hop, ballroom, and acro.",
     image: "/assets/studios/belleville-lake-dance-logo-official.webp",
     imageAlt: "Belleville Lake Dance Company logo",
     imageWidth: 577,
@@ -260,7 +260,7 @@ export const studioProfiles: StudioProfile[] = [
     name: "Rhizome Roots Studio",
     locationLabel: "Ypsilanti, Michigan",
     description:
-      "Rhizome Roots Studio focuses on inclusive wellness programming for all ages, genders, and ability levels, with movement, education, community-building, and nature-centered activities.",
+      "An inclusive Ypsilanti space for movement, wellness, creativity, and community, open to all ages and ability levels.",
     image: "/assets/studios/rhizome-roots-contact-logo.png",
     imageAlt: "Rhizome Roots Studio logo",
     imageWidth: 594,

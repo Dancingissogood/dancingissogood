@@ -291,7 +291,7 @@ export function AdminScheduleEditor() {
           <div>
             <p className="eyebrow">Administration</p>
             <h1>Class schedule</h1>
-            <p>All schedule dates and times are entered and displayed in Eastern Time.</p>
+            <p>All times ET.</p>
           </div>
           <div className="admin-heading-actions">
             <Link className="admin-icon-link" href="/account" title="Account">
@@ -371,7 +371,7 @@ export function AdminScheduleEditor() {
               <input required type="date" value={draft.date} onChange={(event) => setDraft({ ...draft, date: event.target.value })} />
             </label>
             <label className="field">
-              <span>Start time (Eastern)</span>
+              <span>Start time (ET)</span>
               <input required type="time" step={1_200} value={draft.time} onChange={(event) => setDraft({ ...draft, time: event.target.value })} />
             </label>
             <label className="field">

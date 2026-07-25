@@ -19,7 +19,7 @@ export function ContactForm() {
         </select>
       </label>
       <button className="button button-primary" type="button">
-        Request the Schedule
+        Join the List
       </button>
     </form>
   );

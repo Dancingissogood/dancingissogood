@@ -10,11 +10,11 @@ export function SiteFooter() {
           <span className="brand-mark brand-mark-footer">DG</span>
           <div>
             <p>Dancing Is So Good</p>
-            <span>Six-week dance and wellness camp. Monday-Wednesday, 9 AM-2 PM Eastern Time.</span>
+            <span>Dance, movement, and good mornings. Monday-Wednesday, 9 AM-2 PM ET.</span>
           </div>
         </div>
         <Link className="footer-schedule-link" href="/#contact">
-          Request the next schedule
+          Get Camp Updates
         </Link>
       </div>
       <div className="footer-legal-row">

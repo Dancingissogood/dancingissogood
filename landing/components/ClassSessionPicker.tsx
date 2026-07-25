@@ -169,8 +169,8 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
         <div>
           <span className="class-session-picker-icon"><CalendarCheck2 aria-hidden="true" /></span>
           <div>
-            <h3>Choose a class time</h3>
-            <p>Save individual sessions. Times are shown in {timeZoneName}.</p>
+            <h3>Upcoming classes</h3>
+            <p>Times in {timeZoneName}.</p>
           </div>
         </div>
         <div className="mini-calendar-controls">
@@ -227,7 +227,7 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
       <div className="class-session-times" aria-live="polite">
         {isLoading ? <p className="class-session-state">Loading class times...</p> : null}
         {!isLoading && sessions.length === 0 && !error ? (
-          <p className="class-session-state">No {classItem.title} sessions are posted for this month.</p>
+          <p className="class-session-state">No {classItem.title} classes this month.</p>
         ) : null}
         {!isLoading && selectedDate && selectedSessions.length > 0 ? (
           <>

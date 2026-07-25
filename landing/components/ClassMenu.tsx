@@ -239,7 +239,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
             </div>
 
             <div className="lesson-dialog-content">
-              <p className="eyebrow">Class details</p>
+              <p className="eyebrow">{selectedClass.category}</p>
               <h2 id="lesson-dialog-title">{selectedClass.title}</h2>
               <p id="lesson-dialog-description" className="lesson-dialog-description">
                 {selectedClass.details}
@@ -261,7 +261,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
               <div className="lesson-dialog-highlights">
                 <div className="lesson-dialog-subheading">
                   <Sparkles aria-hidden="true" />
-                  <h3>What you&apos;ll explore</h3>
+                  <h3>Inside the class</h3>
                 </div>
                 <ul>
                   {selectedClass.highlights.map((highlight) => (
@@ -283,7 +283,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
                 }}
               >
                 <CalendarDays aria-hidden="true" />
-                View the schedule
+                Full Schedule
               </Link>
             </div>
           </div>

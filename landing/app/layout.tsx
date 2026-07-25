@@ -26,15 +26,15 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Dancing Is So Good | Dance & Wellness Camp",
+    default: "Dancing Is So Good | Summer Dance Camp",
     template: "%s | Dancing Is So Good",
   },
   description:
-    "A six-week dance and wellness camp with 20-minute classes, private and group instruction, and unlimited Monday-Wednesday access from 9 AM to 2 PM Eastern Time.",
+    "Ballroom, Latin, social dance, mobility, rhythm, and recovery classes Monday-Wednesday from 9 AM to 2 PM ET.",
   openGraph: {
     title: "Dancing Is So Good",
     description:
-      "Dance, mobility, rhythm, recovery, and wellness classes in focused 20-minute sessions.",
+      "Ballroom, Latin, social dance, mobility, rhythm, and recovery at Dancing Is So Good.",
     type: "website",
     images: [
       {

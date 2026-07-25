@@ -43,7 +43,7 @@ export function CheckoutButton({ className = "button button-primary", passSlug }
   return (
     <div className="checkout-control">
       <button className={className} disabled={isLoading} onClick={startCheckout} type="button">
-        {isLoading ? "Opening checkout..." : "Purchase 3-Day Pass"}
+        {isLoading ? "Opening checkout..." : "Buy the 3-Day Pass"}
       </button>
       {error ? <p aria-live="polite" className="checkout-error">{error}</p> : null}
     </div>

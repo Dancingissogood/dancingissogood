@@ -13,22 +13,22 @@ export default function StudiosPage() {
   return (
     <main>
       <section className="studios-hero">
-        <p className="eyebrow">Partner studios</p>
-        <h1>Studios supporting dance and wellness.</h1>
+        <p className="eyebrow">Where we dance</p>
+        <h1>Two studios. One dance community.</h1>
         <p>
-          Dancing Is So Good works with Belleville Lake Dance Company and Rhizome
-          Roots Studio for dance instruction, movement education, and wellness classes.
+          Dancing Is So Good brings together Belleville Lake Dance Company and Rhizome
+          Roots Studio - two spaces built around movement, connection, and community.
         </p>
       </section>
 
       <StudioDirectory studios={studioProfiles} />
 
       <section className="section studio-note">
-        <p className="eyebrow">Shared strengths</p>
-        <h2>Dance training, wellness, and community.</h2>
+        <p className="eyebrow">Our studio partners</p>
+        <h2>Local roots. Room to move.</h2>
         <p>
-          Partner studios contribute experience in dance technique, social dancing,
-          rhythm, mobility, recovery, wellness, and education.
+          Together, these studios make space for ballroom, social dance, mobility,
+          recovery, and the shared joy of learning something new.
         </p>
       </section>
     </main>

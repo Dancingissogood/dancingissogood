@@ -83,7 +83,7 @@ function validateSessionTiming(
   if (!isWithinScheduleHours(session)) {
     context.addIssue({
       code: "custom",
-      message: "Class sessions must run between 9:00 AM and 2:00 PM Eastern Time.",
+      message: "Class sessions must run between 9:00 AM and 2:00 PM ET.",
       path: ["startsAt"],
     });
   }
@@ -272,7 +272,7 @@ export async function registerClassSessionRoutes(
 
       if (!durationValidation.success) {
         return reply.code(400).send({
-          error: "Classes must be 20 minutes and run between 9:00 AM and 2:00 PM Eastern Time.",
+          error: "Classes must be 20 minutes and run between 9:00 AM and 2:00 PM ET.",
         });
       }
 
