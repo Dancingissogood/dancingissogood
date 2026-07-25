@@ -3663,6 +3663,12 @@ select:focus {
     min-height: 44px;
   }
 
+  .menu-card-save::before {
+    content: "";
+    inset: -6px 0;
+    position: absolute;
+  }
+
   .mobile-menu-button,
   .lesson-dialog-close,
   .menu-card-expand,

@@ -307,6 +307,8 @@ export function ClassMenu({ classes }: ClassMenuProps) {
           onClose={() => {
             isClosingRef.current = false;
             setOriginCardExpanded(originCardRef.current, false);
+            setIsSharedTransitioning(false);
+            setOpenToSchedule(false);
             setSelectedClass(null);
           }}
           onClick={(event) => {
