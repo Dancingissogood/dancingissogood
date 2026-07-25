@@ -25,11 +25,12 @@ export default function HomePage() {
         </div>
         <div className="hero-overlay" />
         <div className="hero-content">
-          <p className="eyebrow">Summer dance camp</p>
-          <h1>Dancing Is So Good.</h1>
+          <p className="eyebrow">Dancing Is So Good</p>
+          <h1>A summer dance camp made to move with you.</h1>
           <p className="hero-copy">
-            A morning of ballroom, Latin, social dance, mobility, rhythm, and recovery.
-            Monday-Wednesday, 9 AM-2 PM ET.
+            Spend three mornings exploring ballroom, Latin, social dance, mobility,
+            rhythm, and recovery with professional instructors and a fresh lineup every
+            camp week. Monday-Wednesday, 9 AM-2 PM ET.
           </p>
           <div className="hero-actions">
             <Link className="button button-primary" href="#pass">
