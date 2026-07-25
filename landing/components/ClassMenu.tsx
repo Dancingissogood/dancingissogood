@@ -4,8 +4,8 @@ import {
   CalendarDays,
   CalendarPlus,
   Clock3,
+  Expand,
   Layers3,
-  Maximize2,
   Sparkles,
   X,
 } from "lucide-react";
@@ -154,17 +154,6 @@ export function ClassMenu({ classes }: ClassMenuProps) {
       <div className="menu-grid">
         {classes.map((item) => (
           <article className="menu-card" key={item.title}>
-            <button
-              className="menu-card-open"
-              type="button"
-              aria-haspopup="dialog"
-              aria-label={`View details for ${item.title}`}
-              onClick={(event) => {
-                originCardRef.current = event.currentTarget.closest<HTMLElement>(".menu-card");
-                setOpenToSchedule(false);
-                setSelectedClass(item);
-              }}
-            />
             <div className="menu-card-image">
               <Image
                 src={item.image}
@@ -174,27 +163,38 @@ export function ClassMenu({ classes }: ClassMenuProps) {
               />
             </div>
             <div className="menu-card-body">
-              <span className="menu-time">{item.duration}</span>
-              <h3>{item.title}</h3>
+              <div className="menu-card-title-row">
+                <h3>{item.title}</h3>
+                <button
+                  className="menu-card-expand"
+                  type="button"
+                  aria-haspopup="dialog"
+                  aria-label={`View details for ${item.title}`}
+                  title="View class details"
+                  onClick={(event) => {
+                    originCardRef.current = event.currentTarget.closest<HTMLElement>(".menu-card");
+                    setOpenToSchedule(false);
+                    setSelectedClass(item);
+                  }}
+                >
+                  <Expand aria-hidden="true" />
+                </button>
+              </div>
               <p>{item.description}</p>
-              <span className="menu-card-action" aria-hidden="true">
-                View class
-                <Maximize2 />
-              </span>
+              <button
+                className="menu-card-save"
+                type="button"
+                aria-label={`Add a ${item.title} session to your schedule`}
+                onClick={(event) => {
+                  originCardRef.current = event.currentTarget.closest<HTMLElement>(".menu-card");
+                  setOpenToSchedule(true);
+                  setSelectedClass(item);
+                }}
+              >
+                <CalendarPlus aria-hidden="true" />
+                Add class
+              </button>
             </div>
-            <button
-              className="menu-card-save"
-              type="button"
-              aria-label={`Add a ${item.title} session to your schedule`}
-              onClick={(event) => {
-                originCardRef.current = event.currentTarget.closest<HTMLElement>(".menu-card");
-                setOpenToSchedule(true);
-                setSelectedClass(item);
-              }}
-            >
-              <CalendarPlus aria-hidden="true" />
-              Add class
-            </button>
           </article>
         ))}
       </div>
