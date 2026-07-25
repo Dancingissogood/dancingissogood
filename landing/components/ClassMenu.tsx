@@ -4,8 +4,8 @@ import {
   CalendarDays,
   CalendarPlus,
   Clock3,
-  Expand,
   Layers3,
+  Maximize2,
   Sparkles,
   X,
 } from "lucide-react";
@@ -177,23 +177,25 @@ export function ClassMenu({ classes }: ClassMenuProps) {
                     setSelectedClass(item);
                   }}
                 >
-                  <Expand aria-hidden="true" />
+                  <Maximize2 aria-hidden="true" />
                 </button>
               </div>
-              <p>{item.description}</p>
-              <button
-                className="menu-card-save"
-                type="button"
-                aria-label={`Add a ${item.title} session to your schedule`}
-                onClick={(event) => {
-                  originCardRef.current = event.currentTarget.closest<HTMLElement>(".menu-card");
-                  setOpenToSchedule(true);
-                  setSelectedClass(item);
-                }}
-              >
-                <CalendarPlus aria-hidden="true" />
-                Add class
-              </button>
+              <div className="menu-card-subtext-row">
+                <p>{item.description}</p>
+                <button
+                  className="menu-card-save"
+                  type="button"
+                  aria-label={`Add a ${item.title} session to your schedule`}
+                  onClick={(event) => {
+                    originCardRef.current = event.currentTarget.closest<HTMLElement>(".menu-card");
+                    setOpenToSchedule(true);
+                    setSelectedClass(item);
+                  }}
+                >
+                  <CalendarPlus aria-hidden="true" />
+                  Add class
+                </button>
+              </div>
             </div>
           </article>
         ))}

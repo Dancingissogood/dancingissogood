@@ -810,8 +810,8 @@ section[id] {
 .menu-card-expand {
   align-items: center;
   background: transparent;
-  border: 1px solid var(--line-strong);
-  border-radius: 8px;
+  border: 0;
+  border-radius: 6px;
   color: var(--ink);
   cursor: pointer;
   display: inline-flex;
@@ -820,15 +820,13 @@ section[id] {
   padding: 0;
   transition:
     background-color 160ms ease,
-    border-color 160ms ease,
     color 160ms ease;
   width: 38px;
 }
 
 .menu-card-expand:hover {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--white);
+  background: rgba(23, 23, 20, 0.06);
+  color: var(--accent-deep);
 }
 
 .menu-card-expand svg {
@@ -847,8 +845,16 @@ section[id] {
 
 .menu-card p {
   font-size: 0.94rem;
-  line-height: 1.55;
-  margin: 12px 0 0;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.menu-card-subtext-row {
+  align-items: end;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-top: 12px;
 }
 
 .menu-card-save {
@@ -863,10 +869,8 @@ section[id] {
   font-weight: 700;
   gap: 6px;
   line-height: 1;
-  margin-top: auto;
   min-height: 38px;
   padding: 0 10px;
-  align-self: flex-start;
   transition:
     background-color 160ms ease,
     border-color 160ms ease,
@@ -3756,8 +3760,9 @@ select:focus {
     gap: 8px;
   }
 
-  .menu-card-save {
-    margin-top: 14px;
+  .menu-card-subtext-row {
+    gap: 8px;
+    margin-top: 10px;
   }
 
   .menu-card h3 {
@@ -3768,7 +3773,7 @@ select:focus {
   .menu-card p {
     display: -webkit-box;
     font-size: 0.86rem;
-    line-height: 1.4;
+    line-height: 1.35;
     overflow: hidden;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
