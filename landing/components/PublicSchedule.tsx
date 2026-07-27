@@ -191,7 +191,17 @@ export function PublicSchedule() {
   useEffect(() => {
     if (!eventDetails) return;
 
-    const dismissForViewportChange = () => hideEventDetails();
+    const dismissForViewportChange = (event: Event) => {
+      if (
+        event.type === "scroll"
+        && event.target instanceof Node
+        && document.querySelector(".calendar-event-popover")?.contains(event.target)
+      ) {
+        return;
+      }
+
+      hideEventDetails();
+    };
     window.addEventListener("resize", dismissForViewportChange);
     window.addEventListener("scroll", dismissForViewportChange, true);
 

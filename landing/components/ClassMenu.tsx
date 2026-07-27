@@ -263,7 +263,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
                       src={item.image}
                       alt={item.imageAlt}
                       fill
-                      sizes="(max-width: 580px) 117px, (max-width: 1100px) 50vw, 430px"
+                      sizes="(max-width: 640px) calc(100vw - 40px), (max-width: 1180px) calc(50vw - 50px), 430px"
                     />
                   </div>
                   <div className="menu-card-body">
@@ -330,7 +330,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
                 alt={selectedClass.imageAlt}
                 fill
                 priority
-                sizes="(max-width: 760px) calc(100vw - 32px), 460px"
+                sizes="(max-width: 640px) 100vw, (max-width: 900px) 40vw, 460px"
               />
               <span>{selectedClass.category}</span>
             </div>

@@ -1,4 +1,3 @@
-import { Heart, Sparkles, UsersRound } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -34,8 +33,8 @@ export default function HomePage() {
       <section className="hero" aria-label="Summer in the Mitten Movement Series">
         <div className="hero-image">
           <Image
-            src="/assets/editorial/arrival-hero.webp"
-            alt="Adults arriving together for a morning movement class"
+            src="/assets/editorial/movement-hero.webp"
+            alt="Two adults sharing a graceful dance movement in a sunlit studio"
             fill
             priority
             quality={90}
@@ -44,12 +43,17 @@ export default function HomePage() {
         </div>
         <div className="hero-overlay" />
         <div className="hero-content">
-          <p className="hero-kicker">Summer in the Mitten</p>
-          <h1>
-            <span>move.</span>
-            <span>connect.</span>
-            <span>feel good.</span>
-          </h1>
+          <h1 className="hero-title">Summer in the Mitten Movement Series</h1>
+          <Image
+            className="hero-brand-logo"
+            src="/assets/brand/summer-in-the-mitten-hero-logo-on-dark-transparent.png"
+            alt=""
+            aria-hidden="true"
+            height={1022}
+            priority
+            sizes="(max-width: 640px) 230px, (max-width: 900px) 270px, 330px"
+            width={806}
+          />
           <p className="hero-copy">
             Three open mornings of dance, rhythm, mobility, and restoration.
           </p>
@@ -104,17 +108,41 @@ export default function HomePage() {
         </div>
         <div className="practice-pillars">
           <article>
-            <Sparkles aria-hidden="true" />
+            <Image
+              alt=""
+              aria-hidden="true"
+              className="practice-pillar-art"
+              height={619}
+              sizes="120px"
+              src="/assets/illustrations/movement-line-art.png"
+              width={428}
+            />
             <h3>For your movement</h3>
             <p>Build clearer technique, balance, rhythm, and expressive range.</p>
           </article>
           <article>
-            <Heart aria-hidden="true" />
+            <Image
+              alt=""
+              aria-hidden="true"
+              className="practice-pillar-art"
+              height={528}
+              sizes="120px"
+              src="/assets/illustrations/wellbeing-line-art.png"
+              width={510}
+            />
             <h3>For your well-being</h3>
             <p>Make room for mobility, recovery, focus, and a steadier pace.</p>
           </article>
           <article>
-            <UsersRound aria-hidden="true" />
+            <Image
+              alt=""
+              aria-hidden="true"
+              className="practice-pillar-art"
+              height={529}
+              sizes="120px"
+              src="/assets/illustrations/community-line-art.png"
+              width={573}
+            />
             <h3>For your community</h3>
             <p>Learn alongside adults who are curious, open, and ready to move.</p>
           </article>

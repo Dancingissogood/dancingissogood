@@ -299,9 +299,8 @@ export function AdminScheduleEditor() {
             <p>All times ET.</p>
           </div>
           <div className="admin-heading-actions">
-            <Link className="admin-icon-link" href="/account" title="Account">
+            <Link aria-label="Account" className="admin-icon-link" href="/account" title="Account">
               <UserRound aria-hidden="true" size={18} />
-              <span>Account</span>
             </Link>
             <button className="button admin-button-primary" type="button" onClick={() => openNewSession()}>
               <CalendarPlus aria-hidden="true" size={18} />

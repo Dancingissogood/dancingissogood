@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { AccountMenu } from "@/components/AccountMenu";
+import { BrandLogo } from "@/components/BrandLogo";
 import { navigationItems } from "@/content/site";
 import { fetchAccountNavigationState } from "@/lib/account-navigation";
 
@@ -101,11 +102,7 @@ export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
       aria-label="Primary navigation"
     >
       <Link className="brand" href="/" aria-label="Summer in the Mitten Movement Series home">
-        <span className="brand-mark">SM</span>
-        <span className="brand-copy">
-          <strong>Summer in the Mitten</strong>
-          <small>Movement Series</small>
-        </span>
+        <BrandLogo priority variant="adaptive" />
       </Link>
       <nav className="nav-links" aria-label="Main menu">
         {navigationItems.map((item) => (
@@ -171,12 +168,13 @@ export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
         onClose={() => setIsMobileMenuOpen(false)}
       >
         <div className="mobile-nav-heading">
-          <Link className="brand" href="/" onClick={closeMobileMenu}>
-            <span className="brand-mark">SM</span>
-            <span className="brand-copy">
-              <strong>Summer in the Mitten</strong>
-              <small>Movement Series</small>
-            </span>
+          <Link
+            aria-label="Summer in the Mitten Movement Series home"
+            className="brand"
+            href="/"
+            onClick={closeMobileMenu}
+          >
+            <BrandLogo variant="on-dark" />
           </Link>
           <button
             aria-label="Close menu"

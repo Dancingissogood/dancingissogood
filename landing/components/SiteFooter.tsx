@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { BrandLogo } from "@/components/BrandLogo";
+
 export function SiteFooter() {
   const currentYear = new Date().getFullYear();
 
@@ -7,11 +9,16 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div className="footer-main">
         <div className="footer-brand">
-          <span className="brand-mark brand-mark-footer">SM</span>
-          <div>
-            <p>Summer in the Mitten “Movement Series”</p>
-            <span>Move, learn, restore, and connect in Southeast Michigan.</span>
-          </div>
+          <Link
+            aria-label="Summer in the Mitten Movement Series home"
+            className="footer-brand-home"
+            href="/"
+          >
+            <BrandLogo className="footer-brand-logo" variant="on-dark" />
+          </Link>
+          <p className="footer-brand-tagline">
+            Move, learn, restore, and connect in Southeast Michigan.
+          </p>
         </div>
         <div className="footer-column">
           <h2>Explore</h2>
