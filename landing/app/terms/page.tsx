@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: "Terms governing the Dancing Is So Good website, accounts, passes, and programs.",
+  description: "Terms governing the Movement Series website, accounts, passes, and programs.",
 };
 
 export default function TermsOfServicePage() {
@@ -13,11 +13,11 @@ export default function TermsOfServicePage() {
         <header className="legal-heading">
           <p className="eyebrow">Legal</p>
           <h1>Terms of Service</h1>
-          <p className="legal-effective-date">Effective and last updated July 16, 2026</p>
+          <p className="legal-effective-date">Effective and last updated July 26, 2026</p>
           <p>
             These Terms of Service govern your use of dancingissogood.com and the
             accounts, passes, schedules, registrations, and related services offered by
-            Love Productions LLC through Dancing Is So Good. By using the site, creating
+            Love Productions LLC through Summer in the Mitten “Movement Series.” By using the site, creating
             an account, or completing a purchase, you agree to these Terms.
           </p>
         </header>

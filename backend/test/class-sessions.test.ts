@@ -17,6 +17,7 @@ test("public schedule returns only published sessions in the requested range", a
   const suffix = randomUUID();
   const published = await database.classSession.create({
     data: {
+      classKey: `published-${suffix}`,
       endsAt: new Date("2026-07-20T13:20:00.000Z"),
       published: true,
       startsAt: new Date("2026-07-20T13:00:00.000Z"),
@@ -25,6 +26,7 @@ test("public schedule returns only published sessions in the requested range", a
   });
   const unpublished = await database.classSession.create({
     data: {
+      classKey: `unpublished-${suffix}`,
       endsAt: new Date("2026-07-20T13:40:00.000Z"),
       published: false,
       startsAt: new Date("2026-07-20T13:20:00.000Z"),
@@ -208,6 +210,7 @@ test("an administrator can create, move, list, and delete a 20-minute class", as
 function validSessionPayload(title: string) {
   return {
     capacity: 24,
+    classKey: "waltz",
     description: "Focused technique session.",
     endsAt: "2026-07-20T13:20:00.000Z",
     instructorName: "Test Instructor",

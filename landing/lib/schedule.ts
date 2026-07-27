@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const classSessionSchema = z.object({
   capacity: z.number().int().nullable(),
+  classKey: z.string(),
   description: z.string().nullable(),
   endsAt: z.iso.datetime(),
   id: z.string(),

@@ -2,7 +2,6 @@
 
 import {
   CalendarDays,
-  Clock3,
   Layers3,
   Maximize2,
   Plus,
@@ -19,6 +18,13 @@ import { ClassSessionPicker } from "@/components/ClassSessionPicker";
 
 type ClassMenuProps = {
   classes: ClassMenuItem[];
+};
+
+const categoryCopy: Record<string, string> = {
+  "Latin Rhythms": "Straight to the heart of Salsa, Mambo, Cha Cha, Rumba, Bolero, and Samba.",
+  "Swing Rhythms": "The hidden language of East Coast Swing, West Coast Swing, Hustle, and Nightclub.",
+  "Smooth Rhythms": "Flow through Foxtrot, Waltz, Tango, Viennese Waltz, Quickstep, and Argentine Tango.",
+  "Movement & Recovery": "Restore the body, sharpen the rhythm, and build coordination beyond the dance floor.",
 };
 
 export function ClassMenu({ classes }: ClassMenuProps) {
@@ -239,9 +245,16 @@ export function ClassMenu({ classes }: ClassMenuProps) {
 
   return (
     <>
-      <div className="menu-grid">
-        {classes.map((item) => (
-          <article className="menu-card" key={item.title}>
+      <div className="movement-menu-groups">
+        {Object.entries(categoryCopy).map(([category, description]) => (
+          <section className="movement-menu-group" key={category}>
+            <header className="movement-menu-group-heading">
+              <h3>{category}</h3>
+              <p>{description}</p>
+            </header>
+            <div className="menu-grid">
+              {classes.filter((item) => item.category === category).map((item) => (
+                <article className="menu-card" key={item.key}>
             <button
               className="menu-card-open"
               type="button"
@@ -280,17 +293,20 @@ export function ClassMenu({ classes }: ClassMenuProps) {
                 <button
                   className="menu-card-save"
                   type="button"
-                  aria-label={`Add a ${item.title} session to your schedule`}
+                  aria-label={`Reserve a ${item.title} session`}
                   onClick={(event) => {
                     openClass(item, event.currentTarget, true);
                   }}
                 >
                   <Plus aria-hidden="true" />
-                  Add class
+                  Reserve
                 </button>
               </div>
             </div>
-          </article>
+                </article>
+              ))}
+            </div>
+          </section>
         ))}
       </div>
 
@@ -347,11 +363,6 @@ export function ClassMenu({ classes }: ClassMenuProps) {
                 </p>
 
                 <div className="lesson-dialog-facts" aria-label="Lesson details">
-                  <div>
-                    <Clock3 aria-hidden="true" />
-                    <span>Duration</span>
-                    <strong>{selectedClass.duration}</strong>
-                  </div>
                   <div>
                     <Layers3 aria-hidden="true" />
                     <span>Level</span>

@@ -8,10 +8,11 @@ import type Stripe from "stripe";
 import { createClerkIdentityProvider } from "./auth.js";
 import type { IdentityProvider } from "./auth.js";
 import { config } from "./config.js";
+import { registerAdminDashboardRoutes } from "./routes/admin-dashboard.js";
 import { registerAccountRoutes } from "./routes/account.js";
 import { registerCheckoutRoutes } from "./routes/checkout.js";
 import { registerClassSessionRoutes } from "./routes/class-sessions.js";
-import { registerSavedClassSessionRoutes } from "./routes/saved-class-sessions.js";
+import { registerRegistrationRoutes } from "./routes/registrations.js";
 import { registerStripeWebhookRoutes } from "./routes/stripe-webhooks.js";
 import { createStripeClient } from "./stripe.js";
 
@@ -39,8 +40,9 @@ export async function buildApp(dependencies: AppDependencies = {}) {
   });
 
   await registerAccountRoutes(app, { database, identityProvider });
+  await registerAdminDashboardRoutes(app, { database, identityProvider });
   await registerClassSessionRoutes(app, { database, identityProvider });
-  await registerSavedClassSessionRoutes(app, { database, identityProvider });
+  await registerRegistrationRoutes(app, { database, identityProvider });
   await registerCheckoutRoutes(app, { database, identityProvider, stripe });
   await registerStripeWebhookRoutes(app, { database, stripe });
 

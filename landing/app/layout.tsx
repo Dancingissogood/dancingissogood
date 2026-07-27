@@ -26,22 +26,22 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Dancing Is So Good | Summer Dance Camp",
-    template: "%s | Dancing Is So Good",
+    default: "Summer in the Mitten | Movement Series",
+    template: "%s | Summer in the Mitten",
   },
   description:
-    "Ballroom, Latin, social dance, mobility, rhythm, and recovery classes Monday-Wednesday from 9 AM to 2 PM ET.",
+    "A summer movement series of ballroom, Latin, swing, mobility, rhythm, and recovery in Southeast Michigan.",
   openGraph: {
-    title: "Dancing Is So Good",
+    title: "Summer in the Mitten “Movement Series”",
     description:
-      "Ballroom, Latin, social dance, mobility, rhythm, and recovery at Dancing Is So Good.",
+      "Three open mornings of dance, rhythm, movement, and restoration.",
     type: "website",
     images: [
       {
-        url: "/assets/dance-camp-hero-hd-v2.webp",
-        width: 6868,
-        height: 3664,
-        alt: "Adults practicing dance and mobility in a bright studio",
+        url: "/assets/movement-series-hero.webp",
+        width: 2400,
+        height: 1350,
+        alt: "Adults sharing ballroom dance and restorative movement in a bright studio",
       },
     ],
   },
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   initialScale: 1,
-  themeColor: "#fffdf8",
+  themeColor: "#fbfcf8",
   viewportFit: "cover",
   width: "device-width",
 };

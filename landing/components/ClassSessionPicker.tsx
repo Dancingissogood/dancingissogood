@@ -9,10 +9,10 @@ import type { ClassMenuItem } from "@/content/site";
 import type { ClassSession } from "@/lib/schedule";
 import { classSessionListSchema } from "@/lib/schedule";
 import {
-  fetchSavedClassSessions,
-  removeSavedClassSession,
-  saveClassSession,
-} from "@/lib/saved-class-sessions-client";
+  cancelClassReservation,
+  fetchRegistrations,
+  reserveClassSession,
+} from "@/lib/registrations-client";
 import { getTimeZoneDisplayName } from "@/lib/time-zone";
 import { useViewerTimeZone } from "@/lib/use-viewer-time-zone";
 
@@ -50,7 +50,7 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
     timeZoneName: "short",
   }), [timeZone]);
   const [sessions, setSessions] = useState<ClassSession[]>([]);
-  const [savedSessionIds, setSavedSessionIds] = useState<Set<string>>(new Set());
+  const [reservedSessionIds, setReservedSessionIds] = useState<Set<string>>(new Set());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -89,7 +89,7 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
         }
 
         const matchingSessions = publicSchedule.data.sessions.filter(
-          (session) => session.title === classItem.title,
+          (session) => session.classKey === classItem.key,
         );
         setSessions(matchingSessions);
         setSelectedDate((currentDate) => {
@@ -102,15 +102,15 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
         });
 
         if (isSignedIn) {
-          const selections = await fetchSavedClassSessions(range.from, range.to, controller.signal);
-          setSavedSessionIds(new Set(selections.map((selection) => selection.session.id)));
+          const registrations = await fetchRegistrations(range.from, range.to, controller.signal);
+          setReservedSessionIds(new Set(registrations.map((item) => item.session.id)));
         } else {
-          setSavedSessionIds(new Set());
+          setReservedSessionIds(new Set());
         }
       } catch (caughtError) {
         if (controller.signal.aborted) return;
         setSessions([]);
-        setSavedSessionIds(new Set());
+        setReservedSessionIds(new Set());
         setSelectedDate(null);
         setError(caughtError instanceof Error ? caughtError.message : "Class times could not be loaded.");
       } finally {
@@ -120,7 +120,7 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
 
     void loadMonth();
     return () => controller.abort();
-  }, [classItem.title, isSignedIn, range.from, range.to, timeZone]);
+  }, [classItem.key, classItem.title, isSignedIn, range.from, range.to, timeZone]);
 
   const sessionsByDate = useMemo(() => {
     const grouped = new Map<string, ClassSession[]>();
@@ -135,24 +135,24 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
   const selectedSessions = selectedDate ? sessionsByDate.get(selectedDate) ?? [] : [];
   const calendarDays = getCalendarDays(month);
 
-  async function toggleSavedSession(session: ClassSession) {
+  async function toggleReservation(session: ClassSession) {
     if (!isSignedIn || pendingSessionId) return;
 
-    const isSaved = savedSessionIds.has(session.id);
+    const isReserved = reservedSessionIds.has(session.id);
     setPendingSessionId(session.id);
     setError(null);
 
     try {
-      if (isSaved) {
-        await removeSavedClassSession(session.id);
-        setSavedSessionIds((current) => {
+      if (isReserved) {
+        await cancelClassReservation(session.id);
+        setReservedSessionIds((current) => {
           const next = new Set(current);
           next.delete(session.id);
           return next;
         });
       } else {
-        await saveClassSession(session.id);
-        setSavedSessionIds((current) => new Set(current).add(session.id));
+        await reserveClassSession(session.id);
+        setReservedSessionIds((current) => new Set(current).add(session.id));
       }
 
       window.dispatchEvent(new CustomEvent("personal-schedule-changed"));
@@ -236,7 +236,7 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
             </strong>
             <div className="class-session-time-list">
               {selectedSessions.map((session) => {
-                const isSaved = savedSessionIds.has(session.id);
+                const isSaved = reservedSessionIds.has(session.id);
                 const isPending = pendingSessionId === session.id;
                 const action = (
                   <button
@@ -244,10 +244,10 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
                     data-saved={isSaved}
                     disabled={isPending || !isLoaded}
                     type="button"
-                    onClick={() => void toggleSavedSession(session)}
+                    onClick={() => void toggleReservation(session)}
                   >
                     {isSaved ? <Check aria-hidden="true" /> : <Plus aria-hidden="true" />}
-                    {isPending ? "Updating..." : isSaved ? "Saved" : "Add class"}
+                    {isPending ? "Updating..." : isSaved ? "Reserved" : "Reserve"}
                   </button>
                 );
 
@@ -265,7 +265,7 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
                       <SignInButton mode="modal">
                         <button className="class-session-save" type="button">
                           <Plus aria-hidden="true" />
-                          Sign in to save
+                          Sign in to reserve
                         </button>
                       </SignInButton>
                     )}

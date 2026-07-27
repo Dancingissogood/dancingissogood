@@ -9,13 +9,13 @@ export type QuickFact = {
 };
 
 export type ClassMenuItem = {
+  key: string;
   title: string;
-  duration: string;
   description: string;
   details: string;
   category: string;
   level: string;
-  highlights: [string, string, string];
+  highlights: string[];
   image: string;
   imageAlt: string;
 };
@@ -61,129 +61,225 @@ export const navigationItems: NavigationItem[] = [
 
 export const quickFacts: QuickFact[] = [
   { label: "Days", value: "Mon-Wed" },
-  { label: "Class Length", value: "20 min" },
-  { label: "Daily Hours", value: "9 AM-2 PM ET" },
+  { label: "Hours", value: "9 AM-2 PM ET" },
+  { label: "Format", value: "Unlimited classes" },
   { label: "3-Day Pass", value: "$100" },
 ];
 
 export const classMenuItems: ClassMenuItem[] = [
   {
-    title: "Foam Rolling & Dancer's Stretches",
-    duration: "20 min",
-    description: "Roll out, open up, and leave feeling ready to dance.",
-    details:
-      "Target the calves, hips, back, and shoulders with guided foam rolling and dancer-focused stretching. A practical reset before class or a restorative finish to the day.",
-    category: "Mobility & recovery",
-    level: "All levels",
-    highlights: ["Lower-body release", "Active flexibility", "Recovery technique"],
-    image: "/assets/classes/foam-rolling-stretches.jpg",
-    imageAlt: "Dancer using a foam roller and stretching in a studio",
-  },
-  {
-    title: "Argentine Tango Proficiency",
-    duration: "20 min",
-    description: "Grounded walks, close connection, and unmistakable Tango character.",
-    details:
-      "Settle into the walk, refine your posture, and find a clearer connection with your partner. Musical phrasing gives every step somewhere to go.",
-    category: "Partner dance",
-    level: "All levels",
-    highlights: ["Tango walk", "Partner connection", "Musical phrasing"],
-    image: "/assets/classes/argentine-tango.jpg",
-    imageAlt: "Adult dancers practicing Argentine Tango technique",
-  },
-  {
-    title: "Waltz Rise & Fall",
-    duration: "20 min",
-    description: "Stronger feet, smoother flight, and effortless-looking elevation.",
-    details:
-      "Feel rise and fall from the floor up. Foot pressure, knees, and body flight come together for a Waltz that moves with ease.",
-    category: "Ballroom technique",
-    level: "All levels",
-    highlights: ["Foot pressure", "Body flight", "Controlled lowering"],
-    image: "/assets/classes/waltz-rise-fall.jpg",
-    imageAlt: "Ballroom dancers practicing waltz rise and fall",
-  },
-  {
+    key: "cuban-motion",
     title: "Cuban Motion",
-    duration: "20 min",
-    description: "Find the grounded rhythm that brings Latin dancing to life.",
+    description: "Grounded movement for Rumba, Cha Cha, and Salsa.",
     details:
-      "Cuban Motion starts with the floor. Build clear weight changes, natural hip action, and coordinated movement you can carry into every Latin dance.",
-    category: "Latin technique",
+      "Build expressive Cuban Motion from the floor up through forward and back walks, quarter-beat analysis, weight transfer, and arm coordination.",
+    category: "Latin Rhythms",
     level: "All levels",
-    highlights: ["Weight transfer", "Hip action", "Body coordination"],
+    highlights: ["Rumba, Cha Cha & Salsa", "Forward & back walks", "Quarter-beat analysis", "Arm coordination"],
     image: "/assets/classes/cuban-motion.jpg",
     imageAlt: "Dance students learning Cuban motion in a studio",
   },
   {
+    key: "samba",
+    title: "Samba",
+    description: "Rhythm, body action, and buoyant footwork.",
+    details:
+      "Explore Samba rhythm through focused foot and body work, with elements drawn from both American and International styles.",
+    category: "Latin Rhythms",
+    level: "All levels",
+    highlights: ["Rhythm", "Foot & body work", "American & International elements"],
+    image: "/assets/classes/samba-beats.jpg",
+    imageAlt: "Dance students practicing Samba rhythm and footwork",
+  },
+  {
+    key: "bolero",
+    title: "Bolero",
+    description: "Sustained movement with softness, control, and connection.",
+    details:
+      "Develop Bolero's basic movement, rise and fall, contra body movement, and contra body movement position.",
+    category: "Latin Rhythms",
+    level: "All levels",
+    highlights: ["Basic movement", "Rise & fall", "Contra body movement", "Partner position"],
+    image: "/assets/classes/bolero.webp",
+    imageAlt: "Adult partners practicing a graceful Bolero line",
+  },
+  {
+    key: "crossovers-fifths",
+    title: "Just Crossovers & Fifths",
+    description: "A focused study of two versatile Latin patterns.",
+    details:
+      "Refine direction, timing, and body action through concentrated work on Crossovers and Fifth Position Breaks.",
+    category: "Latin Rhythms",
+    level: "All levels",
+    highlights: ["Crossovers", "Fifth Position Breaks", "Direction & timing"],
+    image: "/assets/classes/crossovers-fifths.webp",
+    imageAlt: "Partners practicing Latin crossover patterns in a bright studio",
+  },
+  {
+    key: "latin-arms",
     title: "Latin Arms",
-    duration: "20 min",
     description: "Expressive lines that belong to the whole body.",
     details:
-      "Shape confident arm pathways, hands, and transitions without losing timing or balance. Styling becomes part of the movement, not something added afterward.",
-    category: "Styling",
+      "Shape confident arm pathways, hands, and transitions without losing timing or balance. Styling becomes part of the movement, not an afterthought.",
+    category: "Latin Rhythms",
     level: "All levels",
     highlights: ["Arm pathways", "Hand shaping", "Movement transitions"],
     image: "/assets/classes/latin-arms.jpg",
     imageAlt: "Dancers practicing Latin arm styling and lines",
   },
   {
-    title: "Samba Beats",
-    duration: "20 min",
-    description: "Catch the pulse, settle into the bounce, and let the rhythm lead.",
+    key: "swing-fundamentals",
+    title: "East & West Coast Swing Fundamentals",
+    description: "Clear rhythm, grounded direction, and easy partner movement.",
     details:
-      "Explore Samba's unmistakable energy through bounce action, compact footwork, and musical timing. We build the rhythm first, then let the movement grow.",
-    category: "Rhythm training",
-    level: "All levels",
-    highlights: ["Samba pulse", "Bounce action", "Rhythmic footwork"],
-    image: "/assets/classes/samba-beats.jpg",
-    imageAlt: "Dance students practicing Samba rhythm and footwork",
+      "Find the essential differences between East Coast and West Coast Swing through rhythm, body swing, foot direction, and foot action.",
+    category: "Swing Rhythms",
+    level: "Beginner friendly",
+    highlights: ["East & West Coast Swing", "Body swing", "Foot direction & action"],
+    image: "/assets/classes/swing-fundamentals.webp",
+    imageAlt: "Adult partners practicing swing dance fundamentals",
   },
   {
+    key: "hustle-fundamentals",
+    title: "Hustle Fundamentals",
+    description: "Dynamic shapes, syncopation, and social-floor confidence.",
+    details:
+      "Move through closed syncopation, forward progression, pivots, and the geometric patterns that give Hustle its momentum.",
+    category: "Swing Rhythms",
+    level: "Beginner friendly",
+    highlights: ["Closed syncopation", "Square, triangle & diamond", "Pivot action", "Forward progression"],
+    image: "/assets/classes/hustle-fundamentals.jpg",
+    imageAlt: "Social dancers practicing Hustle partner turns",
+  },
+  {
+    key: "nightclub-elements",
+    title: "Nightclub Elements",
+    description: "Smooth, intimate movement shaped by rise and fall.",
+    details:
+      "Explore pivots, slip actions, tombé, and rise and fall as expressive elements for Nightclub dance.",
+    category: "Swing Rhythms",
+    level: "All levels",
+    highlights: ["Pivots", "Slip actions", "Tombé", "Rise & fall"],
+    image: "/assets/classes/nightclub-elements.webp",
+    imageAlt: "Partners practicing smooth Nightclub dance in an intimate studio",
+  },
+  {
+    key: "argentine-tango",
+    title: "Argentine Tango",
+    description: "Grounded walks, close connection, and precise improvisation.",
+    details:
+      "Develop forward and back ochos, left and right molinetes, the chair, and sacada hook-and-release actions.",
+    category: "Smooth Rhythms",
+    level: "All levels",
+    highlights: ["Forward & back ochos", "Left & right molinetes", "The chair", "Sacada hook & release"],
+    image: "/assets/classes/argentine-tango.jpg",
+    imageAlt: "Adult dancers practicing Argentine Tango technique",
+  },
+  {
+    key: "waltz",
+    title: "Waltz",
+    description: "Lift, flight, and balance through every measure.",
+    details:
+      "Connect rise and fall with foot and body placement, then carry it through open box, straight box, and traveling movement.",
+    category: "Smooth Rhythms",
+    level: "All levels",
+    highlights: ["Rise & fall", "Foot & body placement", "Open box", "Straight box"],
+    image: "/assets/classes/waltz-rise-fall.jpg",
+    imageAlt: "Ballroom dancers practicing Waltz rise and fall",
+  },
+  {
+    key: "tango",
+    title: "Tango",
+    description: "Crisp rhythm and grounded direction with unmistakable character.",
+    details:
+      "Study Tango rhythms, curved walks, promenade, and backward heel walks with clarity and intention.",
+    category: "Smooth Rhythms",
+    level: "All levels",
+    highlights: ["Tango rhythms", "Curved walk", "Promenade", "Back walks"],
+    image: "/assets/classes/ballroom-tango.webp",
+    imageAlt: "Ballroom partners practicing a precise Tango promenade",
+  },
+  {
+    key: "viennese-waltz",
+    title: "Viennese Waltz",
+    description: "Continuous rotation with calm control and musical sweep.",
+    details:
+      "Work through directional timing, line-of-dance alignments, and left and right fleckerls with a checked action.",
+    category: "Smooth Rhythms",
+    level: "Intermediate",
+    highlights: ["Directional timing", "Line-of-dance alignment", "Left & right fleckerls"],
+    image: "/assets/classes/viennese-waltz.webp",
+    imageAlt: "Adult partners practicing Viennese Waltz rotation",
+  },
+  {
+    key: "quickstep",
+    title: "Quickstep",
+    description: "Light, rhythmic movement with energy to spare.",
+    details:
+      "Build the basic step, footwork, and body positioning before adding gallops, hops, skips, and jumping-jack actions.",
+    category: "Smooth Rhythms",
+    level: "All levels",
+    highlights: ["Basic step", "Footwork & positioning", "Galloping, hopping & skipping"],
+    image: "/assets/classes/quickstep.webp",
+    imageAlt: "Partners moving through an energetic Quickstep",
+  },
+  {
+    key: "foxtrot",
+    title: "Foxtrot",
+    description: "Unhurried travel, generous sway, and seamless partnership.",
+    details:
+      "Explore Foxtrot rhythms, forward body sway, backward and feather footwork, contra body movement, and partner position.",
+    category: "Smooth Rhythms",
+    level: "All levels",
+    highlights: ["Rhythms", "Forward body sway", "Feather footwork", "Contra body movement"],
+    image: "/assets/classes/foxtrot.webp",
+    imageAlt: "Mature ballroom partners practicing a smooth Foxtrot line",
+  },
+  {
+    key: "foam-rolling-stretches",
+    title: "Foam Rolling & Dancer's Stretches",
+    description: "Release, restore, and move with greater ease.",
+    details:
+      "Target the calves, hips, back, and shoulders with guided foam rolling and dancer-focused stretching before or after class.",
+    category: "Movement & Recovery",
+    level: "All levels",
+    highlights: ["Lower-body release", "Active flexibility", "Recovery technique"],
+    image: "/assets/classes/foam-rolling-stretches.jpg",
+    imageAlt: "Dancer using a foam roller and stretching in a studio",
+  },
+  {
+    key: "latin-smooth-rhythms",
     title: "Latin & Smooth Rhythms",
-    duration: "20 min",
     description: "Hear the difference. Move with confidence.",
     details:
-      "Shift between Latin drive and Smooth flow with timing drills that sharpen your ear and your feet. A musicality workout for every style.",
-    category: "Musicality",
+      "Shift between Latin drive and Smooth flow with timing drills that sharpen your ear and your feet.",
+    category: "Movement & Recovery",
     level: "All levels",
     highlights: ["Beat recognition", "Timing changes", "Cross-style drills"],
     image: "/assets/classes/latin-smooth-rhythms.jpg",
     imageAlt: "Students practicing rhythm training and dance footwork",
   },
   {
-    title: "Hustle Fundamentals",
-    duration: "20 min",
-    description: "Easy timing, clear turns, and instant social-floor confidence.",
-    details:
-      "Build the timing, lead-and-follow connection, and foundational turns that make Hustle feel natural. Practical, upbeat, and ready for the social floor.",
-    category: "Social dance",
-    level: "Beginner friendly",
-    highlights: ["Core timing", "Lead and follow", "Foundational turns"],
-    image: "/assets/classes/hustle-fundamentals.jpg",
-    imageAlt: "Social dancers practicing Hustle partner turns",
-  },
-  {
+    key: "adult-barre",
     title: "Adult Barre",
-    duration: "20 min",
     description: "Classic barre work for strength, posture, and balance.",
     details:
       "Strengthen the legs, organize posture, and find steadier balance through accessible ballet barre exercises. Every movement can meet you at your level.",
-    category: "Strength & alignment",
+    category: "Movement & Recovery",
     level: "All levels",
     highlights: ["Postural alignment", "Leg strength", "Balance control"],
     image: "/assets/classes/adult-barre.jpg",
     imageAlt: "Adult students practicing ballet barre alignment",
   },
   {
-    title: "Juggling Introduction",
-    duration: "20 min",
+    key: "juggling",
+    title: "Juggling",
     description: "A playful reset for rhythm, focus, and coordination.",
     details:
       "Start with simple tosses and build a repeatable pattern at your own pace. It is lighthearted cross-training for timing, visual focus, and relaxed concentration.",
-    category: "Coordination",
+    category: "Movement & Recovery",
     level: "No experience needed",
-    highlights: ["Basic tosses", "Visual tracking", "Rhythmic coordination"],
+    highlights: ["Two-in-one", "The two cross", "Three on the wall", "Waltz, Foxtrot, Tango & Viennese Waltz"],
     image: "/assets/classes/juggling-introduction.jpg",
     imageAlt: "Adult students practicing juggling for coordination",
   },

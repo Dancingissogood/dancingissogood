@@ -97,9 +97,9 @@ export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
       data-scrolled={isScrolled}
       aria-label="Primary navigation"
     >
-      <Link className="brand" href="/" aria-label="Dancing Is So Good home">
-        <span className="brand-mark">DG</span>
-        <span>Dancing Is So Good</span>
+      <Link className="brand" href="/" aria-label="Summer in the Mitten Movement Series home">
+        <span className="brand-mark">SM</span>
+        <span>Summer in the Mitten</span>
       </Link>
       <nav className="nav-links" aria-label="Main menu">
         {navigationItems.map((item) => (
@@ -116,7 +116,7 @@ export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
                 Sign In
               </button>
             </SignInButton>
-            <SignUpButton mode="modal">
+            <SignUpButton forceRedirectUrl="/welcome" mode="modal">
               <button className="account-cta" type="button">
                 Create Account
               </button>
@@ -166,8 +166,8 @@ export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
       >
         <div className="mobile-nav-heading">
           <Link className="brand" href="/" onClick={closeMobileMenu}>
-            <span className="brand-mark">DG</span>
-            <span>Dancing Is So Good</span>
+            <span className="brand-mark">SM</span>
+            <span>Summer in the Mitten</span>
           </Link>
           <button
             aria-label="Close menu"
@@ -199,7 +199,7 @@ export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
                   Sign In
                 </button>
               </SignInButton>
-              <SignUpButton mode="modal">
+              <SignUpButton forceRedirectUrl="/welcome" mode="modal">
                 <button className="button mobile-nav-create-account" type="button" onClick={closeMobileMenu}>
                   Create Account
                 </button>

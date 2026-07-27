@@ -84,7 +84,7 @@ export function CalendarEventPopover({
       onClick={onToggleSaved}
     >
       {isSaved ? <Check aria-hidden="true" /> : <Plus aria-hidden="true" />}
-      {isPending ? "Updating..." : isSaved ? "Saved to my schedule" : "Add to my schedule"}
+      {isPending ? "Updating..." : isSaved ? "Reserved" : "Reserve class"}
     </button>
   );
 
@@ -159,7 +159,7 @@ export function CalendarEventPopover({
             <SignInButton mode="modal">
               <button className="calendar-event-popover-action" type="button">
                 <Plus aria-hidden="true" />
-                Sign in to add class
+                Sign in to reserve
               </button>
             </SignInButton>
           )}

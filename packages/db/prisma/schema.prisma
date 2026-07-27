@@ -36,6 +36,17 @@ enum UserRole {
   ADMIN
 }
 
+enum MarketingConsentStatus {
+  SUBSCRIBED
+  UNSUBSCRIBED
+}
+
+enum MarketingConsentSource {
+  ONBOARDING
+  CHECKOUT
+  ACCOUNT_SETTINGS
+}
+
 model UserProfile {
   id               String   @id @default(cuid())
   clerkUserId      String   @unique
@@ -50,9 +61,10 @@ model UserProfile {
 
   purchases            PassPurchase[]
   registrations        ClassRegistration[]
-  savedClassSessions   SavedClassSession[]
   createdClassSessions ClassSession[]      @relation("ClassSessionCreatedBy")
   updatedClassSessions ClassSession[]      @relation("ClassSessionUpdatedBy")
+  marketingPreference  MarketingPreference?
+  adminDashboardState  AdminDashboardState?
 
   @@index([email])
 }
@@ -109,6 +121,7 @@ model PassPurchase {
 
 model ClassSession {
   id             String   @id @default(cuid())
+  classKey       String
   title          String
   description    String?
   instructorName String?
@@ -123,28 +136,14 @@ model ClassSession {
   updatedAt      DateTime @updatedAt
 
   registrations ClassRegistration[]
-  savedBy       SavedClassSession[]
   createdBy     UserProfile?        @relation("ClassSessionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   updatedBy     UserProfile?        @relation("ClassSessionUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
 
+  @@index([classKey])
   @@index([startsAt])
   @@index([published, startsAt])
   @@index([createdById])
   @@index([updatedById])
-}
-
-model SavedClassSession {
-  id             String   @id @default(cuid())
-  userId         String
-  classSessionId String
-  createdAt      DateTime @default(now())
-
-  user         UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
-  classSession ClassSession @relation(fields: [classSessionId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, classSessionId])
-  @@index([userId, createdAt])
-  @@index([classSessionId])
 }
 
 model ClassRegistration {
@@ -153,6 +152,7 @@ model ClassRegistration {
   classSessionId String
   passPurchaseId String?
   status         RegistrationStatus @default(RESERVED)
+  canceledAt     DateTime?
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
 
@@ -163,6 +163,47 @@ model ClassRegistration {
   @@unique([userId, classSessionId])
   @@index([classSessionId, status])
   @@index([passPurchaseId])
+}
+
+model AdminDashboardState {
+  userId                   String   @id
+  lastViewedReservationsAt DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  user UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model MarketingPreference {
+  id               String                 @id @default(cuid())
+  userId           String?                @unique
+  email            String                 @unique
+  status           MarketingConsentStatus
+  source           MarketingConsentSource
+  statementVersion String
+  subscribedAt     DateTime?
+  unsubscribedAt   DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  user   UserProfile?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  events MarketingConsentEvent[]
+
+  @@index([status, updatedAt])
+}
+
+model MarketingConsentEvent {
+  id               String                 @id @default(cuid())
+  preferenceId     String
+  email            String
+  status           MarketingConsentStatus
+  source           MarketingConsentSource
+  statementVersion String
+  occurredAt       DateTime               @default(now())
+
+  preference MarketingPreference @relation(fields: [preferenceId], references: [id], onDelete: Cascade)
+
+  @@index([email, occurredAt])
+  @@index([status, occurredAt])
 }
 
 model PaymentEvent {

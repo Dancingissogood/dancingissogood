@@ -27,6 +27,7 @@ const SESSION_MINUTES = 20;
 
 type SessionDraft = {
   capacity: string;
+  classKey: string;
   date: string;
   description: string;
   instructorName: string;
@@ -40,6 +41,7 @@ const emptyDraft = (): SessionDraft => {
   const start = DateTime.now().setZone(STUDIO_TIME_ZONE).plus({ days: 1 }).startOf("day").set({ hour: 9 });
   return {
     capacity: "",
+    classKey: "",
     date: start.toFormat("yyyy-MM-dd"),
     description: "",
     instructorName: "",
@@ -135,6 +137,7 @@ export function AdminScheduleEditor() {
     const startsAt = DateTime.fromISO(session.startsAt).setZone(STUDIO_TIME_ZONE);
     setDraft({
       capacity: session.capacity?.toString() ?? "",
+      classKey: session.classKey,
       date: startsAt.toFormat("yyyy-MM-dd"),
       description: session.description ?? "",
       instructorName: session.instructorName ?? "",
@@ -149,8 +152,8 @@ export function AdminScheduleEditor() {
     dialogRef.current?.showModal();
   }
 
-  function selectClass(title: string) {
-    const selectedClass = classMenuItems.find((classItem) => classItem.title === title);
+  function selectClass(classKey: string) {
+    const selectedClass = classMenuItems.find((classItem) => classItem.key === classKey);
 
     if (!selectedClass) {
       return;
@@ -158,6 +161,7 @@ export function AdminScheduleEditor() {
 
     setDraft({
       ...draft,
+      classKey: selectedClass.key,
       description: selectedClass.description,
       title: selectedClass.title,
     });
@@ -206,6 +210,7 @@ export function AdminScheduleEditor() {
 
     const body = {
       capacity: draft.capacity ? Number(draft.capacity) : null,
+      classKey: draft.classKey,
       description: draft.description.trim() || null,
       endsAt: startsAt.plus({ minutes: SESSION_MINUTES }).toUTC().toISO(),
       instructorName: draft.instructorName.trim() || null,
@@ -356,10 +361,10 @@ export function AdminScheduleEditor() {
 
           <label className="field field-wide">
             <span>Class name</span>
-            <select required value={draft.title} onChange={(event) => selectClass(event.target.value)}>
+            <select required value={draft.classKey} onChange={(event) => selectClass(event.target.value)}>
               <option disabled value="">Select a class</option>
               {classMenuItems.map((classItem) => (
-                <option key={classItem.title} value={classItem.title}>
+                <option key={classItem.key} value={classItem.key}>
                   {classItem.title}
                 </option>
               ))}

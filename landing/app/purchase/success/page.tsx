@@ -8,7 +8,7 @@ export default function PurchaseSuccessPage() {
     <main className="checkout-result">
       <div>
         <p className="eyebrow">You&apos;re in</p>
-        <h1>Welcome to Dancing Is So Good.</h1>
+        <h1>Welcome to the Movement Series.</h1>
         <Suspense fallback={<p>Confirming payment...</p>}>
           <CheckoutStatus />
         </Suspense>

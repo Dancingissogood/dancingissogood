@@ -6,7 +6,7 @@ import { studioProfiles } from "@/content/site";
 export const metadata: Metadata = {
   title: "Partner Studios",
   description:
-    "Dancing Is So Good partner studios, including Belleville Lake Dance Company and Rhizome Roots Studio.",
+    "Movement Series partner studios, including Belleville Lake Dance Company and Rhizome Roots Studio.",
 };
 
 export default function StudiosPage() {
@@ -16,8 +16,8 @@ export default function StudiosPage() {
         <p className="eyebrow">Where we dance</p>
         <h1>Two studios. One dance community.</h1>
         <p>
-          Dancing Is So Good brings together Belleville Lake Dance Company and Rhizome
-          Roots Studio - two spaces built around movement, connection, and community.
+          Summer in the Mitten brings together Belleville Lake Dance Company and Rhizome
+          Roots Studio, two spaces rooted in movement, connection, and community.
         </p>
       </section>
 

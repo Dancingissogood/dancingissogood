@@ -2,6 +2,7 @@ import type { DatabaseClient } from "@dancingissogood/db";
 import type Stripe from "stripe";
 
 import { config } from "./config.js";
+import { recordMarketingPreference } from "./marketing.js";
 
 type CheckoutDependencies = {
   database: DatabaseClient;
@@ -66,6 +67,7 @@ export async function createPassCheckoutSession(
       cancel_url: `${config.landingUrl}/#pass`,
       client_reference_id: purchase.id,
       ...customerParameters,
+      consent_collection: { promotions: "auto" },
       line_items: [{ price: stripePrice.id, quantity: 1 }],
       metadata: {
         passProductId: passProduct.id,
@@ -136,6 +138,25 @@ export async function processStripeEvent(
             await transaction.passPurchase.updateMany({
               data: { status: "CANCELED" },
               where: { id: purchaseId, status: "PENDING" },
+            });
+          }
+
+          const purchaserEmail = session.customer_details?.email ?? session.customer_email;
+          if (
+            purchaserEmail &&
+            (session.consent?.promotions === "opt_in" ||
+              session.consent?.promotions === "opt_out")
+          ) {
+            const purchase = await transaction.passPurchase.findUnique({
+              select: { userId: true },
+              where: { id: purchaseId },
+            });
+            await recordMarketingPreference(transaction, {
+              email: purchaserEmail,
+              source: "CHECKOUT",
+              status:
+                session.consent.promotions === "opt_in" ? "SUBSCRIBED" : "UNSUBSCRIBED",
+              userId: purchase?.userId,
             });
           }
         }

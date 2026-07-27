@@ -8,7 +8,7 @@ import { instructorProfiles } from "@/content/site";
 export const metadata: Metadata = {
   title: "Instructors",
   description:
-    "Meet the dance, rhythm, mobility, and recovery instructors at Dancing Is So Good.",
+    "Meet the dance, rhythm, mobility, and recovery instructors of Summer in the Mitten.",
 };
 
 export default function InstructorsPage() {

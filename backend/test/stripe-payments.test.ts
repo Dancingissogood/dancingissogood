@@ -114,6 +114,9 @@ test("checkout derives the amount from the server-owned Stripe price", async () 
     assert.deepEqual(stripeMock.getCheckoutParameters()?.line_items, [
       { price: product.stripePriceId, quantity: 1 },
     ]);
+    assert.deepEqual(stripeMock.getCheckoutParameters()?.consent_collection, {
+      promotions: "auto",
+    });
     assert.equal("payment_method_types" in (stripeMock.getCheckoutParameters() ?? {}), false);
 
     const purchase = await database.passPurchase.findFirstOrThrow({
@@ -190,6 +193,7 @@ test("Stripe webhook verifies its signature and processes a payment event once",
     created: 1_783_705_600,
     data: {
       object: {
+        consent: { promotions: "opt_in" },
         customer: "cus_test_customer",
         customer_details: { email: "guest@example.com" },
         id: sessionId,
@@ -245,7 +249,14 @@ test("Stripe webhook verifies its signature and processes a payment event once",
 
     const eventCount = await database.paymentEvent.count({ where: { stripeEventId: eventId } });
     assert.equal(eventCount, 1);
+    const marketingPreference = await database.marketingPreference.findUniqueOrThrow({
+      where: { email: "guest@example.com" },
+    });
+    assert.equal(marketingPreference.status, "SUBSCRIBED");
+    assert.equal(marketingPreference.source, "CHECKOUT");
   } finally {
+    await database.marketingConsentEvent.deleteMany({ where: { email: "guest@example.com" } });
+    await database.marketingPreference.deleteMany({ where: { email: "guest@example.com" } });
     await database.paymentEvent.deleteMany({ where: { stripeEventId: eventId } });
     await database.passPurchase.delete({ where: { id: purchase.id } });
     await database.passProduct.delete({ where: { id: product.id } });

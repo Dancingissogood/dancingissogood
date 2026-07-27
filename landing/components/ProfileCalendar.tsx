@@ -12,11 +12,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CalendarEventContent } from "@/components/CalendarEventContent";
 import { classMenuItems } from "@/content/site";
-import type { SavedClassSession } from "@/lib/saved-class-sessions";
+import type { ClassRegistration } from "@/lib/registrations";
 import {
-  fetchSavedClassSessions,
-  removeSavedClassSession,
-} from "@/lib/saved-class-sessions-client";
+  cancelClassReservation,
+  fetchRegistrations,
+} from "@/lib/registrations-client";
 import { getStudioHoursInTimeZone, getTimeZoneDisplayName } from "@/lib/time-zone";
 import { useMediaQuery } from "@/lib/use-media-query";
 import { useViewerTimeZone } from "@/lib/use-viewer-time-zone";
@@ -44,8 +44,8 @@ export function ProfileCalendar() {
     year: "numeric",
   }), [timeZone]);
   const calendarRef = useRef<FullCalendar>(null);
-  const [visibleSelections, setVisibleSelections] = useState<SavedClassSession[]>([]);
-  const [selected, setSelected] = useState<SavedClassSession | null>(null);
+  const [visibleRegistrations, setVisibleRegistrations] = useState<ClassRegistration[]>([]);
+  const [selected, setSelected] = useState<ClassRegistration | null>(null);
   const [isRemoving, setIsRemoving] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,9 +58,9 @@ export function ProfileCalendar() {
     ) => {
       try {
         setError(null);
-        const selections = await fetchSavedClassSessions(range.startStr, range.endStr);
+        const selections = await fetchRegistrations(range.startStr, range.endStr);
         setHasLoaded(true);
-        setVisibleSelections(selections);
+        setVisibleRegistrations(selections);
         setSelected((current) => {
           if (!current) return null;
           return selections.find((selection) => selection.id === current.id) ?? null;
@@ -78,8 +78,8 @@ export function ProfileCalendar() {
       } catch (caughtError) {
         const loadError = caughtError instanceof Error
           ? caughtError
-          : new Error("Your saved classes could not be loaded.");
-        setVisibleSelections([]);
+          : new Error("Your reservations could not be loaded.");
+        setVisibleRegistrations([]);
         setHasLoaded(true);
         setError(loadError.message);
         failure(loadError);
@@ -105,7 +105,7 @@ export function ProfileCalendar() {
 
   function selectEvent(eventInfo: EventClickArg) {
     const selection = eventInfo.event.extendedProps["selection"];
-    if (isSavedClassSession(selection)) setSelected(selection);
+    if (isClassRegistration(selection)) setSelected(selection);
   }
 
   const handleDatesSet = useCallback((dateInfo: DatesSetArg) => {
@@ -128,7 +128,7 @@ export function ProfileCalendar() {
     setError(null);
 
     try {
-      await removeSavedClassSession(selected.session.id);
+      await cancelClassReservation(selected.session.id);
       setSelected(null);
       calendarRef.current?.getApi().refetchEvents();
     } catch (caughtError) {
@@ -139,7 +139,7 @@ export function ProfileCalendar() {
   }
 
   const selectedClassItem = selected
-    ? classMenuItems.find((item) => item.title === selected.session.title)
+    ? classMenuItems.find((item) => item.key === selected.session.classKey)
     : undefined;
 
   return (
@@ -148,10 +148,10 @@ export function ProfileCalendar() {
         <div>
           <h2 id="my-schedule-title">My schedule</h2>
           <p>
-            Times in {timeZoneName}. Saved classes are plans, not reservations.
+            Your reserved classes in {timeZoneName}.
           </p>
         </div>
-        <span>{visibleSelections.length}</span>
+        <span>{visibleRegistrations.length}</span>
       </div>
 
       <div className="public-calendar-shell profile-calendar-shell">
@@ -183,12 +183,12 @@ export function ProfileCalendar() {
         />
       </div>
 
-      {hasLoaded && visibleSelections.length === 0 && !error ? (
+      {hasLoaded && visibleRegistrations.length === 0 && !error ? (
         <div className="profile-calendar-empty">
           <CalendarDays aria-hidden="true" />
           <div>
-            <h3>Nothing saved for these dates</h3>
-            <p>Find a class that feels right and add it here.</p>
+            <h3>No reservations for these dates</h3>
+            <p>Choose a class from the movement menu or current schedule.</p>
           </div>
           <Link className="button button-secondary" href="/#menu">Explore Classes</Link>
         </div>
@@ -202,14 +202,14 @@ export function ProfileCalendar() {
             </div>
           ) : null}
           <div className="profile-selection-copy">
-            <span>{selected.session.published ? "Saved class" : "No longer published"}</span>
+            <span>{selected.session.published ? "Reserved class" : "No longer published"}</span>
             <h3>{selected.session.title}</h3>
             <p><Clock3 aria-hidden="true" />{dateTimeFormatter.format(new Date(selected.session.startsAt))}</p>
             {selected.session.locationName ? <p><MapPin aria-hidden="true" />{selected.session.locationName}</p> : null}
           </div>
           <button className="profile-selection-remove" disabled={isRemoving} type="button" onClick={() => void removeSelected()}>
             <Trash2 aria-hidden="true" />
-            {isRemoving ? "Removing..." : "Remove"}
+            {isRemoving ? "Canceling..." : "Cancel reservation"}
           </button>
         </article>
       ) : null}
@@ -219,6 +219,6 @@ export function ProfileCalendar() {
   );
 }
 
-function isSavedClassSession(value: unknown): value is SavedClassSession {
+function isClassRegistration(value: unknown): value is ClassRegistration {
   return typeof value === "object" && value !== null && "id" in value && "session" in value;
 }

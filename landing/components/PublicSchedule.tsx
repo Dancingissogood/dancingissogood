@@ -25,10 +25,10 @@ import {
 } from "@/components/CalendarEventPopover";
 import { classMenuItems } from "@/content/site";
 import {
-  fetchSavedClassSessions,
-  removeSavedClassSession,
-  saveClassSession,
-} from "@/lib/saved-class-sessions-client";
+  cancelClassReservation,
+  fetchRegistrations,
+  reserveClassSession,
+} from "@/lib/registrations-client";
 import { classSessionListSchema } from "@/lib/schedule";
 import { getStudioHoursInTimeZone } from "@/lib/time-zone";
 import { useMediaQuery } from "@/lib/use-media-query";
@@ -66,10 +66,10 @@ export function PublicSchedule() {
   const calendarRef = useRef<FullCalendar>(null);
   const hideTimeoutRef = useRef<number | null>(null);
   const [eventDetails, setEventDetails] = useState<CalendarEventDetails | null>(null);
-  const [savedSessionIds, setSavedSessionIds] = useState<Set<string>>(new Set());
-  const [isSavedStateReady, setIsSavedStateReady] = useState(false);
+  const [reservedSessionIds, setReservedSessionIds] = useState<Set<string>>(new Set());
+  const [isReservationStateReady, setIsReservationStateReady] = useState(false);
   const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
-  const [savedStateError, setSavedStateError] = useState<string | null>(null);
+  const [reservationStateError, setReservationStateError] = useState<string | null>(null);
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isEmpty, setIsEmpty] = useState(false);
@@ -106,7 +106,7 @@ export function PublicSchedule() {
         top: rect.top,
       },
       classSessionId: event.id,
-      classItem: classMenuItems.find((item) => item.title === event.title),
+      classItem: classMenuItems.find((item) => item.key === event.extendedProps["classKey"]),
       instructorName: typeof instructorName === "string" && instructorName
         ? instructorName
         : undefined,
@@ -154,7 +154,7 @@ export function PublicSchedule() {
     eventInfo.el.tabIndex = 0;
     eventInfo.el.setAttribute(
       "aria-label",
-      `${eventInfo.event.title}. View details and add to your schedule.`,
+      `${eventInfo.event.title}. View details and reserve this class.`,
     );
     eventInfo.el.addEventListener("focus", showDetails);
     eventInfo.el.addEventListener("blur", scheduleHide);
@@ -209,8 +209,8 @@ export function PublicSchedule() {
     ) => {
       try {
         setError(null);
-        setSavedStateError(null);
-        setIsSavedStateReady(!isSignedIn);
+        setReservationStateError(null);
+        setIsReservationStateReady(!isSignedIn);
         const query = new URLSearchParams({ from: range.startStr, to: range.endStr });
         const response = await fetch(`/api/class-sessions?${query.toString()}`, {
           cache: "no-store",
@@ -227,6 +227,7 @@ export function PublicSchedule() {
           parsed.data.sessions.map((session) => ({
             end: session.endsAt,
             extendedProps: {
+              classKey: session.classKey,
               instructorName: session.instructorName,
               locationName: session.locationName,
             },
@@ -238,21 +239,21 @@ export function PublicSchedule() {
 
         if (isSignedIn) {
           try {
-            const selections = await fetchSavedClassSessions(range.startStr, range.endStr);
-            setSavedSessionIds(new Set(selections.map((selection) => selection.session.id)));
-            setIsSavedStateReady(true);
+            const registrations = await fetchRegistrations(range.startStr, range.endStr);
+            setReservedSessionIds(new Set(registrations.map((item) => item.session.id)));
+            setIsReservationStateReady(true);
           } catch (caughtError) {
-            setSavedSessionIds(new Set());
-            setIsSavedStateReady(false);
-            setSavedStateError(
+            setReservedSessionIds(new Set());
+            setIsReservationStateReady(false);
+            setReservationStateError(
               caughtError instanceof Error
                 ? caughtError.message
-                : "Your saved classes could not be loaded.",
+                : "Your reservations could not be loaded.",
             );
           }
         } else {
-          setSavedSessionIds(new Set());
-          setIsSavedStateReady(true);
+          setReservedSessionIds(new Set());
+          setIsReservationStateReady(true);
         }
       } catch (caughtError) {
         const loadError = caughtError instanceof Error
@@ -266,25 +267,25 @@ export function PublicSchedule() {
     [isSignedIn],
   );
 
-  async function toggleSavedSession() {
+  async function toggleReservation() {
     if (!eventDetails || !isSignedIn || pendingSessionId) return;
 
     const sessionId = eventDetails.classSessionId;
-    const isSaved = savedSessionIds.has(sessionId);
+    const isReserved = reservedSessionIds.has(sessionId);
     setPendingSessionId(sessionId);
     setMutationError(null);
 
     try {
-      if (isSaved) {
-        await removeSavedClassSession(sessionId);
-        setSavedSessionIds((current) => {
+      if (isReserved) {
+        await cancelClassReservation(sessionId);
+        setReservedSessionIds((current) => {
           const next = new Set(current);
           next.delete(sessionId);
           return next;
         });
       } else {
-        await saveClassSession(sessionId);
-        setSavedSessionIds((current) => new Set(current).add(sessionId));
+        await reserveClassSession(sessionId);
+        setReservedSessionIds((current) => new Set(current).add(sessionId));
       }
 
       window.dispatchEvent(new CustomEvent("personal-schedule-changed"));
@@ -333,16 +334,16 @@ export function PublicSchedule() {
         ? createPortal(
           <CalendarEventPopover
             details={eventDetails}
-            error={mutationError ?? savedStateError}
+            error={mutationError ?? reservationStateError}
             isAuthLoaded={isAuthLoaded}
             isPending={pendingSessionId === eventDetails.classSessionId}
-            isSaved={savedSessionIds.has(eventDetails.classSessionId)}
-            isSavedStateReady={isSavedStateReady}
+            isSaved={reservedSessionIds.has(eventDetails.classSessionId)}
+            isSavedStateReady={isReservationStateReady}
             isSignedIn={Boolean(isSignedIn)}
             onDismiss={hideEventDetails}
             onMouseEnter={cancelHide}
             onMouseLeave={scheduleHide}
-            onToggleSaved={() => void toggleSavedSession()}
+            onToggleSaved={() => void toggleReservation()}
           />,
           document.body,
         )

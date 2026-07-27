@@ -46,6 +46,7 @@ const nullableTextSchema = (maximumLength: number) =>
 const classSessionFieldsSchema = z
   .object({
     capacity: z.union([z.number().int().min(1).max(500), z.null()]),
+    classKey: z.string().trim().min(1).max(80).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
     description: nullableTextSchema(1_000),
     endsAt: dateTimeSchema,
     instructorName: nullableTextSchema(120),
@@ -129,6 +130,7 @@ function sendAuthorizationFailure(reply: FastifyReply, authorization: Authorizat
 
 function serializeClassSession(session: {
   capacity: number | null;
+  classKey: string;
   description: string | null;
   endsAt: Date;
   id: string;
@@ -154,6 +156,7 @@ async function listClassSessions(
     orderBy: [{ startsAt: "asc" }, { title: "asc" }],
     select: {
       capacity: true,
+      classKey: true,
       description: true,
       endsAt: true,
       id: true,

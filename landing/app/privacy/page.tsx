@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "How Love Productions LLC collects, uses, and protects information for Dancing Is So Good.",
+  description: "How Love Productions LLC collects, uses, and protects Movement Series information.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -12,9 +12,9 @@ export default function PrivacyPolicyPage() {
         <header className="legal-heading">
           <p className="eyebrow">Legal</p>
           <h1>Privacy Policy</h1>
-          <p className="legal-effective-date">Effective and last updated July 16, 2026</p>
+          <p className="legal-effective-date">Effective and last updated July 26, 2026</p>
           <p>
-            Love Productions LLC operates Dancing Is So Good. This Privacy Policy
+            Love Productions LLC operates Summer in the Mitten “Movement Series.” This Privacy Policy
             explains how we collect, use, disclose, and protect personal information
             when you use dancingissogood.com, create an account, purchase a pass,
             register for a class, or communicate with us.
@@ -40,6 +40,11 @@ export default function PrivacyPolicyPage() {
               <strong>Communications:</strong> your name, contact information, areas of
               interest, and anything else you include when requesting information or
               contacting us.
+            </li>
+            <li>
+              <strong>Marketing preferences:</strong> whether you choose to receive
+              program news, the email address associated with that choice, the source and
+              date of the choice, and the version of the consent language shown.
             </li>
           </ul>
 
@@ -70,6 +75,10 @@ export default function PrivacyPolicyPage() {
             <li>Connect guest purchases to an account using a verified email address.</li>
             <li>Display account details, passes, and schedules.</li>
             <li>Administer classes and communicate schedule or service changes.</li>
+            <li>
+              Send Movement Series news when you have opted in and maintain records of
+              subscriptions and unsubscribe requests.
+            </li>
             <li>Respond to questions, support requests, and requests for information.</li>
             <li>Detect fraud, abuse, security incidents, and technical failures.</li>
             <li>Comply with legal, tax, accounting, and contractual obligations.</li>
@@ -106,6 +115,11 @@ export default function PrivacyPolicyPage() {
               <strong>Infrastructure providers.</strong> Hosting, cloud computing,
               database, security, and operational providers process information to run
               and protect the site and services.
+            </li>
+            <li>
+              <strong>Email providers.</strong> If you opt in to program news, an email
+              delivery and audience-management provider may process your email address
+              and subscription status on our behalf.
             </li>
             <li>
               <strong>Studios and instructors.</strong> We may provide information needed
@@ -176,6 +190,11 @@ export default function PrivacyPolicyPage() {
             to or restrict certain processing; or to appeal our response to a request.
             You may also update certain account details through the account or identity
             provider interface.
+          </p>
+          <p>
+            You may change your marketing preference in your account at any time. An
+            unsubscribe request does not prevent transactional messages needed to
+            administer your account, payment, pass, reservation, or schedule.
           </p>
           <p>
             To submit a privacy request, email

@@ -175,3 +175,56 @@ test("account synchronization claims only paid guest purchases for the verified 
     await app.close();
   }
 });
+
+test("account marketing preferences are optional and retain consent history", async () => {
+  const database = createDatabaseClient();
+  const suffix = randomUUID();
+  const clerkUserId = `marketing_${suffix}`;
+  const email = `marketing-${suffix}@example.com`;
+  const app = await buildApp({
+    database,
+    identityProvider: {
+      configured: true,
+      authenticate: async () => ({
+        clerkUserId,
+        email,
+        firstName: "Test",
+        lastName: "Subscriber",
+        phone: null,
+      }),
+    },
+  });
+
+  try {
+    const initial = await app.inject({
+      headers: { authorization: "Bearer valid-session" },
+      method: "GET",
+      url: "/v1/account/marketing-preference",
+    });
+    assert.equal(initial.statusCode, 200);
+    assert.deepEqual(initial.json(), { subscribed: false });
+
+    for (const subscribed of [true, false]) {
+      const update = await app.inject({
+        headers: { authorization: "Bearer valid-session" },
+        method: "PUT",
+        payload: { subscribed },
+        url: "/v1/account/marketing-preference",
+      });
+      assert.equal(update.statusCode, 200);
+      assert.deepEqual(update.json(), { subscribed });
+    }
+
+    const preference = await database.marketingPreference.findUniqueOrThrow({ where: { email } });
+    assert.equal(preference.status, "UNSUBSCRIBED");
+    assert.equal(
+      await database.marketingConsentEvent.count({ where: { preferenceId: preference.id } }),
+      2,
+    );
+  } finally {
+    await database.marketingConsentEvent.deleteMany({ where: { email } });
+    await database.marketingPreference.deleteMany({ where: { email } });
+    await database.userProfile.deleteMany({ where: { clerkUserId } });
+    await app.close();
+  }
+});

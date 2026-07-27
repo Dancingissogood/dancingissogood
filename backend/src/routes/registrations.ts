@@ -8,7 +8,7 @@ import type { IdentityProvider } from "../auth.js";
 const MAXIMUM_QUERY_RANGE_MILLISECONDS = 366 * 24 * 60 * 60 * 1_000;
 const dateTimeSchema = z.iso.datetime({ offset: true });
 const sessionIdSchema = z.string().trim().min(1).max(64);
-const savedSessionQuerySchema = z
+const registrationQuerySchema = z
   .object({ from: dateTimeSchema, to: dateTimeSchema })
   .strict()
   .superRefine((query, context) => {
@@ -21,11 +21,25 @@ const savedSessionQuerySchema = z
       context.addIssue({ code: "custom", message: "The requested range is too large.", path: ["to"] });
     }
   });
-const saveSessionBodySchema = z.object({ classSessionId: sessionIdSchema }).strict();
+const registrationBodySchema = z.object({ classSessionId: sessionIdSchema }).strict();
 
-type SavedSessionRecord = {
+const sessionSelection = {
+  capacity: true,
+  classKey: true,
+  description: true,
+  endsAt: true,
+  id: true,
+  instructorName: true,
+  locationName: true,
+  published: true,
+  startsAt: true,
+  title: true,
+} as const;
+
+type RegistrationRecord = {
   classSession: {
     capacity: number | null;
+    classKey: string;
     description: string | null;
     endsAt: Date;
     id: string;
@@ -37,17 +51,19 @@ type SavedSessionRecord = {
   };
   createdAt: Date;
   id: string;
+  status: "RESERVED" | "ATTENDED" | "CANCELED" | "NO_SHOW";
 };
 
-function serializeSavedSession(selection: SavedSessionRecord) {
+function serializeRegistration(registration: RegistrationRecord) {
   return {
-    createdAt: selection.createdAt.toISOString(),
-    id: selection.id,
+    createdAt: registration.createdAt.toISOString(),
+    id: registration.id,
     session: {
-      ...selection.classSession,
-      endsAt: selection.classSession.endsAt.toISOString(),
-      startsAt: selection.classSession.startsAt.toISOString(),
+      ...registration.classSession,
+      endsAt: registration.classSession.endsAt.toISOString(),
+      startsAt: registration.classSession.startsAt.toISOString(),
     },
+    status: registration.status,
   };
 }
 
@@ -71,69 +87,58 @@ async function authenticateAccount(
   return synchronizeAccount(dependencies.database, identity);
 }
 
-export async function registerSavedClassSessionRoutes(
+export async function registerRegistrationRoutes(
   app: FastifyInstance,
   dependencies: { database: DatabaseClient; identityProvider: IdentityProvider },
 ): Promise<void> {
-  app.get("/v1/account/class-selections", async (request, reply) => {
-    const query = savedSessionQuerySchema.safeParse(request.query);
+  app.get("/v1/account/reservations", async (request, reply) => {
+    const query = registrationQuerySchema.safeParse(request.query);
 
     if (!query.success) {
-      return reply.code(400).send({ error: "Invalid personal schedule range." });
+      return reply.code(400).send({ error: "Invalid reservation range." });
     }
 
     try {
       const user = await authenticateAccount(request, reply, dependencies);
-
       if (!user) return;
 
-      const selections = await dependencies.database.savedClassSession.findMany({
+      const registrations = await dependencies.database.classRegistration.findMany({
         orderBy: [{ classSession: { startsAt: "asc" } }, { createdAt: "asc" }],
         select: {
-          classSession: {
-            select: {
-              capacity: true,
-              description: true,
-              endsAt: true,
-              id: true,
-              instructorName: true,
-              locationName: true,
-              published: true,
-              startsAt: true,
-              title: true,
-            },
-          },
+          classSession: { select: sessionSelection },
           createdAt: true,
           id: true,
+          status: true,
         },
         where: {
           classSession: {
             endsAt: { gt: new Date(query.data.from) },
             startsAt: { lt: new Date(query.data.to) },
           },
+          status: "RESERVED",
           userId: user.id,
         },
       });
 
       reply.header("cache-control", "no-store");
-      return reply.send({ selections: selections.map(serializeSavedSession) });
+      return reply.send({ registrations: registrations.map(serializeRegistration) });
     } catch (error) {
-      return handleSavedSessionError(request, reply, error, "load your schedule");
+      return handleRegistrationError(request, reply, error, "load your reservations");
     }
   });
 
-  app.post("/v1/account/class-selections", async (request, reply) => {
-    const body = saveSessionBodySchema.safeParse(request.body);
+  app.post("/v1/account/reservations", async (request, reply) => {
+    const body = registrationBodySchema.safeParse(request.body);
 
     if (!body.success) {
-      return reply.code(400).send({ error: "Invalid class selection." });
+      return reply.code(400).send({ error: "Invalid class reservation." });
     }
 
     try {
       const user = await authenticateAccount(request, reply, dependencies);
-
       if (!user) return;
 
+      const now = new Date();
       const classSession = await dependencies.database.classSession.findFirst({
         where: { id: body.data.classSessionId, published: true },
       });
@@ -142,14 +147,42 @@ export async function registerSavedClassSessionRoutes(
         return reply.code(404).send({ error: "This class session is not available." });
       }
 
-      if (classSession.endsAt.getTime() <= Date.now()) {
-        return reply.code(409).send({ error: "Past class sessions cannot be saved." });
+      if (classSession.endsAt <= now) {
+        return reply.code(409).send({ error: "Past class sessions cannot be reserved." });
       }
 
-      const selection = await dependencies.database.savedClassSession.upsert({
-        create: { classSessionId: classSession.id, userId: user.id },
+      const passPurchase = await dependencies.database.passPurchase.findFirst({
+        orderBy: [{ paidAt: "desc" }],
+        where: {
+          AND: [
+            { OR: [{ passStatus: null }, { passStatus: "ACTIVE" }] },
+            { OR: [{ validFrom: null }, { validFrom: { lte: classSession.startsAt } }] },
+            { OR: [{ validUntil: null }, { validUntil: { gte: classSession.startsAt } }] },
+          ],
+          status: "PAID",
+          userId: user.id,
+        },
+      });
+
+      if (!passPurchase) {
+        return reply.code(403).send({
+          code: "PASS_REQUIRED",
+          error: "An active camp pass is required to reserve a class.",
+        });
+      }
+
+      const registration = await dependencies.database.classRegistration.upsert({
+        create: {
+          classSessionId: classSession.id,
+          passPurchaseId: passPurchase.id,
+          userId: user.id,
+        },
         include: { classSession: true },
-        update: {},
+        update: {
+          canceledAt: null,
+          passPurchaseId: passPurchase.id,
+          status: "RESERVED",
+        },
         where: {
           userId_classSessionId: {
             classSessionId: classSession.id,
@@ -159,38 +192,42 @@ export async function registerSavedClassSessionRoutes(
       });
 
       reply.header("cache-control", "no-store");
-      return reply.send({ selection: serializeSavedSession(selection) });
+      return reply.send({ registration: serializeRegistration(registration) });
     } catch (error) {
-      return handleSavedSessionError(request, reply, error, "save this class");
+      return handleRegistrationError(request, reply, error, "reserve this class");
     }
   });
 
-  app.delete("/v1/account/class-selections/:classSessionId", async (request, reply) => {
+  app.delete("/v1/account/reservations/:classSessionId", async (request, reply) => {
     const classSessionId = sessionIdSchema.safeParse(
       (request.params as { classSessionId?: string }).classSessionId,
     );
 
     if (!classSessionId.success) {
-      return reply.code(400).send({ error: "Invalid class selection." });
+      return reply.code(400).send({ error: "Invalid class reservation." });
     }
 
     try {
       const user = await authenticateAccount(request, reply, dependencies);
-
       if (!user) return;
 
-      await dependencies.database.savedClassSession.deleteMany({
-        where: { classSessionId: classSessionId.data, userId: user.id },
+      await dependencies.database.classRegistration.updateMany({
+        data: { canceledAt: new Date(), status: "CANCELED" },
+        where: {
+          classSessionId: classSessionId.data,
+          status: "RESERVED",
+          userId: user.id,
+        },
       });
 
       return reply.code(204).send();
     } catch (error) {
-      return handleSavedSessionError(request, reply, error, "remove this class");
+      return handleRegistrationError(request, reply, error, "cancel this reservation");
     }
   });
 }
 
-function handleSavedSessionError(
+function handleRegistrationError(
   request: FastifyRequest,
   reply: FastifyReply,
   error: unknown,

@@ -7,19 +7,19 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div className="footer-primary">
         <div className="footer-brand">
-          <span className="brand-mark brand-mark-footer">DG</span>
+          <span className="brand-mark brand-mark-footer">SM</span>
           <div>
-            <p>Dancing Is So Good</p>
-            <span>Dance, movement, and good mornings. Monday-Wednesday, 9 AM-2 PM ET.</span>
+            <p>Summer in the Mitten “Movement Series”</p>
+            <span>Dance, rhythm, movement, and restoration in Southeast Michigan.</span>
           </div>
         </div>
         <Link className="footer-schedule-link" href="/#contact">
-          Get Camp Updates
+          Contact Us
         </Link>
       </div>
       <div className="footer-legal-row">
         <div>
-          <p>Dancing Is So Good is operated by Love Productions LLC.</p>
+          <p>Summer in the Mitten “Movement Series” is operated by Love Productions LLC.</p>
           <span>&copy; {currentYear} Love Productions LLC. All rights reserved.</span>
         </div>
         <nav className="footer-legal-links" aria-label="Legal">

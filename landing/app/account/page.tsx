@@ -5,12 +5,13 @@ import { redirect } from "next/navigation";
 
 import { fetchAccountSummary } from "@/lib/account";
 import { ProfileCalendar } from "@/components/ProfileCalendar";
+import { MarketingPreference } from "@/components/MarketingPreference";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Account",
-  description: "Your passes, classes, and account at Dancing Is So Good.",
+  description: "Your passes, reservations, and account for Summer in the Mitten.",
 };
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
@@ -67,8 +68,8 @@ export default async function AccountPage() {
           </div>
           <div className="account-heading-actions">
             {account.role === "ADMIN" ? (
-              <Link className="button button-secondary" href="/admin/schedule">
-                Manage Schedule
+              <Link className="button button-secondary" href="/admin">
+                Open Dashboard
               </Link>
             ) : null}
             <Link className="button button-secondary" href="/#pass">
@@ -153,6 +154,7 @@ export default async function AccountPage() {
         ) : null}
 
         <ProfileCalendar />
+        <MarketingPreference />
       </div>
     </main>
   );

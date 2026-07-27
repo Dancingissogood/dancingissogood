@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import { ClassMenu } from "@/components/ClassMenu";
 import { CheckoutButton } from "@/components/CheckoutButton";
-import { ContactForm } from "@/components/ContactForm";
 import { QuickFacts } from "@/components/QuickFacts";
 import { PublicSchedule } from "@/components/PublicSchedule";
 import { ViewerTimeZoneLabel } from "@/components/ViewerTimeZoneLabel";
@@ -12,11 +11,11 @@ import { classMenuItems, quickFacts } from "@/content/site";
 export default function HomePage() {
   return (
     <main id="top">
-      <section className="hero" aria-label="Dancing Is So Good summer camp">
+      <section className="hero" aria-label="Summer in the Mitten Movement Series">
         <div className="hero-image">
           <Image
-            src="/assets/dance-camp-hero-hd-v2.webp"
-            alt="Adults practicing dance and mobility in a bright studio"
+            src="/assets/movement-series-hero.webp"
+            alt="Adults sharing ballroom dance and restorative movement in a bright studio"
             fill
             priority
             quality={90}
@@ -25,12 +24,12 @@ export default function HomePage() {
         </div>
         <div className="hero-overlay" />
         <div className="hero-content">
-          <p className="eyebrow">Dancing Is So Good</p>
-          <h1>A summer dance camp made to move with you.</h1>
+          <p className="eyebrow">Summer in the Mitten</p>
+          <h1>Movement that brings you back to yourself.</h1>
           <p className="hero-copy">
-            Spend three mornings exploring ballroom, Latin, social dance, mobility,
-            rhythm, and recovery with professional instructors and a fresh lineup every
-            camp week. Monday-Wednesday, 9 AM-2 PM ET.
+            Three open mornings of dance, rhythm, mobility, and restoration, guided by
+            professional instructors and shaped for curious beginners and experienced
+            dancers alike.
           </p>
           <div className="hero-actions">
             <Link className="button button-primary" href="#pass">
@@ -47,26 +46,26 @@ export default function HomePage() {
 
       <section id="program" className="section section-intro">
         <div className="section-heading">
-          <p className="eyebrow">Make the morning yours</p>
-          <h2>Build a camp day that moves with you.</h2>
+          <p className="eyebrow">The Movement Series</p>
+          <h2>Arrive as you are. Leave more connected.</h2>
         </div>
         <div className="intro-copy">
           <p>
-            Start with Waltz, move into Cuban Motion, reset with mobility, then follow
-            the music wherever it goes. Every class brings a new skill, specialty, and
-            energy.
+            Move from Waltz to Cuban Motion, pause for recovery, then follow the music
+            somewhere new. Each focused session takes you straight to the heart of the
+            technique.
           </p>
           <p>
-            Drop in for a favorite or stay for the full morning. The lineup changes
-            with the instructors in the room, so every camp week has its own character.
+            Your pass opens the full schedule from Monday through Wednesday. Choose a
+            few classes or settle in for the day; the pace is yours.
           </p>
         </div>
       </section>
 
       <section id="menu" className="section menu-section">
         <div className="section-heading">
-          <p className="eyebrow">On the menu</p>
-          <h2>Find your next favorite way to move.</h2>
+          <p className="eyebrow">Movement Menu</p>
+          <h2>Technique, rhythm, and room to explore.</h2>
         </div>
         <ClassMenu classes={classMenuItems} />
       </section>
@@ -74,10 +73,11 @@ export default function HomePage() {
       <section id="schedule" className="section schedule-section">
         <div className="schedule-heading-row">
           <div>
-            <p className="eyebrow">This week</p>
-            <h2>What&apos;s on the floor.</h2>
+            <p className="eyebrow">Current Schedule</p>
+            <h2>Plan your time in the studio.</h2>
             <p>
-              A fresh lineup of dance, movement, and recovery each camp week.
+              Reserve the sessions that speak to you. All class times are shown in your
+              selected time zone.
             </p>
           </div>
           <div className="schedule-summary" aria-label="Schedule details">
@@ -114,8 +114,8 @@ export default function HomePage() {
 
       <section className="section instructor-section">
         <div className="section-heading">
-          <p className="eyebrow">Beyond the steps</p>
-          <h2>More than a dance class.</h2>
+          <p className="eyebrow">A fuller practice</p>
+          <h2>Move well, learn deeply, feel at home.</h2>
         </div>
         <div className="feature-grid">
           <div>
@@ -141,13 +141,16 @@ export default function HomePage() {
 
       <section id="contact" className="section contact-section">
         <div>
-          <p className="eyebrow">Stay in step</p>
-          <h2>Be first to know what&apos;s next.</h2>
+          <p className="eyebrow">Stay connected</p>
+          <h2>Questions about the series?</h2>
           <p>
-            Join the list for upcoming camp weeks, new class lineups, and pass releases.
+            We are here to help you choose the right camp week and make the most of
+            your time in the studio.
           </p>
         </div>
-        <ContactForm />
+        <a className="button button-secondary" href="mailto:dancingissogood@gmail.com">
+          Get in touch
+        </a>
       </section>
     </main>
   );
