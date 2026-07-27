@@ -99,7 +99,10 @@ export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
     >
       <Link className="brand" href="/" aria-label="Summer in the Mitten Movement Series home">
         <span className="brand-mark">SM</span>
-        <span>Summer in the Mitten</span>
+        <span className="brand-copy">
+          <strong>Summer in the Mitten</strong>
+          <small>Movement Series</small>
+        </span>
       </Link>
       <nav className="nav-links" aria-label="Main menu">
         {navigationItems.map((item) => (
@@ -167,7 +170,10 @@ export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
         <div className="mobile-nav-heading">
           <Link className="brand" href="/" onClick={closeMobileMenu}>
             <span className="brand-mark">SM</span>
-            <span>Summer in the Mitten</span>
+            <span className="brand-copy">
+              <strong>Summer in the Mitten</strong>
+              <small>Movement Series</small>
+            </span>
           </Link>
           <button
             aria-label="Close menu"

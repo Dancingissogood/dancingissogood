@@ -164,11 +164,27 @@ section[id] {
 .brand {
   align-items: center;
   display: inline-flex;
-  font-size: 0.98rem;
-  font-weight: 700;
   gap: 11px;
   letter-spacing: 0;
   white-space: nowrap;
+}
+
+.brand-copy {
+  display: grid;
+  line-height: 1.05;
+  min-width: 0;
+}
+
+.brand-copy strong {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.brand-copy small {
+  color: var(--muted);
+  font-size: 0.67rem;
+  font-weight: 650;
+  margin-top: 4px;
 }
 
 .brand-mark {
@@ -4198,12 +4214,20 @@ select:focus {
 
   .brand {
     min-width: 0;
-    font-size: 0.9rem;
   }
 
-  .brand > span:last-child {
+  .brand-copy strong,
+  .brand-copy small {
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .brand-copy strong {
+    font-size: 0.84rem;
+  }
+
+  .brand-copy small {
+    font-size: 0.62rem;
   }
 
   .brand-mark {
