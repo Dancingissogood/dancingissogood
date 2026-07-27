@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Summer in the Mitten “Movement Series”",
     description:
-      "Three open mornings of dance, rhythm, movement, and restoration.",
+      "Straight to the heart of movement through dance, rhythm, connection, and well-being.",
     type: "website",
     images: [
       {

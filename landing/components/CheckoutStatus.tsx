@@ -58,7 +58,7 @@ export function CheckoutStatus() {
   }
 
   if (state === "complete") {
-    return <p>Payment confirmed. Your 3-day pass is ready.</p>;
+    return <p>Payment confirmed. Your pass is ready.</p>;
   }
 
   if (state === "processing") {

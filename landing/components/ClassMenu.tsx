@@ -1,6 +1,6 @@
 "use client";
 
-import { Layers3, Plus, Sparkles, X } from "lucide-react";
+import { Plus, Sparkles, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -15,10 +15,9 @@ type ClassMenuProps = {
 };
 
 const categoryCopy: Record<string, string> = {
-  "Latin Rhythms": "Straight to the heart of Salsa, Mambo, Cha Cha, Rumba, Bolero, and Samba.",
-  "Swing Rhythms": "The hidden language of East Coast Swing, West Coast Swing, Hustle, and Nightclub.",
-  "Smooth Rhythms": "Flow through Foxtrot, Waltz, Tango, Viennese Waltz, Quickstep, and Argentine Tango.",
-  "Movement & Recovery": "Restore the body, sharpen the rhythm, and build coordination beyond the dance floor.",
+  "Latin Rhythms": "Latin Rhythms employs the hidden secrets of Salsa, Mambo, Cha Cha, Rumba, Bolero, and Samba.",
+  "Swing Rhythms": "Swing Rhythms employs the hidden secrets of West Coast Swing, East Coast Swing, Hustle, and Night Club Slow.",
+  "Smooth Rhythms": "Smooth Rhythms employs the hidden secrets of Foxtrot, Waltz, Tango, Viennese Waltz, Quickstep, and Argentine Tango.",
 };
 
 export function ClassMenu({ classes }: ClassMenuProps) {
@@ -338,20 +337,10 @@ export function ClassMenu({ classes }: ClassMenuProps) {
             <div className="lesson-dialog-content">
               <p className="eyebrow">{selectedClass.category}</p>
               <h2 id="lesson-dialog-title">{selectedClass.title}</h2>
-              <p className="lesson-dialog-description">{selectedClass.description}</p>
+              <p id="lesson-dialog-description" className="lesson-dialog-description">
+                {selectedClass.description}
+              </p>
               <div className="lesson-dialog-details">
-                <p id="lesson-dialog-description" className="lesson-dialog-details-copy">
-                  {selectedClass.details}
-                </p>
-
-                <div className="lesson-dialog-facts" aria-label="Lesson details">
-                  <div>
-                    <Layers3 aria-hidden="true" />
-                    <span>Level</span>
-                    <strong>{selectedClass.level}</strong>
-                  </div>
-                </div>
-
                 <div className="lesson-dialog-highlights">
                   <div className="lesson-dialog-subheading">
                     <Sparkles aria-hidden="true" />

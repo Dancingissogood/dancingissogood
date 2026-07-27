@@ -4,6 +4,7 @@ import type {
   DatesSetArg,
   EventApi,
   EventClickArg,
+  EventContentArg,
   EventHoveringArg,
   EventInput,
   EventMountArg,
@@ -36,6 +37,23 @@ import { useViewerTimeZone } from "@/lib/use-viewer-time-zone";
 
 const POPOVER_HIDE_DELAY = 220;
 const eventInteractionCleanups = new WeakMap<HTMLElement, () => void>();
+
+function getEventClassNames(eventInfo: EventContentArg) {
+  const classItem = classMenuItems.find(
+    (item) => item.key === eventInfo.event.extendedProps["classKey"],
+  );
+
+  switch (classItem?.category) {
+    case "Latin Rhythms":
+      return ["calendar-event-latin"];
+    case "Swing Rhythms":
+      return ["calendar-event-swing"];
+    case "Smooth Rhythms":
+      return ["calendar-event-smooth"];
+    default:
+      return ["calendar-event-default"];
+  }
+}
 
 export function PublicSchedule() {
   const { isLoaded: isAuthLoaded, isSignedIn } = useAuth();
@@ -314,13 +332,15 @@ export function PublicSchedule() {
         allDaySlot={false}
         datesSet={handleDatesSet}
         dayHeaderFormat={{ weekday: "short", day: "numeric" }}
+        eventClassNames={getEventClassNames}
         eventContent={(eventInfo) => <CalendarEventContent eventInfo={eventInfo} />}
         eventClick={handleEventClick}
         eventDidMount={handleEventDidMount}
-        eventMinHeight={58}
+        eventMinHeight={46}
         eventMouseEnter={handleEventMouseEnter}
         eventMouseLeave={scheduleHide}
         eventTimeFormat={{ hour: "numeric", minute: "2-digit", meridiem: "short" }}
+        eventShortHeight={46}
         events={loadEvents}
         expandRows
         firstDay={1}

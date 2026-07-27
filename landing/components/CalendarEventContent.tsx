@@ -16,14 +16,16 @@ export function CalendarEventContent({ eventInfo }: CalendarEventContentProps) {
   return (
     <div className="calendar-event-content">
       {classItem ? (
-        <Image
-          alt=""
-          className="calendar-event-image"
-          height={44}
-          sizes="44px"
-          src={classItem.image}
-          width={44}
-        />
+        <span className="calendar-event-image-frame" aria-hidden="true">
+          <Image
+            alt=""
+            className="calendar-event-image"
+            height={64}
+            sizes="(max-width: 820px) 56px, 38px"
+            src={classItem.image}
+            width={64}
+          />
+        </span>
       ) : null}
       <div className="calendar-event-copy">
         <span className="calendar-event-time">{eventInfo.timeText}</span>

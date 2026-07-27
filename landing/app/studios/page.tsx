@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 
+import { AnimatedArrowIcon } from "@/components/AnimatedArrowIcon";
 import { StudioDirectory } from "@/components/StudioDirectory";
 import { studioProfiles } from "@/content/site";
 
@@ -12,8 +14,8 @@ export const metadata: Metadata = {
 
 export default function StudiosPage() {
   return (
-    <main>
-      <section className="studios-hero">
+    <main className="studios-page">
+      <section className="studios-hero" aria-labelledby="studios-title">
         <Image
           alt="Adults gathering for movement class in a bright studio"
           fill
@@ -23,23 +25,33 @@ export default function StudiosPage() {
         />
         <div className="studios-hero-shade" />
         <div className="studios-hero-content">
-          <p className="eyebrow">Where we move</p>
-          <h1>Local spaces. Shared movement.</h1>
+          <p className="eyebrow">Partner studios</p>
+          <h1 id="studios-title">Movement begins with a place.</h1>
+          <p>Welcoming spaces across Southeast Michigan.</p>
+        </div>
+      </section>
+
+      <section className="section studios-introduction" data-reveal>
+        <p className="eyebrow">Where we gather</p>
+        <div>
+          <h2>Spaces shaped by community.</h2>
           <p>
-            Two studios rooted in learning, well-being, creativity, and community.
+            Each partner brings its own character, practice, and sense of belonging
+            to the Movement Series.
           </p>
         </div>
       </section>
 
       <StudioDirectory studios={studioProfiles} />
 
-      <section className="section studio-note" data-reveal>
-        <p className="eyebrow">Our studio partners</p>
-        <h2>Local roots. Room to move.</h2>
-        <p>
-          Together, these studios make space for ballroom, social dance, mobility,
-          recovery, and the shared joy of learning something new.
-        </p>
+      <section className="section studios-cta" data-reveal>
+        <div>
+          <p className="eyebrow">Make your move</p>
+          <h2>Find your next class.</h2>
+        </div>
+        <Link className="pill-link" href="/#schedule">
+          View the schedule <AnimatedArrowIcon />
+        </Link>
       </section>
     </main>
   );

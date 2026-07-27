@@ -5,9 +5,8 @@ import { AnimatedArrowIcon } from "@/components/AnimatedArrowIcon";
 import { ClassMenu } from "@/components/ClassMenu";
 import { CheckoutButton } from "@/components/CheckoutButton";
 import { PublicSchedule } from "@/components/PublicSchedule";
-import { QuickFacts } from "@/components/QuickFacts";
 import { ViewerTimeZoneLabel } from "@/components/ViewerTimeZoneLabel";
-import { classMenuItems, quickFacts } from "@/content/site";
+import { classMenuItems } from "@/content/site";
 
 const heroPathways = [
   {
@@ -16,14 +15,14 @@ const heroPathways = [
     label: "Explore the class menu",
   },
   {
-    detail: "Shape your three days",
+    detail: "Follow your rhythm",
     href: "#schedule",
-    label: "Plan your camp week",
+    label: "View the schedule",
   },
   {
-    detail: "Learn with confidence",
-    href: "/instructors",
-    label: "Meet the instructors",
+    detail: "Find your place",
+    href: "/studios",
+    label: "Meet our studio partners",
   },
 ];
 
@@ -43,7 +42,7 @@ export default function HomePage() {
         </div>
         <div className="hero-overlay" />
         <div className="hero-content">
-          <h1 className="hero-title">Summer in the Mitten Movement Series</h1>
+          <h1 className="hero-title">Summer in the Mitten “Movement Series”</h1>
           <Image
             className="hero-brand-logo"
             src="/assets/brand/summer-in-the-mitten-hero-logo-on-dark-transparent.png"
@@ -54,9 +53,7 @@ export default function HomePage() {
             sizes="(max-width: 640px) 230px, (max-width: 900px) 270px, 330px"
             width={806}
           />
-          <p className="hero-copy">
-            Three open mornings of dance, rhythm, mobility, and restoration.
-          </p>
+          <p className="hero-copy">Move with intention. Dance with joy.</p>
         </div>
         <div className="hero-pathways" aria-label="Explore the Movement Series">
           <p>Where will your movement take you?</p>
@@ -72,8 +69,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <QuickFacts facts={quickFacts} />
-
       <section id="program" className="section program-story" data-reveal>
         <div className="program-story-media">
           <Image
@@ -85,11 +80,10 @@ export default function HomePage() {
         </div>
         <div className="program-story-copy">
           <p className="eyebrow">The Movement Series</p>
-          <h2>Come as you are. Move from there.</h2>
+          <h2>Straight to the heart of dance movements.</h2>
           <p>
-            Follow the rhythm into ballroom, Latin, swing, mobility, and recovery.
-            Each focused session gives you something clear to feel, practice, and
-            carry into the next class.
+            Discover ballroom, Latin, swing, mobility, and recovery through movement
+            that feels grounded, expressive, and entirely your own.
           </p>
           <Link className="pill-link" href="#menu">
             Discover the classes <AnimatedArrowIcon />
@@ -100,7 +94,7 @@ export default function HomePage() {
       <section className="section practice-section" data-reveal>
         <div className="section-heading section-heading-centered">
           <p className="eyebrow">Why movement, why now</p>
-          <h2>A morning that meets the whole person.</h2>
+          <h2>These class movements are the epitome of dance techniques.</h2>
           <p>
             Technique matters. So do confidence, connection, and the way you feel
             when you leave the room.
@@ -154,8 +148,7 @@ export default function HomePage() {
           <p className="eyebrow">Movement menu</p>
           <h2>Find the practice that speaks to you.</h2>
           <p>
-            Move between rhythm, partnership, technique, and restoration throughout
-            the week.
+            Move between rhythm, partnership, technique, and restoration.
           </p>
         </div>
         <ClassMenu classes={classMenuItems} />
@@ -214,17 +207,14 @@ export default function HomePage() {
         </div>
         <div className="pass-shade" />
         <div className="pass-copy">
-          <p className="eyebrow">One pass. Three days.</p>
-          <h2>The whole series is yours for $100.</h2>
-          <p>
-            Every posted class, Monday through Wednesday, from the first movement of
-            the morning to the last.
-          </p>
+          <p className="eyebrow">Your pass</p>
+          <h2>Move freely through the whole series.</h2>
+          <p>Follow your curiosity from one style, rhythm, and practice to the next.</p>
         </div>
-        <aside className="price-card" aria-label="3-day pass price">
+        <aside className="price-card" aria-label="Movement Series pass price">
           <span className="price-label">Summer pass</span>
           <strong>$100</strong>
-          <p>Unlimited classes across all three camp days.</p>
+          <p>All classes, Monday through Wednesday.</p>
           <CheckoutButton
             className="button pass-purchase-button"
             passSlug="three-day-camp-pass"
@@ -238,9 +228,9 @@ export default function HomePage() {
           <h2>Good teaching. Welcoming rooms. Space to grow.</h2>
         </div>
         <div className="community-actions">
-          <Link className="path-link" href="/instructors">
-            <span>Meet the people guiding the series</span>
-            <strong>Our instructors</strong>
+          <Link className="path-link" href="/#schedule">
+            <span>Choose what moves you</span>
+            <strong>Current schedule</strong>
             <AnimatedArrowIcon />
           </Link>
           <Link className="path-link path-link-rose" href="/studios">
