@@ -21,6 +21,7 @@ export function CalendarEventContent({ eventInfo }: CalendarEventContentProps) {
             alt=""
             className="calendar-event-image"
             height={64}
+            quality={85}
             sizes="(max-width: 820px) 56px, 38px"
             src={classItem.image}
             width={64}

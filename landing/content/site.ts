@@ -49,7 +49,7 @@ export const classMenuItems: ClassMenuItem[] = [
       "Rumba, Cha Cha, and Salsa with forward and back walks, quarter-beat analysis, and arm coordination.",
     category: "Latin Rhythms",
     highlights: ["Rumba, Cha Cha & Salsa", "Forward & back walks", "Quarter-beat analysis", "Arm coordination"],
-    image: "/assets/classes/cuban-motion.jpg",
+    image: "/assets/classes/cuban-motion.webp",
     imageAlt: "Dance students learning Cuban motion in a studio",
   },
   {
@@ -59,7 +59,7 @@ export const classMenuItems: ClassMenuItem[] = [
       "Rhythm, foot and body work, and American and International elements.",
     category: "Latin Rhythms",
     highlights: ["Rhythm", "Foot & body work", "American & International Elements"],
-    image: "/assets/classes/samba-beats.jpg",
+    image: "/assets/classes/samba-beats.webp",
     imageAlt: "Dance students practicing Samba rhythm and footwork",
   },
   {
@@ -97,7 +97,7 @@ export const classMenuItems: ClassMenuItem[] = [
       "Closed syncopation, forward progression, the square, triangle, line, pivot action, and the leader's diamond.",
     category: "Swing Rhythms",
     highlights: ["Closed syncopation", "Forward progression", "The square", "The triangle", "Pivot action", "The line", "The diamond (leaders)"],
-    image: "/assets/classes/hustle-fundamentals.jpg",
+    image: "/assets/classes/hustle-fundamentals.webp",
     imageAlt: "Social dancers practicing Hustle partner turns",
   },
   {
@@ -116,7 +116,7 @@ export const classMenuItems: ClassMenuItem[] = [
       "Forward and back ochos, left and right molinetes, the chair, and sacada hook and release.",
     category: "Smooth Rhythms",
     highlights: ["Forward & back ochos", "Left & right molinetes", "The chair", "Sacada hook & release"],
-    image: "/assets/classes/argentine-tango.jpg",
+    image: "/assets/classes/argentine-tango.webp",
     imageAlt: "Adult dancers practicing Argentine Tango technique",
   },
   {
@@ -126,7 +126,7 @@ export const classMenuItems: ClassMenuItem[] = [
       "Rise and fall, foot and body work, foot and body placement, open box, and straight box.",
     category: "Smooth Rhythms",
     highlights: ["Rise & fall", "Foot & body work", "Foot & body placement", "Open box (square)", "Straight box (line)"],
-    image: "/assets/classes/waltz-rise-fall.jpg",
+    image: "/assets/classes/waltz-rise-fall.webp",
     imageAlt: "Ballroom dancers practicing Waltz rise and fall",
   },
   {
@@ -175,7 +175,7 @@ export const classMenuItems: ClassMenuItem[] = [
       "Two in one, the two cross, three on the wall, and patterns in Waltz, Foxtrot, Tango, and Viennese Waltz.",
     category: "Smooth Rhythms",
     highlights: ["Two in one", "The two cross", "Three on the wall", "In Waltz, Foxtrot, Tango & Viennese Waltz"],
-    image: "/assets/classes/juggling-introduction.jpg",
+    image: "/assets/classes/juggling-introduction.webp",
     imageAlt: "Adult students practicing juggling for coordination",
   },
 ];

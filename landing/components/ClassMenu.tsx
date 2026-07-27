@@ -262,6 +262,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
                       src={item.image}
                       alt={item.imageAlt}
                       fill
+                      quality={85}
                       sizes="(max-width: 640px) calc(100vw - 40px), (max-width: 1180px) calc(50vw - 50px), 430px"
                     />
                   </div>
@@ -329,6 +330,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
                 alt={selectedClass.imageAlt}
                 fill
                 priority
+                quality={85}
                 sizes="(max-width: 640px) 100vw, (max-width: 900px) 40vw, 460px"
               />
               <span>{selectedClass.category}</span>

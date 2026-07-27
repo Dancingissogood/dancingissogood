@@ -198,7 +198,13 @@ export function ProfileCalendar() {
         <article className="profile-selection-detail" aria-label={`Selected class: ${selected.session.title}`}>
           {selectedClassItem ? (
             <div className="profile-selection-image">
-              <Image src={selectedClassItem.image} alt="" fill sizes="140px" />
+              <Image
+                src={selectedClassItem.image}
+                alt=""
+                fill
+                quality={85}
+                sizes="140px"
+              />
             </div>
           ) : null}
           <div className="profile-selection-copy">

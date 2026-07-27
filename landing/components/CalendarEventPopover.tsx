@@ -125,6 +125,7 @@ export function CalendarEventPopover({
           <Image
             alt={details.classItem.imageAlt}
             fill
+            quality={85}
             sizes="320px"
             src={details.classItem.image}
           />
