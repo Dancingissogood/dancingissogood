@@ -21,7 +21,7 @@ export default function InstructorsPage() {
           priority
           quality={90}
           sizes="100vw"
-          src="/assets/instructors-hero.webp"
+          src="/assets/editorial/community-class.webp"
         />
         <div className="instructors-hero-shade" />
         <div className="instructors-hero-content">
@@ -34,7 +34,7 @@ export default function InstructorsPage() {
         <p className="instructors-hero-note">Technique with feeling.</p>
       </section>
 
-      <section className="section instructor-introduction">
+      <section className="section instructor-introduction" data-reveal>
         <div>
           <p className="eyebrow">On the floor</p>
           <h2>Great teaching changes how movement feels.</h2>
@@ -55,7 +55,7 @@ export default function InstructorsPage() {
 
       <InstructorRoster instructors={instructorProfiles} />
 
-      <section className="instructor-method" aria-labelledby="instructor-method-title">
+      <section className="instructor-method" aria-labelledby="instructor-method-title" data-reveal>
         <div className="instructor-method-heading">
           <p className="eyebrow">How we teach</p>
           <h2 id="instructor-method-title">Specific, personal, and made to move.</h2>
@@ -79,7 +79,7 @@ export default function InstructorsPage() {
         </div>
       </section>
 
-      <section className="section instructor-cta">
+      <section className="section instructor-cta" data-reveal>
         <div>
           <p className="eyebrow">Join us</p>
           <h2>Meet us on the floor.</h2>

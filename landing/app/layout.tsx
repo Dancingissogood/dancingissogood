@@ -1,22 +1,17 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
-import { Bodoni_Moda, DM_Sans } from "next/font/google";
+import { Outfit } from "next/font/google";
 
+import { MotionEffects } from "@/components/MotionEffects";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 
 import "./globals.css";
 
-const dmSans = DM_Sans({
+const outfit = Outfit({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-dm-sans",
-});
-
-const bodoniModa = Bodoni_Moda({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-bodoni-moda",
+  variable: "--font-outfit",
 });
 
 const siteUrl =
@@ -49,7 +44,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   initialScale: 1,
-  themeColor: "#fbfcf8",
+  themeColor: "#38322f",
   viewportFit: "cover",
   width: "device-width",
 };
@@ -61,8 +56,75 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${dmSans.variable} ${bodoniModa.variable}`}>
-        <ClerkProvider>
+      <body className={outfit.variable}>
+        <ClerkProvider
+          appearance={{
+            variables: {
+              borderRadius: "0.5rem",
+              colorBackground: "#ffffff",
+              colorBorder: "#cbc5c0",
+              colorForeground: "#342f2c",
+              colorInput: "#faf7f3",
+              colorInputForeground: "#342f2c",
+              colorMuted: "#fcf0e9",
+              colorMutedForeground: "#6d6560",
+              colorNeutral: "#38322f",
+              colorPrimary: "#ad624a",
+              colorRing: "#d58f79",
+              fontFamily: "var(--font-outfit), sans-serif",
+              fontSize: "16px",
+              fontWeight: {
+                bold: 600,
+                medium: 500,
+                normal: 300,
+                semibold: 600,
+              },
+            },
+            elements: {
+              dividerText: {
+                fontSize: "0.8rem",
+                fontWeight: 300,
+              },
+              footerActionLink: {
+                color: "#ad624a",
+                fontSize: "0.9rem",
+                fontWeight: 600,
+              },
+              footerActionText: {
+                fontSize: "0.9rem",
+                fontWeight: 300,
+              },
+              formButtonPrimary: {
+                fontSize: "1rem",
+                fontWeight: 600,
+                minHeight: "48px",
+              },
+              formFieldInput: {
+                fontSize: "1rem",
+                minHeight: "48px",
+              },
+              formFieldLabel: {
+                fontSize: "0.9rem",
+                fontWeight: 500,
+              },
+              headerSubtitle: {
+                fontSize: "1rem",
+                fontWeight: 300,
+                lineHeight: 1.7,
+              },
+              headerTitle: {
+                fontSize: "1.5rem",
+                fontWeight: 600,
+              },
+              socialButtonsBlockButton: {
+                fontSize: "1rem",
+                fontWeight: 600,
+                minHeight: "48px",
+              },
+            },
+          }}
+        >
+          <MotionEffects />
           <SiteHeader />
           {children}
           <SiteFooter />

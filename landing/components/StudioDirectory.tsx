@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import { AnimatedArrowIcon } from "@/components/AnimatedArrowIcon";
 import type { StudioProfile } from "@/content/site";
 
 type StudioDirectoryProps = {
@@ -12,6 +13,7 @@ export function StudioDirectory({ studios }: StudioDirectoryProps) {
       {studios.map((studio, index) => (
         <article
           className={`studio-profile${index % 2 === 1 ? " studio-profile-reverse" : ""}`}
+          data-reveal
           key={studio.name}
         >
           <div className={`studio-media studio-media-${studio.imageTheme}`}>
@@ -43,6 +45,7 @@ export function StudioDirectory({ studios }: StudioDirectoryProps) {
             </dl>
             <a className="studio-link" href={studio.website.href} target="_blank" rel="noopener">
               {studio.website.label}
+              <AnimatedArrowIcon />
             </a>
           </div>
         </article>

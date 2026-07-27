@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { AnimatedArrowIcon } from "@/components/AnimatedArrowIcon";
+
 type CheckoutButtonProps = {
   className?: string;
   passSlug: string;
@@ -42,10 +44,11 @@ export function CheckoutButton({ className = "button button-primary", passSlug }
 
   return (
     <div className="checkout-control">
-      <button className={className} disabled={isLoading} onClick={startCheckout} type="button">
-        {isLoading ? "Opening checkout..." : "Buy the 3-Day Pass"}
-      </button>
       {error ? <p aria-live="polite" className="checkout-error">{error}</p> : null}
+      <button className={className} disabled={isLoading} onClick={startCheckout} type="button">
+        <span>{isLoading ? "Opening checkout..." : "Buy the 3-Day Pass"}</span>
+        <AnimatedArrowIcon />
+      </button>
     </div>
   );
 }

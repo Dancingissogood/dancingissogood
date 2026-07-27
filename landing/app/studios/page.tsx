@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 
 import { StudioDirectory } from "@/components/StudioDirectory";
 import { studioProfiles } from "@/content/site";
@@ -13,17 +14,26 @@ export default function StudiosPage() {
   return (
     <main>
       <section className="studios-hero">
-        <p className="eyebrow">Where we dance</p>
-        <h1>Two studios. One dance community.</h1>
-        <p>
-          Summer in the Mitten brings together Belleville Lake Dance Company and Rhizome
-          Roots Studio, two spaces rooted in movement, connection, and community.
-        </p>
+        <Image
+          alt="Adults gathering for movement class in a bright studio"
+          fill
+          priority
+          sizes="100vw"
+          src="/assets/editorial/community-class.webp"
+        />
+        <div className="studios-hero-shade" />
+        <div className="studios-hero-content">
+          <p className="eyebrow">Where we move</p>
+          <h1>Local spaces. Shared movement.</h1>
+          <p>
+            Two studios rooted in learning, well-being, creativity, and community.
+          </p>
+        </div>
       </section>
 
       <StudioDirectory studios={studioProfiles} />
 
-      <section className="section studio-note">
+      <section className="section studio-note" data-reveal>
         <p className="eyebrow">Our studio partners</p>
         <h2>Local roots. Room to move.</h2>
         <p>

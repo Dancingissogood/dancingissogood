@@ -83,7 +83,11 @@ export function CalendarEventPopover({
       type="button"
       onClick={onToggleSaved}
     >
-      {isSaved ? <Check aria-hidden="true" /> : <Plus aria-hidden="true" />}
+      {isSaved ? (
+        <Check aria-hidden="true" />
+      ) : (
+        <Plus className="cta-plus-icon" aria-hidden="true" />
+      )}
       {isPending ? "Updating..." : isSaved ? "Reserved" : "Reserve class"}
     </button>
   );
@@ -158,7 +162,7 @@ export function CalendarEventPopover({
           ) : isSignedIn ? saveButton : (
             <SignInButton mode="modal">
               <button className="calendar-event-popover-action" type="button">
-                <Plus aria-hidden="true" />
+                <Plus className="cta-plus-icon" aria-hidden="true" />
                 Sign in to reserve
               </button>
             </SignInButton>

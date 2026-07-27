@@ -246,7 +246,11 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
                     type="button"
                     onClick={() => void toggleReservation(session)}
                   >
-                    {isSaved ? <Check aria-hidden="true" /> : <Plus aria-hidden="true" />}
+                    {isSaved ? (
+                      <Check aria-hidden="true" />
+                    ) : (
+                      <Plus className="cta-plus-icon" aria-hidden="true" />
+                    )}
                     {isPending ? "Updating..." : isSaved ? "Reserved" : "Reserve"}
                   </button>
                 );
@@ -264,7 +268,7 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
                     ) : isSignedIn ? action : (
                       <SignInButton mode="modal">
                         <button className="class-session-save" type="button">
-                          <Plus aria-hidden="true" />
+                          <Plus className="cta-plus-icon" aria-hidden="true" />
                           Sign in to reserve
                         </button>
                       </SignInButton>

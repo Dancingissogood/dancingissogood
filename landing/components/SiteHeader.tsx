@@ -3,6 +3,7 @@
 import { SignInButton, SignUpButton, useAuth } from "@clerk/nextjs";
 import { CalendarDays, Menu, UserRound, X } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { AccountMenu } from "@/components/AccountMenu";
@@ -17,6 +18,7 @@ type AccountActionState = "loading" | "has-pass" | "no-pass" | "unavailable";
 
 export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
   const { isLoaded, isSignedIn } = useAuth();
+  const pathname = usePathname();
   const mobileMenuRef = useRef<HTMLDialogElement>(null);
   const navigationRequestRef = useRef(0);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -94,6 +96,7 @@ export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
   return (
     <header
       className="site-header"
+      data-home={pathname === "/"}
       data-scrolled={isScrolled}
       aria-label="Primary navigation"
     >

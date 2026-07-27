@@ -13,7 +13,7 @@ export function InstructorRoster({ instructors }: InstructorRosterProps) {
         const sequence = String(index + 1).padStart(2, "0");
 
         return (
-          <article className="instructor-profile" key={instructor.role}>
+          <article className="instructor-profile" data-reveal key={instructor.role}>
             <div className="instructor-profile-image">
               <Image
                 alt={instructor.imageAlt}

@@ -1,19 +1,13 @@
 "use client";
 
-import {
-  CalendarDays,
-  Layers3,
-  Maximize2,
-  Plus,
-  Sparkles,
-  X,
-} from "lucide-react";
+import { Layers3, Plus, Sparkles, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 
 import type { ClassMenuItem } from "@/content/site";
+import { AnimatedArrowIcon } from "@/components/AnimatedArrowIcon";
 import { ClassSessionPicker } from "@/components/ClassSessionPicker";
 
 type ClassMenuProps = {
@@ -50,9 +44,8 @@ export function ClassMenu({ classes }: ClassMenuProps) {
 
     if (!layout || !origin || prefersReducedMotion()) return;
 
-    const originRect = origin.getBoundingClientRect();
-    const layoutRect = layout.getBoundingClientRect();
-    const morph = getCardMorph(originRect, layoutRect);
+    const morph = getCardMorph(origin, layout);
+    const targetBorderRadius = window.getComputedStyle(layout).borderRadius;
 
     activeAnimationRef.current = layout.animate(
       [
@@ -61,7 +54,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
           transform: morph.transform,
         },
         {
-          borderRadius: "18px",
+          borderRadius: targetBorderRadius,
           transform: "translate3d(0, 0, 0) scale(1, 1)",
         },
       ],
@@ -214,9 +207,7 @@ export function ClassMenu({ classes }: ClassMenuProps) {
       return;
     }
 
-    const layoutRect = layout.getBoundingClientRect();
-    const originRect = origin.getBoundingClientRect();
-    const targetMorph = getCardMorph(originRect, layoutRect);
+    const targetMorph = getCardMorph(origin, layout);
     const currentStyle = window.getComputedStyle(layout);
     const currentBorderRadius = currentStyle.borderRadius;
     const currentTransform = currentStyle.transform;
@@ -246,63 +237,54 @@ export function ClassMenu({ classes }: ClassMenuProps) {
   return (
     <>
       <div className="movement-menu-groups">
-        {Object.entries(categoryCopy).map(([category, description]) => (
+        {Object.entries(categoryCopy).map(([category, description], categoryIndex) => (
           <section className="movement-menu-group" key={category}>
             <header className="movement-menu-group-heading">
-              <h3>{category}</h3>
-              <p>{description}</p>
+              <span>{String(categoryIndex + 1).padStart(2, "0")}</span>
+              <div>
+                <h3>{category}</h3>
+                <p>{description}</p>
+              </div>
             </header>
             <div className="menu-grid">
               {classes.filter((item) => item.category === category).map((item) => (
                 <article className="menu-card" key={item.key}>
-            <button
-              className="menu-card-open"
-              type="button"
-              aria-haspopup="dialog"
-              aria-label={`View details for ${item.title}`}
-              onClick={(event) => {
-                openClass(item, event.currentTarget, false);
-              }}
-            />
-            <div className="menu-card-image">
-              <Image
-                src={item.image}
-                alt={item.imageAlt}
-                fill
-                sizes="(max-width: 580px) 117px, (max-width: 1100px) 50vw, 430px"
-              />
-            </div>
-            <div className="menu-card-body">
-              <div className="menu-card-title-row">
-                <h3>{item.title}</h3>
-                <button
-                  className="menu-card-expand"
-                  type="button"
-                  aria-haspopup="dialog"
-                  aria-label={`View details for ${item.title}`}
-                  title="View class details"
-                  onClick={(event) => {
-                    openClass(item, event.currentTarget, false);
-                  }}
-                >
-                  <Maximize2 aria-hidden="true" />
-                </button>
-              </div>
-              <div className="menu-card-subtext-row">
-                <p>{item.description}</p>
-                <button
-                  className="menu-card-save"
-                  type="button"
-                  aria-label={`Reserve a ${item.title} session`}
-                  onClick={(event) => {
-                    openClass(item, event.currentTarget, true);
-                  }}
-                >
-                  <Plus aria-hidden="true" />
-                  Reserve
-                </button>
-              </div>
-            </div>
+                  <button
+                    className="menu-card-open"
+                    type="button"
+                    aria-haspopup="dialog"
+                    aria-label={`View details for ${item.title}`}
+                    onClick={(event) => {
+                      openClass(item, event.currentTarget, false);
+                    }}
+                  />
+                  <div className="menu-card-image">
+                    <Image
+                      src={item.image}
+                      alt={item.imageAlt}
+                      fill
+                      sizes="(max-width: 580px) 117px, (max-width: 1100px) 50vw, 430px"
+                    />
+                  </div>
+                  <div className="menu-card-body">
+                    <div className="menu-card-title-row">
+                      <h3>{item.title}</h3>
+                    </div>
+                    <div className="menu-card-subtext-row">
+                      <p>{item.description}</p>
+                      <button
+                        className="menu-card-save"
+                        type="button"
+                        aria-label={`Reserve a ${item.title} session`}
+                        onClick={(event) => {
+                          openClass(item, event.currentTarget, true);
+                        }}
+                      >
+                        <Plus className="cta-plus-icon" aria-hidden="true" />
+                        Reserve
+                      </button>
+                    </div>
+                  </div>
                 </article>
               ))}
             </div>
@@ -397,8 +379,8 @@ export function ClassMenu({ classes }: ClassMenuProps) {
                     });
                   }}
                 >
-                  <CalendarDays aria-hidden="true" />
                   Full Schedule
+                  <AnimatedArrowIcon />
                 </Link>
               </div>
             </div>
@@ -409,16 +391,48 @@ export function ClassMenu({ classes }: ClassMenuProps) {
   );
 }
 
-function getCardMorph(origin: DOMRect, target: DOMRect) {
-  const translateX = origin.left + origin.width / 2 - (target.left + target.width / 2);
-  const translateY = origin.top + origin.height / 2 - (target.top + target.height / 2);
-  const scaleX = Math.max(origin.width / target.width, 0.08);
-  const scaleY = Math.max(origin.height / target.height, 0.08);
+function getCardMorph(origin: HTMLElement, target: HTMLElement) {
+  const originRect = origin.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  const translateX =
+    originRect.left + originRect.width / 2 - (targetRect.left + targetRect.width / 2);
+  const translateY =
+    originRect.top + originRect.height / 2 - (targetRect.top + targetRect.height / 2);
+  const scaleX = Math.max(originRect.width / targetRect.width, 0.08);
+  const scaleY = Math.max(originRect.height / targetRect.height, 0.08);
 
   return {
-    borderRadius: `${18 / scaleX}px / ${18 / scaleY}px`,
+    borderRadius: getScaledBorderRadius(window.getComputedStyle(origin), scaleX, scaleY),
     transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scaleX}, ${scaleY})`,
   };
+}
+
+function getScaledBorderRadius(
+  style: CSSStyleDeclaration,
+  scaleX: number,
+  scaleY: number,
+) {
+  const corners = [
+    style.borderTopLeftRadius,
+    style.borderTopRightRadius,
+    style.borderBottomRightRadius,
+    style.borderBottomLeftRadius,
+  ].map(parsePixelRadius);
+  const horizontal = corners.map(([radius]) => `${radius / scaleX}px`).join(" ");
+  const vertical = corners.map(([, radius]) => `${radius / scaleY}px`).join(" ");
+
+  return `${horizontal} / ${vertical}`;
+}
+
+function parsePixelRadius(value: string): [number, number] {
+  const values = value.split(" ");
+  const horizontal = Number.parseFloat(values[0]);
+  const vertical = Number.parseFloat(values[1] ?? values[0]);
+
+  return [
+    Number.isFinite(horizontal) ? horizontal : 0,
+    Number.isFinite(vertical) ? vertical : 0,
+  ];
 }
 
 function prefersReducedMotion() {
