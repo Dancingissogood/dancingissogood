@@ -2014,23 +2014,22 @@ section[id] {
 }
 
 .calendar-event-copy {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  justify-content: flex-start;
+  align-content: center;
+  display: grid;
+  gap: 3px;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
   min-width: 0;
   padding: 7px 9px;
 }
 
 .calendar-event-time,
 .calendar-event-instructor {
-  flex: 0 0 auto;
   font-size: 0.72rem;
   opacity: 0.72;
 }
 
 .calendar-event-copy strong {
-  flex: 1 1 auto;
   font-size: 0.78rem;
   line-height: 1.2;
   overflow: hidden;
@@ -2369,6 +2368,8 @@ section[id] {
 
 .calendar-event-time {
   font-size: 0.66rem;
+  grid-column: 1;
+  grid-row: 2;
   line-height: 1.1;
   opacity: 0.68;
 }
@@ -2379,21 +2380,28 @@ section[id] {
 
 .calendar-event-copy strong {
   display: block;
-  flex: 1 1 auto;
   font-size: 0.76rem;
+  grid-column: 1 / -1;
+  grid-row: 1;
   line-height: 1.15;
   overflow: hidden;
+  min-width: 0;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .calendar-event-status {
   display: block;
-  flex: 0 0 auto;
   font-size: 0.62rem;
   font-weight: 600;
   line-height: 1.1;
   margin: 0;
+  max-width: none;
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
