@@ -8,6 +8,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import type { ClassMenuItem } from "@/content/site";
 
 export type CalendarEventDetails = {
+  availabilityStatus: "AVAILABLE" | "NO_VACANCY";
   anchor: {
     bottom: number;
     left: number;
@@ -16,8 +17,11 @@ export type CalendarEventDetails = {
   };
   classSessionId: string;
   classItem?: ClassMenuItem;
+  deliveryMode: "IN_PERSON" | "ONLINE";
   instructorName?: string;
   locationName?: string;
+  reservationCount: number;
+  spotsRemaining: number | null;
   timeLabel: string;
   title: string;
 };
@@ -79,7 +83,7 @@ export function CalendarEventPopover({
     <button
       className="calendar-event-popover-action"
       data-saved={isSaved}
-      disabled={isPending || !isAuthLoaded}
+      disabled={isPending || !isAuthLoaded || (!isSaved && details.availabilityStatus === "NO_VACANCY")}
       type="button"
       onClick={onToggleSaved}
     >
@@ -88,8 +92,45 @@ export function CalendarEventPopover({
       ) : (
         <Plus className="cta-plus-icon" aria-hidden="true" />
       )}
-      {isPending ? "Updating..." : isSaved ? "Reserved" : "Reserve class"}
+      {isPending
+        ? "Updating..."
+        : isSaved
+          ? "Reserved"
+          : details.availabilityStatus === "NO_VACANCY"
+            ? "No vacancy"
+            : "Reserve class"}
     </button>
+  );
+
+  const sessionDetails = (
+    <dl>
+      <div>
+        <dt>Booking</dt>
+        <dd>{details.availabilityStatus === "NO_VACANCY" ? "No vacancy" : "Available"}</dd>
+      </div>
+      <div>
+        <dt>Class format</dt>
+        <dd>{details.deliveryMode === "ONLINE" ? "Online class" : "In person"}</dd>
+      </div>
+      <div>
+        <dt>Reservations</dt>
+        <dd>{details.spotsRemaining === null
+          ? `${details.reservationCount} reserved`
+          : `${details.reservationCount} reserved · ${details.spotsRemaining} remaining`}</dd>
+      </div>
+      {details.instructorName ? (
+        <div>
+          <dt>Instructor</dt>
+          <dd>{details.instructorName}</dd>
+        </div>
+      ) : null}
+      {details.locationName ? (
+        <div>
+          <dt>Location</dt>
+          <dd>{details.locationName}</dd>
+        </div>
+      ) : null}
+    </dl>
   );
 
   return (
@@ -135,22 +176,7 @@ export function CalendarEventPopover({
         <span className="calendar-event-popover-time">{details.timeLabel}</span>
         <strong>{details.title}</strong>
         {details.classItem ? <p>{details.classItem.description}</p> : null}
-        {details.instructorName || details.locationName ? (
-          <dl>
-            {details.instructorName ? (
-              <div>
-                <dt>Instructor</dt>
-                <dd>{details.instructorName}</dd>
-              </div>
-            ) : null}
-            {details.locationName ? (
-              <div>
-                <dt>Location</dt>
-                <dd>{details.locationName}</dd>
-              </div>
-            ) : null}
-          </dl>
-        ) : null}
+        {sessionDetails}
         <div className="calendar-event-popover-actions">
           {!isAuthLoaded ? (
             <button className="calendar-event-popover-action" disabled type="button">
@@ -160,7 +186,9 @@ export function CalendarEventPopover({
             <button className="calendar-event-popover-action" disabled type="button">
               {error ? "Schedule unavailable" : "Checking schedule..."}
             </button>
-          ) : isSignedIn ? saveButton : (
+          ) : isSignedIn ? saveButton : details.availabilityStatus === "NO_VACANCY" ? (
+            <button className="calendar-event-popover-action" disabled type="button">No vacancy</button>
+          ) : (
             <SignInButton mode="modal">
               <button className="calendar-event-popover-action" type="button">
                 <Plus className="cta-plus-icon" aria-hidden="true" />

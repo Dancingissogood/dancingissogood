@@ -43,16 +43,26 @@ function getEventClassNames(eventInfo: EventContentArg) {
     (item) => item.key === eventInfo.event.extendedProps["classKey"],
   );
 
-  switch (classItem?.category) {
+  const categoryClass = (() => {
+    switch (classItem?.category) {
     case "Latin Rhythms":
-      return ["calendar-event-latin"];
+      return "calendar-event-latin";
     case "Swing Rhythms":
-      return ["calendar-event-swing"];
+      return "calendar-event-swing";
     case "Smooth Rhythms":
-      return ["calendar-event-smooth"];
+      return "calendar-event-smooth";
     default:
-      return ["calendar-event-default"];
-  }
+      return "calendar-event-default";
+    }
+  })();
+
+  return [
+    categoryClass,
+    eventInfo.event.extendedProps["availabilityStatus"] === "NO_VACANCY"
+      ? "calendar-event-no-vacancy"
+      : "calendar-event-available",
+    eventInfo.event.extendedProps["deliveryMode"] === "ONLINE" ? "calendar-event-online" : "",
+  ].filter(Boolean);
 }
 
 export function PublicSchedule() {
@@ -115,6 +125,10 @@ export function PublicSchedule() {
     const rect = element.getBoundingClientRect();
     const instructorName = event.extendedProps["instructorName"];
     const locationName = event.extendedProps["locationName"];
+    const availabilityStatus = event.extendedProps["availabilityStatus"];
+    const deliveryMode = event.extendedProps["deliveryMode"];
+    const reservationCount = event.extendedProps["reservationCount"];
+    const spotsRemaining = event.extendedProps["spotsRemaining"];
 
     setEventDetails({
       anchor: {
@@ -123,14 +137,18 @@ export function PublicSchedule() {
         right: rect.right,
         top: rect.top,
       },
+      availabilityStatus: availabilityStatus === "NO_VACANCY" ? "NO_VACANCY" : "AVAILABLE",
       classSessionId: event.id,
       classItem: classMenuItems.find((item) => item.key === event.extendedProps["classKey"]),
+      deliveryMode: deliveryMode === "ONLINE" ? "ONLINE" : "IN_PERSON",
       instructorName: typeof instructorName === "string" && instructorName
         ? instructorName
         : undefined,
       locationName: typeof locationName === "string" && locationName
         ? locationName
         : undefined,
+      reservationCount: typeof reservationCount === "number" ? reservationCount : 0,
+      spotsRemaining: typeof spotsRemaining === "number" ? spotsRemaining : null,
       timeLabel: event.start
         ? `${scheduleDateTimeFormatter.format(event.start)}${event.end ? ` - ${scheduleEndTimeFormatter.format(event.end)}` : ""}`
         : "Time unavailable",
@@ -172,7 +190,7 @@ export function PublicSchedule() {
     eventInfo.el.tabIndex = 0;
     eventInfo.el.setAttribute(
       "aria-label",
-      `${eventInfo.event.title}. View details and reserve this class.`,
+      `${eventInfo.event.title}. ${eventInfo.event.extendedProps["availabilityStatus"] === "NO_VACANCY" ? "No vacancy." : "Available to reserve."} View class details.`,
     );
     eventInfo.el.addEventListener("focus", showDetails);
     eventInfo.el.addEventListener("blur", scheduleHide);
@@ -255,9 +273,14 @@ export function PublicSchedule() {
           parsed.data.sessions.map((session) => ({
             end: session.endsAt,
             extendedProps: {
+              availabilityStatus: session.availabilityStatus,
+              bookingStatus: session.bookingStatus,
               classKey: session.classKey,
+              deliveryMode: session.deliveryMode,
               instructorName: session.instructorName,
               locationName: session.locationName,
+              reservationCount: session.reservationCount,
+              spotsRemaining: session.spotsRemaining,
             },
             id: session.id,
             start: session.startsAt,
@@ -315,6 +338,8 @@ export function PublicSchedule() {
         await reserveClassSession(sessionId);
         setReservedSessionIds((current) => new Set(current).add(sessionId));
       }
+
+      calendarRef.current?.getApi().refetchEvents();
 
       window.dispatchEvent(new CustomEvent("personal-schedule-changed"));
     } catch (caughtError) {

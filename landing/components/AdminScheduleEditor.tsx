@@ -11,7 +11,7 @@ import type { DateClickArg } from "@fullcalendar/interaction";
 import luxonPlugin from "@fullcalendar/luxon3";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { CalendarPlus, UserRound, X } from "lucide-react";
+import { CalendarPlus, UserRound, Video, X } from "lucide-react";
 import { DateTime } from "luxon";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -26,10 +26,12 @@ import { useMediaQuery } from "@/lib/use-media-query";
 const SESSION_MINUTES = 20;
 
 type SessionDraft = {
+  bookingStatus: "OPEN" | "CLOSED";
   capacity: string;
   classKey: string;
   date: string;
   description: string;
+  deliveryMode: "IN_PERSON" | "ONLINE";
   instructorName: string;
   locationName: string;
   published: boolean;
@@ -37,13 +39,23 @@ type SessionDraft = {
   title: string;
 };
 
+type BulkDraft = {
+  bookingStatus: "" | "OPEN" | "CLOSED";
+  classKey: string;
+  deliveryMode: "" | "IN_PERSON" | "ONLINE";
+  from: string;
+  through: string;
+};
+
 const emptyDraft = (): SessionDraft => {
   const start = DateTime.now().setZone(STUDIO_TIME_ZONE).plus({ days: 1 }).startOf("day").set({ hour: 9 });
   return {
+    bookingStatus: "OPEN",
     capacity: "",
     classKey: "",
     date: start.toFormat("yyyy-MM-dd"),
     description: "",
+    deliveryMode: "IN_PERSON",
     instructorName: "",
     locationName: "",
     published: true,
@@ -52,15 +64,30 @@ const emptyDraft = (): SessionDraft => {
   };
 };
 
+const emptyBulkDraft = (): BulkDraft => {
+  const start = DateTime.now().setZone(STUDIO_TIME_ZONE).plus({ days: 1 }).startOf("day");
+  return {
+    bookingStatus: "",
+    classKey: "",
+    deliveryMode: "",
+    from: start.toFormat("yyyy-MM-dd"),
+    through: start.toFormat("yyyy-MM-dd"),
+  };
+};
+
 export function AdminScheduleEditor() {
   const isMobileCalendar = useMediaQuery("(max-width: 820px)");
   const calendarRef = useRef<FullCalendar>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [draft, setDraft] = useState<SessionDraft>(emptyDraft);
+  const [bulkDraft, setBulkDraft] = useState<BulkDraft>(emptyBulkDraft);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedSession, setSelectedSession] = useState<ClassSession | null>(null);
   const [requestError, setRequestError] = useState<string | null>(null);
   const [accessDenied, setAccessDenied] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isBulkSaving, setIsBulkSaving] = useState(false);
+  const [bulkMessage, setBulkMessage] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const sessionsRef = useRef(new Map<string, ClassSession>());
 
@@ -122,6 +149,7 @@ export function AdminScheduleEditor() {
       time: selected.toFormat("HH:mm"),
     });
     setEditingId(null);
+    setSelectedSession(null);
     setConfirmDelete(false);
     setRequestError(null);
     dialogRef.current?.showModal();
@@ -137,9 +165,11 @@ export function AdminScheduleEditor() {
     const startsAt = DateTime.fromISO(session.startsAt).setZone(STUDIO_TIME_ZONE);
     setDraft({
       capacity: session.capacity?.toString() ?? "",
+      bookingStatus: session.bookingStatus,
       classKey: session.classKey,
       date: startsAt.toFormat("yyyy-MM-dd"),
       description: session.description ?? "",
+      deliveryMode: session.deliveryMode,
       instructorName: session.instructorName ?? "",
       locationName: session.locationName ?? "",
       published: session.published,
@@ -147,6 +177,7 @@ export function AdminScheduleEditor() {
       title: session.title,
     });
     setEditingId(session.id);
+    setSelectedSession(session);
     setConfirmDelete(false);
     setRequestError(null);
     dialogRef.current?.showModal();
@@ -209,9 +240,11 @@ export function AdminScheduleEditor() {
     }
 
     const body = {
+      bookingStatus: draft.bookingStatus,
       capacity: draft.capacity ? Number(draft.capacity) : null,
       classKey: draft.classKey,
       description: draft.description.trim() || null,
+      deliveryMode: draft.deliveryMode,
       endsAt: startsAt.plus({ minutes: SESSION_MINUTES }).toUTC().toISO(),
       instructorName: draft.instructorName.trim() || null,
       locationName: draft.locationName.trim() || null,
@@ -241,6 +274,55 @@ export function AdminScheduleEditor() {
       setRequestError(caughtError instanceof Error ? caughtError.message : "The class could not be saved.");
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function saveBulkUpdate(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBulkMessage(null);
+
+    if (!bulkDraft.bookingStatus && !bulkDraft.deliveryMode) {
+      setBulkMessage("Choose a booking or class-format update first.");
+      return;
+    }
+
+    const from = DateTime.fromISO(bulkDraft.from, { zone: STUDIO_TIME_ZONE }).startOf("day");
+    const through = DateTime.fromISO(bulkDraft.through, { zone: STUDIO_TIME_ZONE }).startOf("day");
+
+    if (!from.isValid || !through.isValid || through < from) {
+      setBulkMessage("Choose a valid date range.");
+      return;
+    }
+
+    setIsBulkSaving(true);
+    setRequestError(null);
+
+    try {
+      const response = await fetch("/api/admin/class-sessions/bulk", {
+        body: JSON.stringify({
+          ...(bulkDraft.bookingStatus ? { bookingStatus: bulkDraft.bookingStatus } : {}),
+          ...(bulkDraft.classKey ? { classKey: bulkDraft.classKey } : {}),
+          ...(bulkDraft.deliveryMode ? { deliveryMode: bulkDraft.deliveryMode } : {}),
+          from: from.toUTC().toISO(),
+          to: through.plus({ days: 1 }).toUTC().toISO(),
+        }),
+        headers: { "content-type": "application/json" },
+        method: "PATCH",
+      });
+      const payload: unknown = await response.json();
+
+      if (!response.ok || !isBulkUpdateResponse(payload)) {
+        throw new Error(getErrorMessage(payload, "The selected classes could not be updated."));
+      }
+
+      setBulkMessage(`${payload.updated} ${payload.updated === 1 ? "class" : "classes"} updated.`);
+      refetchEvents();
+    } catch (caughtError) {
+      setBulkMessage(
+        caughtError instanceof Error ? caughtError.message : "The selected classes could not be updated.",
+      );
+    } finally {
+      setIsBulkSaving(false);
     }
   }
 
@@ -311,13 +393,64 @@ export function AdminScheduleEditor() {
 
         {requestError ? <p className="admin-alert" role="alert">{requestError}</p> : null}
 
+        <section className="admin-bulk-update" aria-labelledby="bulk-update-title">
+          <div className="admin-bulk-update-heading">
+            <div>
+              <p className="eyebrow">Bulk update</p>
+              <h2 id="bulk-update-title">Update a group of classes</h2>
+            </div>
+            <p>Leave a setting unchanged unless you want it applied to every matching class.</p>
+          </div>
+          <form onSubmit={saveBulkUpdate}>
+            <label className="field">
+              <span>From</span>
+              <input required type="date" value={bulkDraft.from} onChange={(event) => setBulkDraft({ ...bulkDraft, from: event.target.value })} />
+            </label>
+            <label className="field">
+              <span>Through</span>
+              <input required type="date" value={bulkDraft.through} onChange={(event) => setBulkDraft({ ...bulkDraft, through: event.target.value })} />
+            </label>
+            <label className="field">
+              <span>Class</span>
+              <select value={bulkDraft.classKey} onChange={(event) => setBulkDraft({ ...bulkDraft, classKey: event.target.value })}>
+                <option value="">All classes</option>
+                {classMenuItems.map((classItem) => <option key={classItem.key} value={classItem.key}>{classItem.title}</option>)}
+              </select>
+            </label>
+            <label className="field">
+              <span>Reservations</span>
+              <select value={bulkDraft.bookingStatus} onChange={(event) => setBulkDraft({ ...bulkDraft, bookingStatus: event.target.value as BulkDraft["bookingStatus"] })}>
+                <option value="">No change</option>
+                <option value="OPEN">Available</option>
+                <option value="CLOSED">No vacancy</option>
+              </select>
+            </label>
+            <label className="field">
+              <span>Class format</span>
+              <select value={bulkDraft.deliveryMode} onChange={(event) => setBulkDraft({ ...bulkDraft, deliveryMode: event.target.value as BulkDraft["deliveryMode"] })}>
+                <option value="">No change</option>
+                <option value="IN_PERSON">In person</option>
+                <option value="ONLINE">Online class</option>
+              </select>
+            </label>
+            <button className="button admin-button-primary" disabled={isBulkSaving} type="submit">
+              {isBulkSaving ? "Updating..." : "Apply update"}
+            </button>
+          </form>
+          {bulkMessage ? <p className="admin-bulk-message" role="status">{bulkMessage}</p> : null}
+        </section>
+
         <section className="admin-calendar" aria-label="Class schedule editor">
           <FullCalendar
             allDaySlot={false}
             dateClick={(selection: DateClickArg) => openNewSession(selection.date)}
             dayHeaderFormat={{ weekday: "short", day: "numeric" }}
             editable
-            eventClassNames={(eventInfo) => eventInfo.event.extendedProps["published"] ? [] : ["schedule-event-unpublished"]}
+            eventClassNames={(eventInfo) => [
+              eventInfo.event.extendedProps["published"] ? "" : "schedule-event-unpublished",
+              `schedule-event-${String(eventInfo.event.extendedProps["availabilityStatus"]).toLowerCase()}`,
+              eventInfo.event.extendedProps["deliveryMode"] === "ONLINE" ? "schedule-event-online" : "",
+            ].filter(Boolean)}
             eventClick={openExistingSession}
             eventContent={(eventInfo) => <CalendarEventContent eventInfo={eventInfo} />}
             eventDurationEditable={false}
@@ -346,7 +479,14 @@ export function AdminScheduleEditor() {
         </section>
       </div>
 
-      <dialog className="schedule-dialog" ref={dialogRef} onClose={() => setConfirmDelete(false)}>
+      <dialog
+        className="schedule-dialog"
+        ref={dialogRef}
+        onClose={() => {
+          setConfirmDelete(false);
+          setSelectedSession(null);
+        }}
+      >
         <form onSubmit={saveSession}>
           <div className="schedule-dialog-heading">
             <div>
@@ -390,11 +530,36 @@ export function AdminScheduleEditor() {
               <span>Capacity</span>
               <input min={1} max={500} type="number" value={draft.capacity} onChange={(event) => setDraft({ ...draft, capacity: event.target.value })} />
             </label>
+            <fieldset className="schedule-choice-field field">
+              <legend>Class format</legend>
+              <div className="schedule-choice-group">
+                <button className={draft.deliveryMode === "IN_PERSON" ? "is-selected" : ""} type="button" onClick={() => setDraft({ ...draft, deliveryMode: "IN_PERSON" })}>In person</button>
+                <button className={draft.deliveryMode === "ONLINE" ? "is-selected" : ""} type="button" onClick={() => setDraft({ ...draft, deliveryMode: "ONLINE" })}><Video aria-hidden="true" size={15} /> Online</button>
+              </div>
+            </fieldset>
+            <fieldset className="schedule-choice-field field">
+              <legend>Reservations</legend>
+              <div className="schedule-choice-group">
+                <button className={draft.bookingStatus === "OPEN" ? "is-selected" : ""} type="button" onClick={() => setDraft({ ...draft, bookingStatus: "OPEN" })}>Available</button>
+                <button className={draft.bookingStatus === "CLOSED" ? "is-selected" : ""} type="button" onClick={() => setDraft({ ...draft, bookingStatus: "CLOSED" })}>No vacancy</button>
+              </div>
+            </fieldset>
             <label className="publish-control">
               <input type="checkbox" checked={draft.published} onChange={(event) => setDraft({ ...draft, published: event.target.checked })} />
               <span>Published</span>
             </label>
           </div>
+          {selectedSession ? (
+            <p className="schedule-session-summary">
+              {selectedSession.reservationCount} reserved
+              {selectedSession.capacity !== null
+                ? ` of ${selectedSession.capacity}`
+                : ""}
+              {selectedSession.spotsRemaining !== null
+                ? ` · ${selectedSession.spotsRemaining} remaining`
+                : " · Unlimited capacity"}
+            </p>
+          ) : null}
           <label className="field field-wide">
             <span>Description</span>
             <textarea maxLength={1_000} rows={4} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} />
@@ -422,14 +587,26 @@ function toCalendarEvent(session: ClassSession): EventInput {
   return {
     end: session.endsAt,
     extendedProps: {
+      availabilityStatus: session.availabilityStatus,
+      bookingStatus: session.bookingStatus,
+      deliveryMode: session.deliveryMode,
       instructorName: session.instructorName,
       locationName: session.locationName,
       published: session.published,
+      reservationCount: session.reservationCount,
+      spotsRemaining: session.spotsRemaining,
     },
     id: session.id,
     start: session.startsAt,
     title: session.title,
   };
+}
+
+function isBulkUpdateResponse(payload: unknown): payload is { updated: number } {
+  return typeof payload === "object"
+    && payload !== null
+    && "updated" in payload
+    && typeof payload.updated === "number";
 }
 
 function getErrorMessage(payload: unknown, defaultMessage: string) {

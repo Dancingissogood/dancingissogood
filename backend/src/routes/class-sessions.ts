@@ -6,6 +6,7 @@ import { AccountIdentityConflictError } from "../accounts.js";
 import { authorizeAdministrator } from "../authorization.js";
 import type { AuthorizationResult } from "../authorization.js";
 import type { IdentityProvider } from "../auth.js";
+import { getClassAvailability } from "../class-availability.js";
 
 const SESSION_DURATION_MILLISECONDS = 20 * 60 * 1_000;
 const MAXIMUM_QUERY_RANGE_MILLISECONDS = 93 * 24 * 60 * 60 * 1_000;
@@ -42,11 +43,15 @@ const scheduleQuerySchema = z
 
 const nullableTextSchema = (maximumLength: number) =>
   z.union([z.string().trim().min(1).max(maximumLength), z.null()]);
+const classDeliveryModeSchema = z.enum(["IN_PERSON", "ONLINE"]);
+const classBookingStatusSchema = z.enum(["OPEN", "CLOSED"]);
 
 const classSessionFieldsSchema = z
   .object({
+    bookingStatus: classBookingStatusSchema.default("OPEN"),
     capacity: z.union([z.number().int().min(1).max(500), z.null()]),
     classKey: z.string().trim().min(1).max(80).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+    deliveryMode: classDeliveryModeSchema.default("IN_PERSON"),
     description: nullableTextSchema(1_000),
     endsAt: dateTimeSchema,
     instructorName: nullableTextSchema(120),
@@ -61,6 +66,28 @@ const createClassSessionSchema = classSessionFieldsSchema.superRefine(validateSe
 const updateClassSessionSchema = classSessionFieldsSchema
   .partial()
   .refine((value) => Object.keys(value).length > 0, "At least one field is required.");
+const bulkClassSessionUpdateSchema = z
+  .object({
+    bookingStatus: classBookingStatusSchema.optional(),
+    capacity: z.union([z.number().int().min(1).max(500), z.null()]).optional(),
+    classKey: z.string().trim().min(1).max(80).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).optional(),
+    deliveryMode: classDeliveryModeSchema.optional(),
+    from: dateTimeSchema,
+    to: dateTimeSchema,
+  })
+  .strict()
+  .superRefine((value, context) => {
+    const from = Date.parse(value.from);
+    const to = Date.parse(value.to);
+
+    if (to <= from || to - from > MAXIMUM_QUERY_RANGE_MILLISECONDS) {
+      context.addIssue({ code: "custom", message: "Invalid class date range.", path: ["to"] });
+    }
+
+    if (value.bookingStatus === undefined && value.capacity === undefined && value.deliveryMode === undefined) {
+      context.addIssue({ code: "custom", message: "Choose at least one update." });
+    }
+  });
 
 function validateDuration(
   session: { startsAt: string; endsAt: string },
@@ -129,8 +156,10 @@ function sendAuthorizationFailure(reply: FastifyReply, authorization: Authorizat
 }
 
 function serializeClassSession(session: {
+  bookingStatus: "OPEN" | "CLOSED";
   capacity: number | null;
   classKey: string;
+  deliveryMode: "IN_PERSON" | "ONLINE";
   description: string | null;
   endsAt: Date;
   id: string;
@@ -139,10 +168,16 @@ function serializeClassSession(session: {
   published: boolean;
   startsAt: Date;
   title: string;
-}) {
+}, reservationCount: number) {
   return {
     ...session,
+    ...getClassAvailability({
+      bookingStatus: session.bookingStatus,
+      capacity: session.capacity,
+      reservationCount,
+    }),
     endsAt: session.endsAt.toISOString(),
+    reservationCount,
     startsAt: session.startsAt.toISOString(),
   };
 }
@@ -155,8 +190,11 @@ async function listClassSessions(
   const sessions = await database.classSession.findMany({
     orderBy: [{ startsAt: "asc" }, { title: "asc" }],
     select: {
+      _count: { select: { registrations: { where: { status: "RESERVED" } } } },
+      bookingStatus: true,
       capacity: true,
       classKey: true,
+      deliveryMode: true,
       description: true,
       endsAt: true,
       id: true,
@@ -173,7 +211,12 @@ async function listClassSessions(
     },
   });
 
-  return { sessions: sessions.map(serializeClassSession) };
+  return {
+    sessions: sessions.map((session) => {
+      const { _count, ...classSession } = session;
+      return serializeClassSession(classSession, _count.registrations);
+    }),
+  };
 }
 
 export async function registerClassSessionRoutes(
@@ -238,7 +281,7 @@ export async function registerClassSessionRoutes(
         },
       });
 
-      return reply.code(201).send({ session: serializeClassSession(session) });
+      return reply.code(201).send({ session: serializeClassSession(session, 0) });
     } catch (error) {
       return handleAdministrativeError(request, reply, error, "create the class session");
     }
@@ -279,6 +322,18 @@ export async function registerClassSessionRoutes(
         });
       }
 
+      if (typeof body.data.capacity === "number") {
+        const reservationCount = await dependencies.database.classRegistration.count({
+          where: { classSessionId: existing.id, status: "RESERVED" },
+        });
+
+        if (reservationCount > body.data.capacity) {
+          return reply.code(409).send({
+            error: "Capacity cannot be set below the number of existing reservations.",
+          });
+        }
+      }
+
       const session = await dependencies.database.classSession.update({
         data: {
           ...body.data,
@@ -289,9 +344,73 @@ export async function registerClassSessionRoutes(
         where: { id: sessionId },
       });
 
-      return reply.send({ session: serializeClassSession(session) });
+      const reservationCount = await dependencies.database.classRegistration.count({
+        where: { classSessionId: session.id, status: "RESERVED" },
+      });
+
+      return reply.send({ session: serializeClassSession(session, reservationCount) });
     } catch (error) {
       return handleAdministrativeError(request, reply, error, "update the class session");
+    }
+  });
+
+  app.patch("/v1/admin/class-sessions/bulk", async (request, reply) => {
+    const body = bulkClassSessionUpdateSchema.safeParse(request.body);
+
+    if (!body.success) {
+      return reply.code(400).send({ error: "Invalid bulk class update." });
+    }
+
+    try {
+      const authorization = await authorizeAdministrator(request, dependencies);
+      const failure = sendAuthorizationFailure(reply, authorization);
+
+      if (failure || authorization.status !== "authorized") {
+        return failure;
+      }
+
+      const where = {
+        ...(body.data.classKey ? { classKey: body.data.classKey } : {}),
+        startsAt: { gte: new Date(body.data.from), lt: new Date(body.data.to) },
+      };
+      const requestedCapacity = body.data.capacity;
+
+      const result = await dependencies.database.$transaction(async (transaction) => {
+        const sessions = await transaction.classSession.findMany({
+          select: {
+            _count: { select: { registrations: { where: { status: "RESERVED" } } } },
+            id: true,
+          },
+          where,
+        });
+
+        if (
+          typeof requestedCapacity === "number"
+          && sessions.some((session) => session._count.registrations > requestedCapacity)
+        ) {
+          throw new CapacityBelowReservationsError();
+        }
+
+        return transaction.classSession.updateMany({
+          data: {
+            ...(body.data.bookingStatus === undefined ? {} : { bookingStatus: body.data.bookingStatus }),
+            ...(body.data.capacity === undefined ? {} : { capacity: body.data.capacity }),
+            ...(body.data.deliveryMode === undefined ? {} : { deliveryMode: body.data.deliveryMode }),
+            updatedById: authorization.userId,
+          },
+          where: { id: { in: sessions.map((session) => session.id) } },
+        });
+      });
+
+      return reply.send({ updated: result.count });
+    } catch (error) {
+      if (error instanceof CapacityBelowReservationsError) {
+        return reply.code(409).send({
+          error: "Capacity cannot be set below the number of existing reservations.",
+        });
+      }
+
+      return handleAdministrativeError(request, reply, error, "update the selected classes");
     }
   });
 
@@ -333,6 +452,8 @@ export async function registerClassSessionRoutes(
     }
   });
 }
+
+class CapacityBelowReservationsError extends Error {}
 
 function handleAdministrativeError(
   request: FastifyRequest,

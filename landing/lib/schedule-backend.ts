@@ -3,13 +3,18 @@ import "server-only";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-import { classSessionListSchema, classSessionMutationSchema } from "@/lib/schedule";
+import {
+  bulkClassSessionUpdateSchema,
+  classSessionListSchema,
+  classSessionMutationSchema,
+} from "@/lib/schedule";
 
 type ScheduleRequestOptions = {
   admin: boolean;
   body?: unknown;
   method: "DELETE" | "GET" | "PATCH" | "POST";
   path: string;
+  responseType?: "bulk-update" | "class-session";
 };
 
 export async function forwardScheduleRequest(options: ScheduleRequestOptions) {
@@ -49,7 +54,9 @@ export async function forwardScheduleRequest(options: ScheduleRequestOptions) {
 
     const parsed = options.method === "GET"
       ? classSessionListSchema.safeParse(payload)
-      : classSessionMutationSchema.safeParse(payload);
+      : options.responseType === "bulk-update"
+        ? bulkClassSessionUpdateSchema.safeParse(payload)
+        : classSessionMutationSchema.safeParse(payload);
 
     if (!parsed.success) {
       return NextResponse.json({ error: "The schedule service returned invalid data." }, { status: 502 });

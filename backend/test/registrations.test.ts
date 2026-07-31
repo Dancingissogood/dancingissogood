@@ -47,6 +47,7 @@ test("reservations require a paid usable pass and retain cancellation history", 
   };
   const session = await database.classSession.create({
     data: {
+      capacity: 1,
       classKey: "waltz",
       endsAt: new Date(`${futureYear}-07-08T13:20:00.000Z`),
       startsAt: new Date(`${futureYear}-07-08T13:00:00.000Z`),
@@ -64,6 +65,7 @@ test("reservations require a paid usable pass and retain cancellation history", 
     },
   });
   const app = await buildApp({ database, identityProvider });
+  let occupiedUserId: string | undefined;
 
   try {
     const withoutPass = await app.inject({
@@ -148,6 +150,47 @@ test("reservations require a paid usable pass and retain cancellation history", 
       null,
     );
 
+    await database.classSession.update({
+      data: { bookingStatus: "CLOSED" },
+      where: { id: session.id },
+    });
+    await app.inject({
+      headers: { authorization: "Bearer member" },
+      method: "DELETE",
+      url: `/v1/account/reservations/${session.id}`,
+    });
+    const occupyingUser = await database.userProfile.create({
+      data: {
+        clerkUserId: `capacity_${suffix}`,
+        email: `capacity-${suffix}@example.com`,
+      },
+    });
+    occupiedUserId = occupyingUser.id;
+    await database.classRegistration.create({
+      data: { classSessionId: session.id, userId: occupyingUser.id },
+    });
+    const fullClass = await app.inject({
+      headers: { authorization: "Bearer member" },
+      method: "POST",
+      payload: { classSessionId: session.id },
+      url: "/v1/account/reservations",
+    });
+    assert.equal(fullClass.statusCode, 409);
+    assert.equal(fullClass.json().code, "NO_VACANCY");
+    await database.classRegistration.deleteMany({
+      where: { classSessionId: session.id, userId: occupyingUser.id },
+    });
+    await database.userProfile.delete({ where: { id: occupyingUser.id } });
+    occupiedUserId = undefined;
+    const closedClass = await app.inject({
+      headers: { authorization: "Bearer member" },
+      method: "POST",
+      payload: { classSessionId: session.id },
+      url: "/v1/account/reservations",
+    });
+    assert.equal(closedClass.statusCode, 409);
+    assert.equal(closedClass.json().code, "NO_VACANCY");
+
     await database.classRegistration.deleteMany({ where: { classSessionId: session.id } });
     await database.passPurchase.delete({ where: { id: purchase.id } });
   } finally {
@@ -157,6 +200,9 @@ test("reservations require a paid usable pass and retain cancellation history", 
     await database.marketingConsentEvent.deleteMany({ where: { email } });
     await database.marketingPreference.deleteMany({ where: { email } });
     await database.userProfile.deleteMany({ where: { clerkUserId } });
+    if (occupiedUserId) {
+      await database.userProfile.deleteMany({ where: { id: occupiedUserId } });
+    }
     await database.passProduct.delete({ where: { id: product.id } });
     await app.close();
   }

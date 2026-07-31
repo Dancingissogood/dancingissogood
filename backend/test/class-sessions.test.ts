@@ -18,6 +18,8 @@ test("public schedule returns only published sessions in the requested range", a
   const published = await database.classSession.create({
     data: {
       classKey: `published-${suffix}`,
+      capacity: 12,
+      deliveryMode: "ONLINE",
       endsAt: new Date("2026-07-20T13:20:00.000Z"),
       published: true,
       startsAt: new Date("2026-07-20T13:00:00.000Z"),
@@ -46,6 +48,21 @@ test("public schedule returns only published sessions in the requested range", a
     const ids = response.json().sessions.map((session: { id: string }) => session.id);
     assert.equal(ids.includes(published.id), true);
     assert.equal(ids.includes(unpublished.id), false);
+    const publicSession = response.json().sessions.find((session: { id: string }) => session.id === published.id);
+    assert.deepEqual(
+      {
+        availabilityStatus: publicSession.availabilityStatus,
+        deliveryMode: publicSession.deliveryMode,
+        reservationCount: publicSession.reservationCount,
+        spotsRemaining: publicSession.spotsRemaining,
+      },
+      {
+        availabilityStatus: "AVAILABLE",
+        deliveryMode: "ONLINE",
+        reservationCount: 0,
+        spotsRemaining: 12,
+      },
+    );
   } finally {
     await database.classSession.deleteMany({ where: { id: { in: [published.id, unpublished.id] } } });
     await app.close();
@@ -202,6 +219,79 @@ test("an administrator can create, move, list, and delete a 20-minute class", as
     if (registeredUserId) {
       await database.userProfile.delete({ where: { id: registeredUserId } });
     }
+    await database.userProfile.delete({ where: { id: user.id } });
+    await app.close();
+  }
+});
+
+test("an administrator can bulk update booking state and class format", async () => {
+  const database = createDatabaseClient();
+  const suffix = randomUUID();
+  const clerkUserId = `bulk_admin_${suffix}`;
+  const email = `bulk-admin-${suffix}@example.com`;
+  const user = await database.userProfile.create({
+    data: { clerkUserId, email, role: "ADMIN" },
+  });
+  const matching = await database.classSession.create({
+    data: {
+      classKey: "waltz",
+      endsAt: new Date("2026-07-20T13:20:00.000Z"),
+      startsAt: new Date("2026-07-20T13:00:00.000Z"),
+      title: `Bulk target ${suffix}`,
+    },
+  });
+  const other = await database.classSession.create({
+    data: {
+      classKey: "samba",
+      startsAt: new Date("2026-07-21T13:00:00.000Z"),
+      endsAt: new Date("2026-07-21T13:20:00.000Z"),
+      title: `Bulk other ${suffix}`,
+    },
+  });
+  const identityProvider: IdentityProvider = {
+    configured: true,
+    authenticate: async () => ({
+      clerkUserId,
+      email,
+      firstName: "Test",
+      lastName: "Administrator",
+      phone: null,
+    }),
+  };
+  const app = await buildApp({ database, identityProvider });
+
+  try {
+    const response = await app.inject({
+      headers: { authorization: "Bearer valid-session" },
+      method: "PATCH",
+      payload: {
+        bookingStatus: "CLOSED",
+        classKey: "waltz",
+        deliveryMode: "ONLINE",
+        from: "2026-07-20T00:00:00.000Z",
+        to: "2026-07-21T00:00:00.000Z",
+      },
+      url: "/v1/admin/class-sessions/bulk",
+    });
+
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(response.json(), { updated: 1 });
+    assert.deepEqual(
+      await database.classSession.findUniqueOrThrow({
+        select: { bookingStatus: true, deliveryMode: true },
+        where: { id: matching.id },
+      }),
+      { bookingStatus: "CLOSED", deliveryMode: "ONLINE" },
+    );
+    assert.deepEqual(
+      await database.classSession.findUniqueOrThrow({
+        select: { bookingStatus: true, deliveryMode: true },
+        where: { id: other.id },
+      }),
+      { bookingStatus: "OPEN", deliveryMode: "IN_PERSON" },
+    );
+  } finally {
+    await database.classSession.deleteMany({ where: { id: { in: [matching.id, other.id] } } });
     await database.userProfile.delete({ where: { id: user.id } });
     await app.close();
   }

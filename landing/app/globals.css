@@ -2385,6 +2385,46 @@ section[id] {
   -webkit-line-clamp: 2;
 }
 
+.calendar-event-status {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1.1;
+  margin-top: 3px;
+}
+
+.calendar-event-status-available {
+  color: var(--peach-700);
+}
+
+.calendar-event-status-no_vacancy {
+  color: #625d58;
+}
+
+.public-calendar-shell .fc-event.calendar-event-available {
+  background: var(--peach-100);
+  border-color: var(--peach-300);
+}
+
+.public-calendar-shell .fc-event.calendar-event-online.calendar-event-available {
+  background: #edf1f0;
+  border-color: #c7d0cd;
+}
+
+.public-calendar-shell .fc-event.calendar-event-online.calendar-event-available .calendar-event-status {
+  color: #46615d;
+}
+
+.public-calendar-shell .fc-event.calendar-event-no-vacancy {
+  background: #e9e5e1;
+  border-color: #cfc7c1;
+  color: var(--charcoal-800);
+}
+
+.public-calendar-shell .fc-event.calendar-event-no-vacancy .calendar-event-status {
+  color: #625d58;
+}
+
 .calendar-state {
   background: transparent;
   border-bottom: 1px solid var(--line);
@@ -3301,6 +3341,140 @@ section[id] {
   opacity: 0.5;
 }
 
+.admin-calendar .fc-event.schedule-event-available {
+  background: var(--peach-100);
+  border-color: var(--peach-300);
+  color: var(--charcoal-950);
+}
+
+.admin-calendar .fc-event.schedule-event-online.schedule-event-available {
+  background: #edf1f0;
+  border-color: #c7d0cd;
+}
+
+.admin-calendar .fc-event.schedule-event-no_vacancy {
+  background: #e9e5e1;
+  border-color: #cfc7c1;
+  color: var(--charcoal-800);
+}
+
+.admin-bulk-update {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-top: 36px;
+  padding: 24px;
+}
+
+.admin-bulk-update-heading {
+  align-items: end;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.admin-bulk-update-heading h2 {
+  font-size: 1.35rem;
+  font-weight: 500;
+  margin: 4px 0 0;
+}
+
+.admin-bulk-update-heading > p {
+  color: var(--subtle);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin: 0;
+  max-width: 380px;
+}
+
+.admin-bulk-update form {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+}
+
+.admin-bulk-update .field {
+  gap: 6px;
+}
+
+.admin-bulk-update .field span {
+  font-size: 0.72rem;
+}
+
+.admin-bulk-update .button {
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.admin-bulk-message {
+  color: var(--subtle);
+  font-size: 0.8rem;
+  margin: 14px 0 0;
+}
+
+.admin-roster-status {
+  color: var(--subtle);
+  display: block;
+  font-size: 0.72rem;
+  margin-top: 3px;
+}
+
+.schedule-choice-field {
+  border: 0;
+  margin: 0;
+  min-inline-size: 0;
+  padding: 0;
+}
+
+.schedule-choice-field legend {
+  color: var(--charcoal-800);
+  font-size: 0.78rem;
+  margin-bottom: 8px;
+  padding: 0;
+}
+
+.schedule-choice-group {
+  display: flex;
+  gap: 6px;
+}
+
+.schedule-choice-group button {
+  background: var(--warm-white);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--charcoal-800);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 500;
+  gap: 5px;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 12px;
+}
+
+.schedule-choice-group button.is-selected {
+  background: var(--charcoal-900);
+  border-color: var(--charcoal-900);
+  color: var(--white);
+}
+
+.schedule-choice-group svg {
+  height: 14px;
+  width: 14px;
+}
+
+.schedule-session-summary {
+  border-bottom: 1px solid var(--line);
+  color: var(--subtle);
+  font-size: 0.8rem;
+  margin: 0;
+  padding: 0 0 18px;
+}
+
 .admin-access-state,
 .admin-dashboard-state {
   background: var(--white);
@@ -4076,6 +4250,20 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
+  .admin-bulk-update-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-bulk-update form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-bulk-update .button {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+
   .account-heading,
   .admin-heading {
     align-items: flex-start;
@@ -4690,6 +4878,20 @@ textarea:focus {
 
   .schedule-form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .admin-bulk-update {
+    margin-left: -4px;
+    margin-right: -4px;
+    padding: 20px;
+  }
+
+  .admin-bulk-update form {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-choice-group {
+    flex-wrap: wrap;
   }
 
   .schedule-dialog {

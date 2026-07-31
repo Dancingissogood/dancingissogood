@@ -7,6 +7,7 @@ import { MarketingPreference } from "@/components/MarketingPreference";
 
 export const metadata: Metadata = {
   title: "Welcome",
+  robots: { index: false, follow: false },
 };
 
 export default async function WelcomePage() {

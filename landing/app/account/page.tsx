@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Account",
   description: "Your passes, reservations, and account for Summer in the Mitten.",
+  robots: { index: false, follow: false },
 };
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {

@@ -7,6 +7,14 @@ import { CheckoutButton } from "@/components/CheckoutButton";
 import { PublicSchedule } from "@/components/PublicSchedule";
 import { ViewerTimeZoneLabel } from "@/components/ViewerTimeZoneLabel";
 import { classMenuItems } from "@/content/site";
+import { createPublicPageMetadata } from "@/lib/site-config";
+
+export const metadata = createPublicPageMetadata({
+  title: "Summer in the Mitten | Movement Series",
+  description:
+    "Straight to the heart of movement through dance, rhythm, connection, and well-being.",
+  path: "/",
+});
 
 const heroPathways = [
   {

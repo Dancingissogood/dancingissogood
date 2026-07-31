@@ -12,6 +12,13 @@ type CalendarEventContentProps = {
 export function CalendarEventContent({ eventInfo }: CalendarEventContentProps) {
   const classItem = classMenuItems.find((item) => item.title === eventInfo.event.title);
   const instructorName = eventInfo.event.extendedProps["instructorName"];
+  const availabilityStatus = eventInfo.event.extendedProps["availabilityStatus"];
+  const deliveryMode = eventInfo.event.extendedProps["deliveryMode"];
+  const statusLabel = availabilityStatus === "NO_VACANCY"
+    ? "No vacancy"
+    : deliveryMode === "ONLINE"
+      ? "Online class"
+      : "Available";
 
   return (
     <div className="calendar-event-content">
@@ -31,6 +38,9 @@ export function CalendarEventContent({ eventInfo }: CalendarEventContentProps) {
       <div className="calendar-event-copy">
         <span className="calendar-event-time">{eventInfo.timeText}</span>
         <strong>{eventInfo.event.title}</strong>
+        <span className={`calendar-event-status calendar-event-status-${String(availabilityStatus).toLowerCase()}`}>
+          {statusLabel}
+        </span>
         {typeof instructorName === "string" && instructorName ? (
           <span className="calendar-event-instructor">{instructorName}</span>
         ) : null}

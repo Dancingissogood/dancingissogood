@@ -18,8 +18,10 @@ type Registration = {
 };
 
 type DashboardSession = {
+  bookingStatus: "OPEN" | "CLOSED";
   capacity: number | null;
   classKey: string;
+  deliveryMode: "IN_PERSON" | "ONLINE";
   endsAt: string;
   id: string;
   instructorName: string | null;
@@ -151,7 +153,17 @@ export function AdminDashboard() {
               return (
                 <details className="admin-roster-session" key={session.id}>
                   <summary>
-                    <div><strong>{session.title}</strong><span>{dateTimeFormatter.format(new Date(session.startsAt))} ET</span></div>
+                    <div>
+                      <strong>{session.title}</strong>
+                      <span>{dateTimeFormatter.format(new Date(session.startsAt))} ET</span>
+                      <span className="admin-roster-status">
+                        {session.bookingStatus === "CLOSED"
+                          ? "No vacancy"
+                          : session.deliveryMode === "ONLINE"
+                            ? "Online class"
+                            : "Available"}
+                      </span>
+                    </div>
                     <b>{reservations.length}{session.capacity ? ` / ${session.capacity}` : ""}</b>
                   </summary>
                   {reservations.length > 0 ? (

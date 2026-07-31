@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { AccountIdentityConflictError, synchronizeAccount } from "../accounts.js";
 import type { IdentityProvider } from "../auth.js";
+import { getClassAvailability } from "../class-availability.js";
 
 const MAXIMUM_QUERY_RANGE_MILLISECONDS = 366 * 24 * 60 * 60 * 1_000;
 const dateTimeSchema = z.iso.datetime({ offset: true });
@@ -24,8 +25,11 @@ const registrationQuerySchema = z
 const registrationBodySchema = z.object({ classSessionId: sessionIdSchema }).strict();
 
 const sessionSelection = {
+  _count: { select: { registrations: { where: { status: "RESERVED" } } } },
+  bookingStatus: true,
   capacity: true,
   classKey: true,
+  deliveryMode: true,
   description: true,
   endsAt: true,
   id: true,
@@ -38,8 +42,11 @@ const sessionSelection = {
 
 type RegistrationRecord = {
   classSession: {
+    _count: { registrations: number };
+    bookingStatus: "OPEN" | "CLOSED";
     capacity: number | null;
     classKey: string;
+    deliveryMode: "IN_PERSON" | "ONLINE";
     description: string | null;
     endsAt: Date;
     id: string;
@@ -55,13 +62,21 @@ type RegistrationRecord = {
 };
 
 function serializeRegistration(registration: RegistrationRecord) {
+  const { _count, ...classSession } = registration.classSession;
+
   return {
     createdAt: registration.createdAt.toISOString(),
     id: registration.id,
     session: {
-      ...registration.classSession,
-      endsAt: registration.classSession.endsAt.toISOString(),
-      startsAt: registration.classSession.startsAt.toISOString(),
+      ...classSession,
+      ...getClassAvailability({
+        bookingStatus: classSession.bookingStatus,
+        capacity: classSession.capacity,
+        reservationCount: _count.registrations,
+      }),
+      endsAt: classSession.endsAt.toISOString(),
+      reservationCount: _count.registrations,
+      startsAt: classSession.startsAt.toISOString(),
     },
     status: registration.status,
   };
@@ -140,6 +155,7 @@ export async function registerRegistrationRoutes(
 
       const now = new Date();
       const classSession = await dependencies.database.classSession.findFirst({
+        select: { endsAt: true, id: true, startsAt: true },
         where: { id: body.data.classSessionId, published: true },
       });
 
@@ -171,24 +187,69 @@ export async function registerRegistrationRoutes(
         });
       }
 
-      const registration = await dependencies.database.classRegistration.upsert({
-        create: {
-          classSessionId: classSession.id,
-          passPurchaseId: passPurchase.id,
-          userId: user.id,
-        },
-        include: { classSession: true },
-        update: {
-          canceledAt: null,
-          passPurchaseId: passPurchase.id,
-          status: "RESERVED",
-        },
-        where: {
-          userId_classSessionId: {
-            classSessionId: classSession.id,
+      const registration = await dependencies.database.$transaction(async (transaction) => {
+        await transaction.$executeRaw`
+          SELECT pg_advisory_xact_lock(hashtextextended(${classSession.id}, 0))
+        `;
+
+        const lockedSession = await transaction.classSession.findFirst({
+          select: {
+            _count: { select: { registrations: { where: { status: "RESERVED" } } } },
+            bookingStatus: true,
+            capacity: true,
+            endsAt: true,
+            id: true,
+          },
+          where: { id: classSession.id, published: true },
+        });
+
+        if (!lockedSession || lockedSession.endsAt <= now) {
+          throw new ClassUnavailableError("This class session is not available.");
+        }
+
+        const existingRegistration = await transaction.classRegistration.findUnique({
+          include: { classSession: { select: sessionSelection } },
+          where: {
+            userId_classSessionId: {
+              classSessionId: lockedSession.id,
+              userId: user.id,
+            },
+          },
+        });
+
+        if (existingRegistration?.status === "RESERVED") {
+          return existingRegistration;
+        }
+
+        const availability = getClassAvailability({
+          bookingStatus: lockedSession.bookingStatus,
+          capacity: lockedSession.capacity,
+          reservationCount: lockedSession._count.registrations,
+        });
+
+        if (availability.availabilityStatus === "NO_VACANCY") {
+          throw new ClassUnavailableError("This class no longer has a vacancy.");
+        }
+
+        return transaction.classRegistration.upsert({
+          create: {
+            classSessionId: lockedSession.id,
+            passPurchaseId: passPurchase.id,
             userId: user.id,
           },
-        },
+          include: { classSession: { select: sessionSelection } },
+          update: {
+            canceledAt: null,
+            passPurchaseId: passPurchase.id,
+            status: "RESERVED",
+          },
+          where: {
+            userId_classSessionId: {
+              classSessionId: lockedSession.id,
+              userId: user.id,
+            },
+          },
+        });
       });
 
       reply.header("cache-control", "no-store");
@@ -233,6 +294,10 @@ function handleRegistrationError(
   error: unknown,
   action: string,
 ) {
+  if (error instanceof ClassUnavailableError) {
+    return reply.code(409).send({ code: "NO_VACANCY", error: error.message });
+  }
+
   if (error instanceof AccountIdentityConflictError) {
     request.log.warn(error, "Account identity conflict");
     return reply.code(409).send({ error: error.message });
@@ -241,3 +306,5 @@ function handleRegistrationError(
   request.log.error(error, `Unable to ${action}`);
   return reply.code(502).send({ error: `Unable to ${action}. Please try again.` });
 }
+
+class ClassUnavailableError extends Error {}

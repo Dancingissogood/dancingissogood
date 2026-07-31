@@ -42,8 +42,10 @@ export async function registerAdminDashboardRoutes(
           dependencies.database.classSession.findMany({
             orderBy: [{ startsAt: "asc" }, { title: "asc" }],
             select: {
+              bookingStatus: true,
               capacity: true,
               classKey: true,
+              deliveryMode: true,
               endsAt: true,
               id: true,
               instructorName: true,

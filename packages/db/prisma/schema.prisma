@@ -31,6 +31,16 @@ enum RegistrationStatus {
   NO_SHOW
 }
 
+enum ClassDeliveryMode {
+  IN_PERSON
+  ONLINE
+}
+
+enum ClassBookingStatus {
+  OPEN
+  CLOSED
+}
+
 enum UserRole {
   MEMBER
   ADMIN
@@ -129,6 +139,8 @@ model ClassSession {
   startsAt       DateTime
   endsAt         DateTime
   capacity       Int?
+  deliveryMode   ClassDeliveryMode  @default(IN_PERSON)
+  bookingStatus  ClassBookingStatus @default(OPEN)
   published      Boolean  @default(true)
   createdById    String?
   updatedById    String?

@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+import { createPublicPageMetadata } from "@/lib/site-config";
+
+export const metadata = createPublicPageMetadata({
   title: "Terms of Service",
   description: "Terms governing the Movement Series website, accounts, passes, and programs.",
-};
+  path: "/terms",
+});
 
 export default function TermsOfServicePage() {
   return (

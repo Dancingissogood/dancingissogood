@@ -1,16 +1,17 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
 import { AnimatedArrowIcon } from "@/components/AnimatedArrowIcon";
 import { StudioDirectory } from "@/components/StudioDirectory";
 import { studioProfiles } from "@/content/site";
+import { createPublicPageMetadata } from "@/lib/site-config";
 
-export const metadata: Metadata = {
+export const metadata = createPublicPageMetadata({
   title: "Partner Studios",
   description:
     "Movement Series partner studios, including Belleville Lake Dance Company and Rhizome Roots Studio.",
-};
+  path: "/studios",
+});
 
 export default function StudiosPage() {
   return (

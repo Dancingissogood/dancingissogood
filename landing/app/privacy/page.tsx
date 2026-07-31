@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import { createPublicPageMetadata } from "@/lib/site-config";
 
-export const metadata: Metadata = {
+export const metadata = createPublicPageMetadata({
   title: "Privacy Policy",
   description: "How Love Productions LLC collects, uses, and protects Movement Series information.",
-};
+  path: "/privacy",
+});
 
 export default function PrivacyPolicyPage() {
   return (

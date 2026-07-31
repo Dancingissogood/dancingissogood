@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 
 import { CheckoutStatus } from "@/components/CheckoutStatus";
+
+export const metadata: Metadata = {
+  title: "Purchase confirmation",
+  robots: { index: false, follow: false },
+};
 
 export default function PurchaseSuccessPage() {
   return (

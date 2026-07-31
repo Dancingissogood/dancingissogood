@@ -5,6 +5,7 @@ import { Outfit } from "next/font/google";
 import { MotionEffects } from "@/components/MotionEffects";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { siteConfig, siteUrl } from "@/lib/site-config";
 
 import "./globals.css";
 
@@ -14,31 +15,51 @@ const outfit = Outfit({
   variable: "--font-outfit",
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: siteUrl,
+  applicationName: siteConfig.name,
   title: {
     default: "Summer in the Mitten | Movement Series",
     template: "%s | Summer in the Mitten",
   },
-  description:
-    "A summer movement series of ballroom, Latin, swing, mobility, rhythm, and recovery in Southeast Michigan.",
-  openGraph: {
-    title: "Summer in the Mitten “Movement Series”",
-    description:
-      "Straight to the heart of movement through dance, rhythm, connection, and well-being.",
-    type: "website",
-    images: [
+  description: siteConfig.description,
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
       {
-        url: "/assets/movement-series-hero.webp",
-        width: 2400,
-        height: 1350,
-        alt: "Adults sharing ballroom dance and restorative movement in a bright studio",
+        url: "/icons/favicon-16x16.png",
+        sizes: "16x16",
+        type: "image/png",
+      },
+      {
+        url: "/icons/favicon-32x32.png",
+        sizes: "32x32",
+        type: "image/png",
       },
     ],
+    apple: [
+      {
+        url: "/icons/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: siteConfig.shortName,
   },
 };
 
