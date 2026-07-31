@@ -28,6 +28,7 @@ import { classMenuItems } from "@/content/site";
 import {
   cancelClassReservation,
   fetchRegistrations,
+  getClassJoinUrl,
   reserveClassSession,
 } from "@/lib/registrations-client";
 import { classSessionListSchema } from "@/lib/schedule";
@@ -97,6 +98,7 @@ export function PublicSchedule() {
   const [reservedSessionIds, setReservedSessionIds] = useState<Set<string>>(new Set());
   const [isReservationStateReady, setIsReservationStateReady] = useState(false);
   const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
+  const [isJoining, setIsJoining] = useState(false);
   const [reservationStateError, setReservationStateError] = useState<string | null>(null);
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -127,8 +129,9 @@ export function PublicSchedule() {
     const locationName = event.extendedProps["locationName"];
     const availabilityStatus = event.extendedProps["availabilityStatus"];
     const deliveryMode = event.extendedProps["deliveryMode"];
-    const reservationCount = event.extendedProps["reservationCount"];
-    const spotsRemaining = event.extendedProps["spotsRemaining"];
+    const startsAt = event.start?.toISOString() ?? "";
+    const endsAt = event.end?.toISOString() ?? "";
+    const now = Date.now();
 
     setEventDetails({
       anchor: {
@@ -141,14 +144,15 @@ export function PublicSchedule() {
       classSessionId: event.id,
       classItem: classMenuItems.find((item) => item.key === event.extendedProps["classKey"]),
       deliveryMode: deliveryMode === "ONLINE" ? "ONLINE" : "IN_PERSON",
+      endsAt,
       instructorName: typeof instructorName === "string" && instructorName
         ? instructorName
         : undefined,
       locationName: typeof locationName === "string" && locationName
         ? locationName
         : undefined,
-      reservationCount: typeof reservationCount === "number" ? reservationCount : 0,
-      spotsRemaining: typeof spotsRemaining === "number" ? spotsRemaining : null,
+      isLive: Boolean(startsAt && endsAt && Date.parse(startsAt) <= now && now < Date.parse(endsAt)),
+      startsAt,
       timeLabel: event.start
         ? `${scheduleDateTimeFormatter.format(event.start)}${event.end ? ` - ${scheduleEndTimeFormatter.format(event.end)}` : ""}`
         : "Time unavailable",
@@ -274,13 +278,10 @@ export function PublicSchedule() {
             end: session.endsAt,
             extendedProps: {
               availabilityStatus: session.availabilityStatus,
-              bookingStatus: session.bookingStatus,
               classKey: session.classKey,
               deliveryMode: session.deliveryMode,
               instructorName: session.instructorName,
               locationName: session.locationName,
-              reservationCount: session.reservationCount,
-              spotsRemaining: session.spotsRemaining,
             },
             id: session.id,
             start: session.startsAt,
@@ -351,8 +352,29 @@ export function PublicSchedule() {
     }
   }
 
+  async function joinClass() {
+    if (!eventDetails || isJoining) return;
+
+    setIsJoining(true);
+    setMutationError(null);
+    try {
+      const meetUrl = await getClassJoinUrl(eventDetails.classSessionId);
+      window.location.assign(meetUrl);
+    } catch (caughtError) {
+      setMutationError(
+        caughtError instanceof Error ? caughtError.message : "The class link is not available.",
+      );
+      setIsJoining(false);
+    }
+  }
+
   return (
     <div className="public-calendar-shell">
+      <div className="calendar-legend" aria-label="Class availability legend">
+        <span><i className="calendar-legend-swatch calendar-legend-available" aria-hidden="true" />Available</span>
+        <span><i className="calendar-legend-swatch calendar-legend-unavailable" aria-hidden="true" />No vacancy</span>
+        <span><i className="calendar-legend-swatch calendar-legend-online" aria-hidden="true" />Online class</span>
+      </div>
       <FullCalendar
         allDaySlot={false}
         datesSet={handleDatesSet}
@@ -391,11 +413,13 @@ export function PublicSchedule() {
             details={eventDetails}
             error={mutationError ?? reservationStateError}
             isAuthLoaded={isAuthLoaded}
+            isJoining={isJoining}
             isPending={pendingSessionId === eventDetails.classSessionId}
             isSaved={reservedSessionIds.has(eventDetails.classSessionId)}
             isSavedStateReady={isReservationStateReady}
             isSignedIn={Boolean(isSignedIn)}
             onDismiss={hideEventDetails}
+            onJoin={() => void joinClass()}
             onMouseEnter={cancelHide}
             onMouseLeave={scheduleHide}
             onToggleSaved={() => void toggleReservation()}

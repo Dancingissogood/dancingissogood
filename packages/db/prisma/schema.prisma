@@ -141,6 +141,7 @@ model ClassSession {
   capacity       Int?
   deliveryMode   ClassDeliveryMode  @default(IN_PERSON)
   bookingStatus  ClassBookingStatus @default(OPEN)
+  meetUrl        String?
   published      Boolean  @default(true)
   createdById    String?
   updatedById    String?

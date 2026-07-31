@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 import {
+  classJoinSchema,
   registrationListSchema,
   registrationMutationSchema,
 } from "@/lib/registrations";
@@ -12,6 +13,7 @@ type RegistrationRequestOptions = {
   body?: unknown;
   method: "DELETE" | "GET" | "POST";
   path: string;
+  responseType?: "class-join" | "registration" | "registration-list";
 };
 
 export async function forwardRegistrationRequest(options: RegistrationRequestOptions) {
@@ -41,9 +43,11 @@ export async function forwardRegistrationRequest(options: RegistrationRequestOpt
     const payload: unknown = await response.json();
     if (!response.ok) return NextResponse.json(normalizeError(payload), { status: response.status });
 
-    const parsed = options.method === "GET"
-      ? registrationListSchema.safeParse(payload)
-      : registrationMutationSchema.safeParse(payload);
+    const parsed = options.responseType === "class-join"
+      ? classJoinSchema.safeParse(payload)
+      : options.responseType === "registration-list" || options.method === "GET"
+        ? registrationListSchema.safeParse(payload)
+        : registrationMutationSchema.safeParse(payload);
 
     if (!parsed.success) {
       return NextResponse.json(

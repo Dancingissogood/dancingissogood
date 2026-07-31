@@ -2015,19 +2015,22 @@ section[id] {
 
 .calendar-event-copy {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  justify-content: flex-start;
   min-width: 0;
   padding: 7px 9px;
 }
 
 .calendar-event-time,
 .calendar-event-instructor {
+  flex: 0 0 auto;
   font-size: 0.72rem;
   opacity: 0.72;
 }
 
 .calendar-event-copy strong {
+  flex: 1 1 auto;
   font-size: 0.78rem;
   line-height: 1.2;
   overflow: hidden;
@@ -2375,22 +2378,23 @@ section[id] {
 }
 
 .calendar-event-copy strong {
-  display: -webkit-box;
+  display: block;
+  flex: 1 1 auto;
   font-size: 0.76rem;
   line-height: 1.15;
   overflow: hidden;
-  text-overflow: clip;
-  white-space: normal;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .calendar-event-status {
   display: block;
+  flex: 0 0 auto;
   font-size: 0.62rem;
   font-weight: 600;
   line-height: 1.1;
-  margin-top: 3px;
+  margin: 0;
+  white-space: nowrap;
 }
 
 .calendar-event-status-available {
@@ -2404,11 +2408,13 @@ section[id] {
 .public-calendar-shell .fc-event.calendar-event-available {
   background: var(--peach-100);
   border-color: var(--peach-300);
+  color: var(--charcoal-950);
 }
 
 .public-calendar-shell .fc-event.calendar-event-online.calendar-event-available {
   background: #edf1f0;
   border-color: #c7d0cd;
+  color: var(--charcoal-950);
 }
 
 .public-calendar-shell .fc-event.calendar-event-online.calendar-event-available .calendar-event-status {
@@ -2423,6 +2429,47 @@ section[id] {
 
 .public-calendar-shell .fc-event.calendar-event-no-vacancy .calendar-event-status {
   color: #625d58;
+}
+
+.calendar-legend {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  justify-content: flex-end;
+  margin: 0 0 18px;
+}
+
+.calendar-legend span {
+  align-items: center;
+  color: var(--charcoal-800);
+  display: inline-flex;
+  font-size: 0.76rem;
+  font-weight: 500;
+  gap: 7px;
+}
+
+.calendar-legend-swatch {
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  display: block;
+  height: 10px;
+  width: 10px;
+}
+
+.calendar-legend-available {
+  background: var(--peach-100);
+  border-color: var(--peach-300);
+}
+
+.calendar-legend-unavailable {
+  background: #e9e5e1;
+  border-color: #cfc7c1;
+}
+
+.calendar-legend-online {
+  background: #edf1f0;
+  border-color: #c7d0cd;
 }
 
 .calendar-state {
@@ -3350,6 +3397,7 @@ section[id] {
 .admin-calendar .fc-event.schedule-event-online.schedule-event-available {
   background: #edf1f0;
   border-color: #c7d0cd;
+  color: var(--charcoal-950);
 }
 
 .admin-calendar .fc-event.schedule-event-no_vacancy {
@@ -3393,6 +3441,10 @@ section[id] {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+}
+
+.admin-bulk-meet-link {
+  grid-column: span 2;
 }
 
 .admin-bulk-update .field {
@@ -4888,6 +4940,14 @@ textarea:focus {
 
   .admin-bulk-update form {
     grid-template-columns: 1fr;
+  }
+
+  .admin-bulk-meet-link {
+    grid-column: auto;
+  }
+
+  .calendar-legend {
+    justify-content: flex-start;
   }
 
   .schedule-choice-group {

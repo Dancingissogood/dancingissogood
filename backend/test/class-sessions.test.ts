@@ -21,6 +21,7 @@ test("public schedule returns only published sessions in the requested range", a
       capacity: 12,
       deliveryMode: "ONLINE",
       endsAt: new Date("2026-07-20T13:20:00.000Z"),
+      meetUrl: "https://meet.google.com/abc-defg-hij",
       published: true,
       startsAt: new Date("2026-07-20T13:00:00.000Z"),
       title: `Published ${suffix}`,
@@ -53,16 +54,16 @@ test("public schedule returns only published sessions in the requested range", a
       {
         availabilityStatus: publicSession.availabilityStatus,
         deliveryMode: publicSession.deliveryMode,
-        reservationCount: publicSession.reservationCount,
-        spotsRemaining: publicSession.spotsRemaining,
       },
       {
         availabilityStatus: "AVAILABLE",
         deliveryMode: "ONLINE",
-        reservationCount: 0,
-        spotsRemaining: 12,
       },
     );
+    assert.equal("capacity" in publicSession, false);
+    assert.equal("reservationCount" in publicSession, false);
+    assert.equal("spotsRemaining" in publicSession, false);
+    assert.equal("meetUrl" in publicSession, false);
   } finally {
     await database.classSession.deleteMany({ where: { id: { in: [published.id, unpublished.id] } } });
     await app.close();
@@ -268,6 +269,7 @@ test("an administrator can bulk update booking state and class format", async ()
         bookingStatus: "CLOSED",
         classKey: "waltz",
         deliveryMode: "ONLINE",
+        meetUrl: "https://meet.google.com/abc-defg-hij",
         from: "2026-07-20T00:00:00.000Z",
         to: "2026-07-21T00:00:00.000Z",
       },
@@ -278,10 +280,10 @@ test("an administrator can bulk update booking state and class format", async ()
     assert.deepEqual(response.json(), { updated: 1 });
     assert.deepEqual(
       await database.classSession.findUniqueOrThrow({
-        select: { bookingStatus: true, deliveryMode: true },
+        select: { bookingStatus: true, deliveryMode: true, meetUrl: true },
         where: { id: matching.id },
       }),
-      { bookingStatus: "CLOSED", deliveryMode: "ONLINE" },
+      { bookingStatus: "CLOSED", deliveryMode: "ONLINE", meetUrl: "https://meet.google.com/abc-defg-hij" },
     );
     assert.deepEqual(
       await database.classSession.findUniqueOrThrow({

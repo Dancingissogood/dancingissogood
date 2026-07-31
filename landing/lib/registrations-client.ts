@@ -1,6 +1,7 @@
 import {
   registrationListSchema,
   registrationMutationSchema,
+  classJoinSchema,
   type ClassRegistration,
 } from "@/lib/registrations";
 
@@ -52,6 +53,20 @@ export async function cancelClassReservation(classSessionId: string): Promise<vo
     }
     throw new Error(readApiError(payload, "This reservation could not be canceled."));
   }
+}
+
+export async function getClassJoinUrl(classSessionId: string): Promise<string> {
+  const response = await fetch(`/api/account/class-sessions/${encodeURIComponent(classSessionId)}/join`, {
+    cache: "no-store",
+  });
+  const payload: unknown = await response.json();
+  const parsed = classJoinSchema.safeParse(payload);
+
+  if (!response.ok || !parsed.success) {
+    throw new Error(readApiError(payload, "The class link is not available."));
+  }
+
+  return parsed.data.meetUrl;
 }
 
 function readApiError(payload: unknown, defaultMessage: string) {

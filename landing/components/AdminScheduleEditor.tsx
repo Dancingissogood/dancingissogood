@@ -18,8 +18,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CalendarEventContent } from "@/components/CalendarEventContent";
 import { classMenuItems } from "@/content/site";
-import { classSessionListSchema, classSessionMutationSchema } from "@/lib/schedule";
-import type { ClassSession } from "@/lib/schedule";
+import { adminClassSessionListSchema, classSessionMutationSchema } from "@/lib/schedule";
+import type { AdminClassSession } from "@/lib/schedule";
 import { STUDIO_TIME_ZONE } from "@/lib/time-zone";
 import { useMediaQuery } from "@/lib/use-media-query";
 
@@ -34,6 +34,7 @@ type SessionDraft = {
   deliveryMode: "IN_PERSON" | "ONLINE";
   instructorName: string;
   locationName: string;
+  meetUrl: string;
   published: boolean;
   time: string;
   title: string;
@@ -44,6 +45,7 @@ type BulkDraft = {
   classKey: string;
   deliveryMode: "" | "IN_PERSON" | "ONLINE";
   from: string;
+  meetUrl: string;
   through: string;
 };
 
@@ -58,6 +60,7 @@ const emptyDraft = (): SessionDraft => {
     deliveryMode: "IN_PERSON",
     instructorName: "",
     locationName: "",
+    meetUrl: "",
     published: true,
     time: start.toFormat("HH:mm"),
     title: "",
@@ -71,6 +74,7 @@ const emptyBulkDraft = (): BulkDraft => {
     classKey: "",
     deliveryMode: "",
     from: start.toFormat("yyyy-MM-dd"),
+    meetUrl: "",
     through: start.toFormat("yyyy-MM-dd"),
   };
 };
@@ -82,14 +86,14 @@ export function AdminScheduleEditor() {
   const [draft, setDraft] = useState<SessionDraft>(emptyDraft);
   const [bulkDraft, setBulkDraft] = useState<BulkDraft>(emptyBulkDraft);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [selectedSession, setSelectedSession] = useState<ClassSession | null>(null);
+  const [selectedSession, setSelectedSession] = useState<AdminClassSession | null>(null);
   const [requestError, setRequestError] = useState<string | null>(null);
   const [accessDenied, setAccessDenied] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isBulkSaving, setIsBulkSaving] = useState(false);
   const [bulkMessage, setBulkMessage] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const sessionsRef = useRef(new Map<string, ClassSession>());
+  const sessionsRef = useRef(new Map<string, AdminClassSession>());
 
   useEffect(() => {
     const calendar = calendarRef.current?.getApi();
@@ -121,7 +125,7 @@ export function AdminScheduleEditor() {
           throw new Error("Administrator access is required.");
         }
 
-        const parsed = classSessionListSchema.safeParse(payload);
+        const parsed = adminClassSessionListSchema.safeParse(payload);
 
         if (!response.ok || !parsed.success) {
           throw new Error(getErrorMessage(payload, "The schedule could not be loaded."));
@@ -172,6 +176,7 @@ export function AdminScheduleEditor() {
       deliveryMode: session.deliveryMode,
       instructorName: session.instructorName ?? "",
       locationName: session.locationName ?? "",
+      meetUrl: session.meetUrl ?? "",
       published: session.published,
       time: startsAt.toFormat("HH:mm"),
       title: session.title,
@@ -248,6 +253,7 @@ export function AdminScheduleEditor() {
       endsAt: startsAt.plus({ minutes: SESSION_MINUTES }).toUTC().toISO(),
       instructorName: draft.instructorName.trim() || null,
       locationName: draft.locationName.trim() || null,
+      meetUrl: draft.deliveryMode === "ONLINE" ? draft.meetUrl.trim() : null,
       published: draft.published,
       startsAt: startsAt.toUTC().toISO(),
       title: draft.title.trim(),
@@ -286,6 +292,11 @@ export function AdminScheduleEditor() {
       return;
     }
 
+    if (bulkDraft.deliveryMode === "ONLINE" && !bulkDraft.meetUrl.trim()) {
+      setBulkMessage("Add the Google Meet link for the online classes.");
+      return;
+    }
+
     const from = DateTime.fromISO(bulkDraft.from, { zone: STUDIO_TIME_ZONE }).startOf("day");
     const through = DateTime.fromISO(bulkDraft.through, { zone: STUDIO_TIME_ZONE }).startOf("day");
 
@@ -303,6 +314,7 @@ export function AdminScheduleEditor() {
           ...(bulkDraft.bookingStatus ? { bookingStatus: bulkDraft.bookingStatus } : {}),
           ...(bulkDraft.classKey ? { classKey: bulkDraft.classKey } : {}),
           ...(bulkDraft.deliveryMode ? { deliveryMode: bulkDraft.deliveryMode } : {}),
+          ...(bulkDraft.deliveryMode === "ONLINE" ? { meetUrl: bulkDraft.meetUrl.trim() } : {}),
           from: from.toUTC().toISO(),
           to: through.plus({ days: 1 }).toUTC().toISO(),
         }),
@@ -433,6 +445,12 @@ export function AdminScheduleEditor() {
                 <option value="ONLINE">Online class</option>
               </select>
             </label>
+            {bulkDraft.deliveryMode === "ONLINE" ? (
+              <label className="field admin-bulk-meet-link">
+                <span>Google Meet link</span>
+                <input required type="url" value={bulkDraft.meetUrl} onChange={(event) => setBulkDraft({ ...bulkDraft, meetUrl: event.target.value })} />
+              </label>
+            ) : null}
             <button className="button admin-button-primary" disabled={isBulkSaving} type="submit">
               {isBulkSaving ? "Updating..." : "Apply update"}
             </button>
@@ -533,10 +551,16 @@ export function AdminScheduleEditor() {
             <fieldset className="schedule-choice-field field">
               <legend>Class format</legend>
               <div className="schedule-choice-group">
-                <button className={draft.deliveryMode === "IN_PERSON" ? "is-selected" : ""} type="button" onClick={() => setDraft({ ...draft, deliveryMode: "IN_PERSON" })}>In person</button>
+                <button className={draft.deliveryMode === "IN_PERSON" ? "is-selected" : ""} type="button" onClick={() => setDraft({ ...draft, deliveryMode: "IN_PERSON", meetUrl: "" })}>In person</button>
                 <button className={draft.deliveryMode === "ONLINE" ? "is-selected" : ""} type="button" onClick={() => setDraft({ ...draft, deliveryMode: "ONLINE" })}><Video aria-hidden="true" size={15} /> Online</button>
               </div>
             </fieldset>
+            {draft.deliveryMode === "ONLINE" ? (
+              <label className="field field-wide">
+                <span>Google Meet link</span>
+                <input required type="url" value={draft.meetUrl} onChange={(event) => setDraft({ ...draft, meetUrl: event.target.value })} />
+              </label>
+            ) : null}
             <fieldset className="schedule-choice-field field">
               <legend>Reservations</legend>
               <div className="schedule-choice-group">
@@ -583,7 +607,7 @@ export function AdminScheduleEditor() {
   );
 }
 
-function toCalendarEvent(session: ClassSession): EventInput {
+function toCalendarEvent(session: AdminClassSession): EventInput {
   return {
     end: session.endsAt,
     extendedProps: {

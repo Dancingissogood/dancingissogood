@@ -62,7 +62,12 @@ type RegistrationRecord = {
 };
 
 function serializeRegistration(registration: RegistrationRecord) {
-  const { _count, ...classSession } = registration.classSession;
+  const {
+    _count,
+    bookingStatus,
+    capacity,
+    ...classSession
+  } = registration.classSession;
 
   return {
     createdAt: registration.createdAt.toISOString(),
@@ -70,12 +75,11 @@ function serializeRegistration(registration: RegistrationRecord) {
     session: {
       ...classSession,
       ...getClassAvailability({
-        bookingStatus: classSession.bookingStatus,
-        capacity: classSession.capacity,
+        bookingStatus,
+        capacity,
         reservationCount: _count.registrations,
       }),
       endsAt: classSession.endsAt.toISOString(),
-      reservationCount: _count.registrations,
       startsAt: classSession.startsAt.toISOString(),
     },
     status: registration.status,
@@ -284,6 +288,57 @@ export async function registerRegistrationRoutes(
       return reply.code(204).send();
     } catch (error) {
       return handleRegistrationError(request, reply, error, "cancel this reservation");
+    }
+  });
+
+  app.get("/v1/account/class-sessions/:classSessionId/join", async (request, reply) => {
+    const classSessionId = sessionIdSchema.safeParse(
+      (request.params as { classSessionId?: string }).classSessionId,
+    );
+
+    if (!classSessionId.success) {
+      return reply.code(400).send({ error: "Invalid class session." });
+    }
+
+    try {
+      const user = await authenticateAccount(request, reply, dependencies);
+      if (!user) return;
+
+      const now = new Date();
+      const reservation = await dependencies.database.classRegistration.findFirst({
+        select: { classSession: { select: { meetUrl: true } } },
+        where: {
+          classSessionId: classSessionId.data,
+          passPurchase: {
+            is: {
+              AND: [
+                { OR: [{ passStatus: null }, { passStatus: "ACTIVE" }] },
+                { OR: [{ validFrom: null }, { validFrom: { lte: now } }] },
+                { OR: [{ validUntil: null }, { validUntil: { gte: now } }] },
+              ],
+              status: "PAID",
+            },
+          },
+          classSession: {
+            deliveryMode: "ONLINE",
+            endsAt: { gt: now },
+            meetUrl: { not: null },
+            published: true,
+            startsAt: { lte: now },
+          },
+          status: "RESERVED",
+          userId: user.id,
+        },
+      });
+
+      if (!reservation?.classSession.meetUrl) {
+        return reply.code(404).send({ error: "The class link is not available." });
+      }
+
+      reply.header("cache-control", "no-store");
+      return reply.send({ meetUrl: reservation.classSession.meetUrl });
+    } catch (error) {
+      return handleRegistrationError(request, reply, error, "open this class");
     }
   });
 }

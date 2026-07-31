@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 
 import {
   bulkClassSessionUpdateSchema,
+  adminClassSessionListSchema,
   classSessionListSchema,
   classSessionMutationSchema,
 } from "@/lib/schedule";
@@ -53,7 +54,7 @@ export async function forwardScheduleRequest(options: ScheduleRequestOptions) {
     }
 
     const parsed = options.method === "GET"
-      ? classSessionListSchema.safeParse(payload)
+      ? (options.admin ? adminClassSessionListSchema : classSessionListSchema).safeParse(payload)
       : options.responseType === "bulk-update"
         ? bulkClassSessionUpdateSchema.safeParse(payload)
         : classSessionMutationSchema.safeParse(payload);

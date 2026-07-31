@@ -1,7 +1,7 @@
 "use client";
 
 import { SignInButton } from "@clerk/nextjs";
-import { Check, Plus, X } from "lucide-react";
+import { Check, Plus, Video, X } from "lucide-react";
 import Image from "next/image";
 import { useLayoutEffect, useRef, useState } from "react";
 
@@ -18,10 +18,11 @@ export type CalendarEventDetails = {
   classSessionId: string;
   classItem?: ClassMenuItem;
   deliveryMode: "IN_PERSON" | "ONLINE";
+  endsAt: string;
   instructorName?: string;
+  isLive: boolean;
   locationName?: string;
-  reservationCount: number;
-  spotsRemaining: number | null;
+  startsAt: string;
   timeLabel: string;
   title: string;
 };
@@ -34,10 +35,12 @@ type CalendarEventPopoverProps = {
   error: string | null;
   isAuthLoaded: boolean;
   isPending: boolean;
+  isJoining: boolean;
   isSaved: boolean;
   isSavedStateReady: boolean;
   isSignedIn: boolean;
   onDismiss: () => void;
+  onJoin: () => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onToggleSaved: () => void;
@@ -48,10 +51,12 @@ export function CalendarEventPopover({
   error,
   isAuthLoaded,
   isPending,
+  isJoining,
   isSaved,
   isSavedStateReady,
   isSignedIn,
   onDismiss,
+  onJoin,
   onMouseEnter,
   onMouseLeave,
   onToggleSaved,
@@ -112,12 +117,6 @@ export function CalendarEventPopover({
         <dt>Class format</dt>
         <dd>{details.deliveryMode === "ONLINE" ? "Online class" : "In person"}</dd>
       </div>
-      <div>
-        <dt>Reservations</dt>
-        <dd>{details.spotsRemaining === null
-          ? `${details.reservationCount} reserved`
-          : `${details.reservationCount} reserved · ${details.spotsRemaining} remaining`}</dd>
-      </div>
       {details.instructorName ? (
         <div>
           <dt>Instructor</dt>
@@ -131,6 +130,12 @@ export function CalendarEventPopover({
         </div>
       ) : null}
     </dl>
+  );
+  const joinButton = (
+    <button className="calendar-event-popover-action" disabled={isJoining} type="button" onClick={onJoin}>
+      <Video aria-hidden="true" />
+      {isJoining ? "Opening..." : "Join class"}
+    </button>
   );
 
   return (
@@ -186,7 +191,7 @@ export function CalendarEventPopover({
             <button className="calendar-event-popover-action" disabled type="button">
               {error ? "Schedule unavailable" : "Checking schedule..."}
             </button>
-          ) : isSignedIn ? saveButton : details.availabilityStatus === "NO_VACANCY" ? (
+          ) : isSignedIn && isSaved && details.deliveryMode === "ONLINE" && details.isLive ? joinButton : isSignedIn ? saveButton : details.availabilityStatus === "NO_VACANCY" ? (
             <button className="calendar-event-popover-action" disabled type="button">No vacancy</button>
           ) : (
             <SignInButton mode="modal">

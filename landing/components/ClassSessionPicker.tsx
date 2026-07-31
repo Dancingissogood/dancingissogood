@@ -6,7 +6,7 @@ import { CalendarCheck2, Check, ChevronLeft, ChevronRight, Clock3, MapPin, Plus 
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { ClassMenuItem } from "@/content/site";
-import type { ClassSession } from "@/lib/schedule";
+import type { PublicClassSession } from "@/lib/schedule";
 import { classSessionListSchema } from "@/lib/schedule";
 import {
   cancelClassReservation,
@@ -49,7 +49,7 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
     timeZone,
     timeZoneName: "short",
   }), [timeZone]);
-  const [sessions, setSessions] = useState<ClassSession[]>([]);
+  const [sessions, setSessions] = useState<PublicClassSession[]>([]);
   const [reservedSessionIds, setReservedSessionIds] = useState<Set<string>>(new Set());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
@@ -123,7 +123,7 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
   }, [classItem.key, classItem.title, isSignedIn, range.from, range.to, timeZone]);
 
   const sessionsByDate = useMemo(() => {
-    const grouped = new Map<string, ClassSession[]>();
+    const grouped = new Map<string, PublicClassSession[]>();
 
     for (const session of sessions) {
       const dateKey = getSessionDateKey(session, timeZone);
@@ -135,7 +135,7 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
   const selectedSessions = selectedDate ? sessionsByDate.get(selectedDate) ?? [] : [];
   const calendarDays = getCalendarDays(month);
 
-  async function toggleReservation(session: ClassSession) {
+  async function toggleReservation(session: PublicClassSession) {
     if (!isSignedIn || pendingSessionId) return;
 
     const isReserved = reservedSessionIds.has(session.id);
@@ -292,7 +292,7 @@ function getMonthRange(month: DateTime) {
   } as { from: string; to: string };
 }
 
-function getSessionDateKey(session: ClassSession, timeZone: string) {
+function getSessionDateKey(session: PublicClassSession, timeZone: string) {
   return DateTime.fromISO(session.startsAt).setZone(timeZone).toISODate() ?? "";
 }
 

@@ -45,6 +45,16 @@ const nullableTextSchema = (maximumLength: number) =>
   z.union([z.string().trim().min(1).max(maximumLength), z.null()]);
 const classDeliveryModeSchema = z.enum(["IN_PERSON", "ONLINE"]);
 const classBookingStatusSchema = z.enum(["OPEN", "CLOSED"]);
+const nullableGoogleMeetUrlSchema = z
+  .union([z.string().trim().url().max(500), z.null()])
+  .superRefine((value, context) => {
+    if (value === null) return;
+
+    const url = new URL(value);
+    if (url.protocol !== "https:" || url.hostname !== "meet.google.com" || url.pathname === "/") {
+      context.addIssue({ code: "custom", message: "Enter a valid Google Meet link." });
+    }
+  });
 
 const classSessionFieldsSchema = z
   .object({
@@ -56,13 +66,14 @@ const classSessionFieldsSchema = z
     endsAt: dateTimeSchema,
     instructorName: nullableTextSchema(120),
     locationName: nullableTextSchema(160),
+    meetUrl: nullableGoogleMeetUrlSchema.default(null),
     published: z.boolean(),
     startsAt: dateTimeSchema,
     title: z.string().trim().min(1).max(120),
   })
   .strict();
 
-const createClassSessionSchema = classSessionFieldsSchema.superRefine(validateSessionTiming);
+const createClassSessionSchema = classSessionFieldsSchema.superRefine(validateClassSession);
 const updateClassSessionSchema = classSessionFieldsSchema
   .partial()
   .refine((value) => Object.keys(value).length > 0, "At least one field is required.");
@@ -73,6 +84,7 @@ const bulkClassSessionUpdateSchema = z
     classKey: z.string().trim().min(1).max(80).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).optional(),
     deliveryMode: classDeliveryModeSchema.optional(),
     from: dateTimeSchema,
+    meetUrl: nullableGoogleMeetUrlSchema.optional(),
     to: dateTimeSchema,
   })
   .strict()
@@ -86,6 +98,14 @@ const bulkClassSessionUpdateSchema = z
 
     if (value.bookingStatus === undefined && value.capacity === undefined && value.deliveryMode === undefined) {
       context.addIssue({ code: "custom", message: "Choose at least one update." });
+    }
+
+    if (value.deliveryMode === "ONLINE" && !value.meetUrl) {
+      context.addIssue({ code: "custom", message: "An online class needs a Google Meet link.", path: ["meetUrl"] });
+    }
+
+    if (value.meetUrl !== undefined && value.deliveryMode !== "ONLINE") {
+      context.addIssue({ code: "custom", message: "Choose Online class to apply a Google Meet link.", path: ["deliveryMode"] });
     }
   });
 
@@ -113,6 +133,26 @@ function validateSessionTiming(
       code: "custom",
       message: "Class sessions must run between 9:00 AM and 2:00 PM ET.",
       path: ["startsAt"],
+    });
+  }
+}
+
+function validateClassSession(session: z.infer<typeof classSessionFieldsSchema>, context: z.RefinementCtx) {
+  validateSessionTiming(session, context);
+
+  if (session.deliveryMode === "ONLINE" && !session.meetUrl) {
+    context.addIssue({
+      code: "custom",
+      message: "Online classes need a Google Meet link.",
+      path: ["meetUrl"],
+    });
+  }
+
+  if (session.deliveryMode === "IN_PERSON" && session.meetUrl) {
+    context.addIssue({
+      code: "custom",
+      message: "In-person classes cannot have a Google Meet link.",
+      path: ["meetUrl"],
     });
   }
 }
@@ -165,18 +205,34 @@ function serializeClassSession(session: {
   id: string;
   instructorName: string | null;
   locationName: string | null;
+  meetUrl: string | null;
   published: boolean;
   startsAt: Date;
   title: string;
-}, reservationCount: number) {
+}, reservationCount: number, includeAdministrativeDetails: boolean) {
+  const { bookingStatus, capacity, meetUrl, ...publicSession } = session;
+  const availability = getClassAvailability({
+    bookingStatus,
+    capacity,
+    reservationCount,
+  });
+
+  if (!includeAdministrativeDetails) {
+    return {
+      availabilityStatus: availability.availabilityStatus,
+      ...publicSession,
+      endsAt: session.endsAt.toISOString(),
+      startsAt: session.startsAt.toISOString(),
+    };
+  }
+
   return {
-    ...session,
-    ...getClassAvailability({
-      bookingStatus: session.bookingStatus,
-      capacity: session.capacity,
-      reservationCount,
-    }),
+    ...publicSession,
+    ...availability,
+    bookingStatus,
+    capacity,
     endsAt: session.endsAt.toISOString(),
+    meetUrl,
     reservationCount,
     startsAt: session.startsAt.toISOString(),
   };
@@ -200,6 +256,7 @@ async function listClassSessions(
       id: true,
       instructorName: true,
       locationName: true,
+      meetUrl: true,
       published: true,
       startsAt: true,
       title: true,
@@ -214,7 +271,7 @@ async function listClassSessions(
   return {
     sessions: sessions.map((session) => {
       const { _count, ...classSession } = session;
-      return serializeClassSession(classSession, _count.registrations);
+      return serializeClassSession(classSession, _count.registrations, includeUnpublished);
     }),
   };
 }
@@ -281,7 +338,7 @@ export async function registerClassSessionRoutes(
         },
       });
 
-      return reply.code(201).send({ session: serializeClassSession(session, 0) });
+      return reply.code(201).send({ session: serializeClassSession(session, 0, true) });
     } catch (error) {
       return handleAdministrativeError(request, reply, error, "create the class session");
     }
@@ -309,16 +366,25 @@ export async function registerClassSessionRoutes(
         return reply.code(404).send({ error: "Class session not found." });
       }
 
-      const startsAt = body.data.startsAt ?? existing.startsAt.toISOString();
-      const endsAt = body.data.endsAt ?? existing.endsAt.toISOString();
-      const durationValidation = z
-        .object({ startsAt: dateTimeSchema, endsAt: dateTimeSchema })
-        .superRefine(validateSessionTiming)
-        .safeParse({ startsAt, endsAt });
+      const fullSession = {
+        bookingStatus: body.data.bookingStatus ?? existing.bookingStatus,
+        capacity: body.data.capacity ?? existing.capacity,
+        classKey: body.data.classKey ?? existing.classKey,
+        deliveryMode: body.data.deliveryMode ?? existing.deliveryMode,
+        description: body.data.description ?? existing.description,
+        endsAt: body.data.endsAt ?? existing.endsAt.toISOString(),
+        instructorName: body.data.instructorName ?? existing.instructorName,
+        locationName: body.data.locationName ?? existing.locationName,
+        meetUrl: body.data.meetUrl === undefined ? existing.meetUrl : body.data.meetUrl,
+        published: body.data.published ?? existing.published,
+        startsAt: body.data.startsAt ?? existing.startsAt.toISOString(),
+        title: body.data.title ?? existing.title,
+      };
+      const fullSessionValidation = createClassSessionSchema.safeParse(fullSession);
 
-      if (!durationValidation.success) {
+      if (!fullSessionValidation.success) {
         return reply.code(400).send({
-          error: "Classes must be 20 minutes and run between 9:00 AM and 2:00 PM ET.",
+          error: "Enter a complete valid class session, including a Google Meet link for online classes.",
         });
       }
 
@@ -348,7 +414,7 @@ export async function registerClassSessionRoutes(
         where: { classSessionId: session.id, status: "RESERVED" },
       });
 
-      return reply.send({ session: serializeClassSession(session, reservationCount) });
+      return reply.send({ session: serializeClassSession(session, reservationCount, true) });
     } catch (error) {
       return handleAdministrativeError(request, reply, error, "update the class session");
     }
@@ -396,6 +462,8 @@ export async function registerClassSessionRoutes(
             ...(body.data.bookingStatus === undefined ? {} : { bookingStatus: body.data.bookingStatus }),
             ...(body.data.capacity === undefined ? {} : { capacity: body.data.capacity }),
             ...(body.data.deliveryMode === undefined ? {} : { deliveryMode: body.data.deliveryMode }),
+            ...(body.data.deliveryMode === "IN_PERSON" ? { meetUrl: null } : {}),
+            ...(body.data.meetUrl === undefined ? {} : { meetUrl: body.data.meetUrl }),
             updatedById: authorization.userId,
           },
           where: { id: { in: sessions.map((session) => session.id) } },

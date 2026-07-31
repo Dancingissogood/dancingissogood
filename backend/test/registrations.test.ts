@@ -207,3 +207,76 @@ test("reservations require a paid usable pass and retain cancellation history", 
     await app.close();
   }
 });
+
+test("an active reserved attendee can retrieve an in-progress online class link", async () => {
+  const database = createDatabaseClient();
+  const suffix = randomUUID();
+  const clerkUserId = `join_${suffix}`;
+  const email = `join-${suffix}@example.com`;
+  const now = new Date();
+  const identityProvider: IdentityProvider = {
+    configured: true,
+    authenticate: async () => ({
+      clerkUserId,
+      email,
+      firstName: "Join",
+      lastName: "Dancer",
+      phone: null,
+    }),
+  };
+  const user = await database.userProfile.create({ data: { clerkUserId, email } });
+  const product = await database.passProduct.create({
+    data: {
+      accessDays: 3,
+      accessEnds: "2:00 PM",
+      accessStarts: "9:00 AM",
+      name: "Join Test Pass",
+      priceCents: 10_000,
+      slug: `join-pass-${suffix}`,
+    },
+  });
+  const session = await database.classSession.create({
+    data: {
+      classKey: "waltz",
+      deliveryMode: "ONLINE",
+      endsAt: new Date(now.getTime() + 10 * 60 * 1_000),
+      meetUrl: "https://meet.google.com/abc-defg-hij",
+      startsAt: new Date(now.getTime() - 10 * 60 * 1_000),
+      title: "Online Waltz",
+    },
+  });
+  const purchase = await database.passPurchase.create({
+    data: {
+      amountTotalCents: product.priceCents,
+      paidAt: now,
+      passProductId: product.id,
+      passStatus: "ACTIVE",
+      status: "PAID",
+      userId: user.id,
+      validFrom: new Date(now.getTime() - 60 * 60 * 1_000),
+      validUntil: new Date(now.getTime() + 60 * 60 * 1_000),
+    },
+  });
+  await database.classRegistration.create({
+    data: { classSessionId: session.id, passPurchaseId: purchase.id, userId: user.id },
+  });
+  const app = await buildApp({ database, identityProvider });
+
+  try {
+    const response = await app.inject({
+      headers: { authorization: "Bearer member" },
+      method: "GET",
+      url: `/v1/account/class-sessions/${session.id}/join`,
+    });
+
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(response.json(), { meetUrl: "https://meet.google.com/abc-defg-hij" });
+  } finally {
+    await database.classRegistration.deleteMany({ where: { classSessionId: session.id } });
+    await database.passPurchase.delete({ where: { id: purchase.id } });
+    await database.classSession.delete({ where: { id: session.id } });
+    await database.passProduct.delete({ where: { id: product.id } });
+    await database.userProfile.delete({ where: { id: user.id } });
+    await app.close();
+  }
+});
