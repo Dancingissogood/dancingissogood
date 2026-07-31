@@ -2368,7 +2368,7 @@ section[id] {
 .calendar-event-time {
   flex: 1 1 auto;
   font-size: 0.66rem;
-  line-height: 1.1;
+  line-height: 1.2;
   min-width: 0;
   opacity: 0.68;
   overflow: hidden;
@@ -2382,7 +2382,7 @@ section[id] {
 
 .calendar-event-copy strong {
   font-size: 0.7rem;
-  line-height: 1.05;
+  line-height: 1.25;
   min-width: 0;
 }
 
@@ -2391,7 +2391,7 @@ section[id] {
   font-size: 0.62rem;
   flex: 0 0 auto;
   font-weight: 600;
-  line-height: 1.1;
+  line-height: 1.2;
   margin: 0;
   white-space: nowrap;
 }
