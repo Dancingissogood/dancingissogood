@@ -473,7 +473,7 @@ export function AdminScheduleEditor() {
             eventContent={(eventInfo) => <CalendarEventContent eventInfo={eventInfo} />}
             eventDurationEditable={false}
             eventDrop={moveSession}
-            eventMinHeight={64}
+            eventMinHeight={58}
             eventStartEditable
             eventTimeFormat={{ hour: "numeric", minute: "2-digit", meridiem: "short" }}
             events={loadEvents}
