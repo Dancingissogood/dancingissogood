@@ -1979,7 +1979,7 @@ section[id] {
 
 .public-calendar-shell .fc .fc-timegrid-slot,
 .admin-calendar .fc .fc-timegrid-slot {
-  height: 42px;
+  height: 64px;
 }
 
 .public-calendar-shell .fc-event,
@@ -1987,7 +1987,7 @@ section[id] {
   border-radius: 5px;
   box-shadow: none;
   cursor: pointer;
-  min-height: 58px;
+  min-height: 64px;
   overflow: hidden;
 }
 
@@ -2014,11 +2014,10 @@ section[id] {
 }
 
 .calendar-event-copy {
-  align-content: center;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 3px;
-  grid-template-columns: auto minmax(0, 1fr);
-  grid-template-rows: auto auto;
+  justify-content: center;
   min-width: 0;
   padding: 7px 9px;
 }
@@ -2027,6 +2026,13 @@ section[id] {
 .calendar-event-instructor {
   font-size: 0.72rem;
   opacity: 0.72;
+}
+
+.calendar-event-meta {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  min-width: 0;
 }
 
 .calendar-event-copy strong {
@@ -2285,10 +2291,6 @@ section[id] {
   padding: 0 12px;
 }
 
-.public-calendar-shell .fc .fc-timegrid-slot {
-  height: 48px;
-}
-
 .public-calendar-shell .fc .fc-timegrid-now-indicator-line {
   border-color: var(--peach-700);
 }
@@ -2301,7 +2303,6 @@ section[id] {
 .public-calendar-shell .fc-event {
   border-radius: 6px 6px 20px 6px;
   color: var(--charcoal-950);
-  min-height: 46px;
   transition:
     box-shadow 180ms ease,
     transform 180ms ease;
@@ -2368,8 +2369,7 @@ section[id] {
 
 .calendar-event-time {
   font-size: 0.66rem;
-  grid-column: 1;
-  grid-row: 2;
+  flex: 0 0 auto;
   line-height: 1.1;
   opacity: 0.68;
 }
@@ -2381,8 +2381,6 @@ section[id] {
 .calendar-event-copy strong {
   display: block;
   font-size: 0.76rem;
-  grid-column: 1 / -1;
-  grid-row: 1;
   line-height: 1.15;
   overflow: hidden;
   min-width: 0;
@@ -2397,9 +2395,7 @@ section[id] {
   line-height: 1.1;
   margin: 0;
   max-width: none;
-  grid-column: 2;
-  grid-row: 2;
-  justify-self: end;
+  margin-left: auto;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

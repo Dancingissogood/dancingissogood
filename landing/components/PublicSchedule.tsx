@@ -383,11 +383,11 @@ export function PublicSchedule() {
         eventContent={(eventInfo) => <CalendarEventContent eventInfo={eventInfo} />}
         eventClick={handleEventClick}
         eventDidMount={handleEventDidMount}
-        eventMinHeight={46}
+        eventMinHeight={64}
         eventMouseEnter={handleEventMouseEnter}
         eventMouseLeave={scheduleHide}
         eventTimeFormat={{ hour: "numeric", minute: "2-digit", meridiem: "short" }}
-        eventShortHeight={46}
+        eventShortHeight={64}
         events={loadEvents}
         expandRows
         firstDay={1}

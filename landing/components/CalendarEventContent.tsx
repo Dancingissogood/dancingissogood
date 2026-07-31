@@ -36,11 +36,13 @@ export function CalendarEventContent({ eventInfo }: CalendarEventContentProps) {
         </span>
       ) : null}
       <div className="calendar-event-copy">
-        <span className="calendar-event-time">{eventInfo.timeText}</span>
         <strong>{eventInfo.event.title}</strong>
-        <span className={`calendar-event-status calendar-event-status-${String(availabilityStatus).toLowerCase()}`}>
-          {statusLabel}
-        </span>
+        <div className="calendar-event-meta">
+          <span className="calendar-event-time">{eventInfo.timeText}</span>
+          <span className={`calendar-event-status calendar-event-status-${String(availabilityStatus).toLowerCase()}`}>
+            {statusLabel}
+          </span>
+        </div>
         {typeof instructorName === "string" && instructorName ? (
           <span className="calendar-event-instructor">{instructorName}</span>
         ) : null}
