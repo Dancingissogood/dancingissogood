@@ -2007,8 +2007,7 @@ section[id] {
 
 .calendar-event-content {
   align-items: stretch;
-  display: grid;
-  grid-template-columns: 54px minmax(0, 1fr);
+  display: block;
   height: 100%;
   min-height: 58px;
 }
@@ -2017,6 +2016,7 @@ section[id] {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  height: 100%;
   justify-content: center;
   min-width: 0;
   padding: 7px 9px;
@@ -2031,8 +2031,7 @@ section[id] {
 .calendar-event-meta {
   align-items: center;
   display: flex;
-  flex-wrap: wrap;
-  gap: 2px 6px;
+  gap: 6px;
   justify-content: space-between;
   min-width: 0;
   width: 100%;
@@ -2042,9 +2041,6 @@ section[id] {
   display: block;
   font-size: 0.78rem;
   line-height: 1.2;
-  overflow-wrap: normal;
-  white-space: normal;
-  word-break: normal;
 }
 
 .calendar-state {
@@ -2350,36 +2346,33 @@ section[id] {
 }
 
 .calendar-event-content {
-  grid-template-columns: 42px minmax(0, 1fr);
   min-height: 44px;
 }
 
-.calendar-event-image-frame {
-  align-self: stretch;
-  border-radius: 4px;
-  display: block;
-  margin: 4px;
-  min-height: 36px;
+.public-calendar-shell .fc-timegrid-event .calendar-event-copy strong,
+.admin-calendar .fc-timegrid-event .calendar-event-copy strong {
   overflow: hidden;
-  position: relative;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.calendar-event-image {
-  height: 100%;
-  inset: 0;
-  object-fit: cover;
-  position: absolute;
-  width: 100%;
+.public-calendar-shell .fc-timegrid-event .calendar-event-meta,
+.admin-calendar .fc-timegrid-event .calendar-event-meta {
+  flex-wrap: nowrap;
 }
 
 .calendar-event-copy {
-  padding: 4px 7px 4px 2px;
+  padding: 4px 7px;
 }
 
 .calendar-event-time {
+  flex: 1 1 auto;
   font-size: 0.66rem;
   line-height: 1.1;
+  min-width: 0;
   opacity: 0.68;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -4613,7 +4606,6 @@ textarea:focus {
   }
 
   .public-calendar-shell .fc .fc-list-event .calendar-event-content {
-    grid-template-columns: 64px minmax(0, 1fr);
     min-height: 80px;
   }
 
@@ -4621,13 +4613,8 @@ textarea:focus {
     display: none;
   }
 
-  .public-calendar-shell .fc .fc-list-event .calendar-event-image-frame {
-    margin: 8px;
-    min-height: 56px;
-  }
-
   .public-calendar-shell .fc .fc-list-event .calendar-event-copy {
-    padding: 8px 14px 8px 2px;
+    padding: 12px 14px;
   }
 
   .public-calendar-shell .fc .fc-list-event .calendar-event-copy strong {
