@@ -293,7 +293,7 @@ export function AdminScheduleEditor() {
     }
 
     if (bulkDraft.deliveryMode === "ONLINE" && !bulkDraft.meetUrl.trim()) {
-      setBulkMessage("Add the Google Meet link for the online classes.");
+      setBulkMessage("Add the link for the online classes.");
       return;
     }
 
@@ -447,8 +447,8 @@ export function AdminScheduleEditor() {
             </label>
             {bulkDraft.deliveryMode === "ONLINE" ? (
               <label className="field admin-bulk-meet-link">
-                <span>Google Meet link</span>
-                <input required type="url" value={bulkDraft.meetUrl} onChange={(event) => setBulkDraft({ ...bulkDraft, meetUrl: event.target.value })} />
+                <span>Online class link</span>
+                <input pattern="https://.+" required type="url" value={bulkDraft.meetUrl} onChange={(event) => setBulkDraft({ ...bulkDraft, meetUrl: event.target.value })} />
               </label>
             ) : null}
             <button className="button admin-button-primary" disabled={isBulkSaving} type="submit">
@@ -557,8 +557,8 @@ export function AdminScheduleEditor() {
             </fieldset>
             {draft.deliveryMode === "ONLINE" ? (
               <label className="field field-wide">
-                <span>Google Meet link</span>
-                <input required type="url" value={draft.meetUrl} onChange={(event) => setDraft({ ...draft, meetUrl: event.target.value })} />
+                <span>Online class link</span>
+                <input pattern="https://.+" required type="url" value={draft.meetUrl} onChange={(event) => setDraft({ ...draft, meetUrl: event.target.value })} />
               </label>
             ) : null}
             <fieldset className="schedule-choice-field field">

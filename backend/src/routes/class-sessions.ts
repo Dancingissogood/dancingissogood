@@ -45,16 +45,20 @@ const nullableTextSchema = (maximumLength: number) =>
   z.union([z.string().trim().min(1).max(maximumLength), z.null()]);
 const classDeliveryModeSchema = z.enum(["IN_PERSON", "ONLINE"]);
 const classBookingStatusSchema = z.enum(["OPEN", "CLOSED"]);
-const nullableGoogleMeetUrlSchema = z
+const nullableOnlineClassUrlSchema = z
   .union([z.string().trim().url().max(500), z.null()])
   .superRefine((value, context) => {
     if (value === null) return;
 
     const url = new URL(value);
-    if (url.protocol !== "https:" || url.hostname !== "meet.google.com" || url.pathname === "/") {
-      context.addIssue({ code: "custom", message: "Enter a valid Google Meet link." });
+    if (url.protocol !== "https:") {
+      context.addIssue({ code: "custom", message: "Enter a valid HTTPS online class link." });
     }
   });
+
+function firstValidationMessage(error: z.ZodError, fallback: string) {
+  return error.issues[0]?.message ?? fallback;
+}
 
 const classSessionFieldsSchema = z
   .object({
@@ -66,7 +70,7 @@ const classSessionFieldsSchema = z
     endsAt: dateTimeSchema,
     instructorName: nullableTextSchema(120),
     locationName: nullableTextSchema(160),
-    meetUrl: nullableGoogleMeetUrlSchema.default(null),
+    meetUrl: nullableOnlineClassUrlSchema.default(null),
     published: z.boolean(),
     startsAt: dateTimeSchema,
     title: z.string().trim().min(1).max(120),
@@ -84,7 +88,7 @@ const bulkClassSessionUpdateSchema = z
     classKey: z.string().trim().min(1).max(80).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).optional(),
     deliveryMode: classDeliveryModeSchema.optional(),
     from: dateTimeSchema,
-    meetUrl: nullableGoogleMeetUrlSchema.optional(),
+    meetUrl: nullableOnlineClassUrlSchema.optional(),
     to: dateTimeSchema,
   })
   .strict()
@@ -101,11 +105,11 @@ const bulkClassSessionUpdateSchema = z
     }
 
     if (value.deliveryMode === "ONLINE" && !value.meetUrl) {
-      context.addIssue({ code: "custom", message: "An online class needs a Google Meet link.", path: ["meetUrl"] });
+      context.addIssue({ code: "custom", message: "An online class needs a class link.", path: ["meetUrl"] });
     }
 
     if (value.meetUrl !== undefined && value.deliveryMode !== "ONLINE") {
-      context.addIssue({ code: "custom", message: "Choose Online class to apply a Google Meet link.", path: ["deliveryMode"] });
+      context.addIssue({ code: "custom", message: "Choose Online class to apply an online class link.", path: ["deliveryMode"] });
     }
   });
 
@@ -143,7 +147,7 @@ function validateClassSession(session: z.infer<typeof classSessionFieldsSchema>,
   if (session.deliveryMode === "ONLINE" && !session.meetUrl) {
     context.addIssue({
       code: "custom",
-      message: "Online classes need a Google Meet link.",
+      message: "Online classes need a class link.",
       path: ["meetUrl"],
     });
   }
@@ -151,7 +155,7 @@ function validateClassSession(session: z.infer<typeof classSessionFieldsSchema>,
   if (session.deliveryMode === "IN_PERSON" && session.meetUrl) {
     context.addIssue({
       code: "custom",
-      message: "In-person classes cannot have a Google Meet link.",
+      message: "In-person classes cannot have an online class link.",
       path: ["meetUrl"],
     });
   }
@@ -317,7 +321,9 @@ export async function registerClassSessionRoutes(
     const body = createClassSessionSchema.safeParse(request.body);
 
     if (!body.success) {
-      return reply.code(400).send({ error: "Invalid class session." });
+      return reply.code(400).send({
+        error: firstValidationMessage(body.error, "Invalid class session."),
+      });
     }
 
     try {
@@ -348,8 +354,14 @@ export async function registerClassSessionRoutes(
     const sessionId = (request.params as { sessionId?: string }).sessionId;
     const body = updateClassSessionSchema.safeParse(request.body);
 
-    if (!sessionId || sessionId.length > 64 || !body.success) {
+    if (!sessionId || sessionId.length > 64) {
       return reply.code(400).send({ error: "Invalid class session update." });
+    }
+
+    if (!body.success) {
+      return reply.code(400).send({
+        error: firstValidationMessage(body.error, "Invalid class session update."),
+      });
     }
 
     try {
@@ -384,7 +396,7 @@ export async function registerClassSessionRoutes(
 
       if (!fullSessionValidation.success) {
         return reply.code(400).send({
-          error: "Enter a complete valid class session, including a Google Meet link for online classes.",
+          error: firstValidationMessage(fullSessionValidation.error, "Enter a complete valid class session."),
         });
       }
 
@@ -424,7 +436,9 @@ export async function registerClassSessionRoutes(
     const body = bulkClassSessionUpdateSchema.safeParse(request.body);
 
     if (!body.success) {
-      return reply.code(400).send({ error: "Invalid bulk class update." });
+      return reply.code(400).send({
+        error: firstValidationMessage(body.error, "Invalid bulk class update."),
+      });
     }
 
     try {

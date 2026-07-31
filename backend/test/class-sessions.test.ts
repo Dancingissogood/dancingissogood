@@ -262,6 +262,21 @@ test("an administrator can bulk update booking state and class format", async ()
   const app = await buildApp({ database, identityProvider });
 
   try {
+    const insecureLinkResponse = await app.inject({
+      headers: { authorization: "Bearer valid-session" },
+      method: "PATCH",
+      payload: {
+        deliveryMode: "ONLINE",
+        meetUrl: "http://zoom.us/j/123456789",
+        from: "2026-07-20T00:00:00.000Z",
+        to: "2026-07-21T00:00:00.000Z",
+      },
+      url: "/v1/admin/class-sessions/bulk",
+    });
+
+    assert.equal(insecureLinkResponse.statusCode, 400);
+    assert.deepEqual(insecureLinkResponse.json(), { error: "Enter a valid HTTPS online class link." });
+
     const response = await app.inject({
       headers: { authorization: "Bearer valid-session" },
       method: "PATCH",
@@ -269,7 +284,7 @@ test("an administrator can bulk update booking state and class format", async ()
         bookingStatus: "CLOSED",
         classKey: "waltz",
         deliveryMode: "ONLINE",
-        meetUrl: "https://meet.google.com/abc-defg-hij",
+        meetUrl: "https://zoom.us/j/123456789",
         from: "2026-07-20T00:00:00.000Z",
         to: "2026-07-21T00:00:00.000Z",
       },
@@ -283,7 +298,7 @@ test("an administrator can bulk update booking state and class format", async ()
         select: { bookingStatus: true, deliveryMode: true, meetUrl: true },
         where: { id: matching.id },
       }),
-      { bookingStatus: "CLOSED", deliveryMode: "ONLINE", meetUrl: "https://meet.google.com/abc-defg-hij" },
+      { bookingStatus: "CLOSED", deliveryMode: "ONLINE", meetUrl: "https://zoom.us/j/123456789" },
     );
     assert.deepEqual(
       await database.classSession.findUniqueOrThrow({
