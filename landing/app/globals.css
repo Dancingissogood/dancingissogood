@@ -2015,7 +2015,7 @@ section[id] {
 .calendar-event-copy {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
   height: 100%;
   justify-content: center;
   min-width: 0;
@@ -2031,14 +2031,16 @@ section[id] {
 .calendar-event-meta {
   align-items: flex-start;
   display: flex;
+  flex: 0 0 auto;
   flex-direction: column;
-  gap: 1px;
+  gap: 0;
   min-width: 0;
   width: 100%;
 }
 
 .calendar-event-copy strong {
   display: block;
+  flex: 0 0 auto;
   font-size: 0.78rem;
   line-height: 1.2;
 }
@@ -2362,11 +2364,11 @@ section[id] {
 }
 
 .calendar-event-copy {
-  padding: 4px 7px;
+  padding: 1px 7px;
 }
 
 .calendar-event-time {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   font-size: 0.66rem;
   line-height: 1.2;
   min-width: 0;
