@@ -17,6 +17,18 @@ This directory provisions the backend in AWS account `914115115192`, region `us-
 
 Single-AZ RDS is the deliberate low-cost availability tradeoff. Seven days of automated backups, encryption, deletion protection, and Terraform `prevent_destroy` protect the data, but this configuration does not provide automatic cross-AZ failover.
 
+## Current state: torn down, data kept in a snapshot
+
+The production stack was torn down on 2026-09-02 to save costs. Terraform state is empty and no server, database, or registry exists. What remains: the RDS snapshot `dancingissogood-prod-final` (all production data, about $2/month to keep) and the SSM SecureString parameters.
+
+Relaunching with `terraform apply` creates the database **from that snapshot** (`restore_snapshot_identifier` in `variables.tf`), so data comes back. Keep the snapshot until the restored database is verified. Set `restore_snapshot_identifier = null` only if you want an empty database. Each database saves a dated final snapshot (`dancingissogood-prod-final-<timestamp>`) if it is ever torn down again.
+
+Terraform 1.5 cannot read `aws login` credentials directly. Export them for the shell first:
+
+```bash
+eval "$(aws configure export-credentials --profile dancingissogood-prod --format env)"
+```
+
 ## Provisioning order
 
 All commands must use the dedicated profile:

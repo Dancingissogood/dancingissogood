@@ -100,3 +100,9 @@ variable "secret_parameter_prefix" {
   type        = string
   default     = "/dancingissogood/production"
 }
+
+variable "restore_snapshot_identifier" {
+  description = "RDS snapshot to create the database from when it is first created. Defaults to the final snapshot taken when the stack was torn down on 2026-09-02, so relaunching keeps all production data. Set to null to start with an empty database."
+  type        = string
+  default     = "dancingissogood-prod-final"
+}
