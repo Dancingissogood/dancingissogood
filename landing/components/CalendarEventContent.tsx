@@ -11,7 +11,7 @@ export function CalendarEventContent({ eventInfo }: CalendarEventContentProps) {
   const availabilityStatus = eventInfo.event.extendedProps["availabilityStatus"];
   const deliveryMode = eventInfo.event.extendedProps["deliveryMode"];
   const statusLabel = availabilityStatus === "NO_VACANCY"
-    ? "No vacancy"
+    ? "Full"
     : deliveryMode === "ONLINE"
       ? "Online class"
       : "Available";

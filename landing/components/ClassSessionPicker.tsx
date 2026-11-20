@@ -253,7 +253,7 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
                     ) : (
                       <Plus className="cta-plus-icon" aria-hidden="true" />
                     )}
-                    {isPending ? "Updating..." : isSaved ? "Reserved" : hasNoVacancy ? "No vacancy" : "Reserve"}
+                    {isPending ? "Updating..." : isSaved ? "Booked" : hasNoVacancy ? "Full" : "Book"}
                   </button>
                 );
 
@@ -268,12 +268,12 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
                         Checking account...
                       </button>
                     ) : isSignedIn ? action : hasNoVacancy ? (
-                      <button className="class-session-save" disabled type="button">No vacancy</button>
+                      <button className="class-session-save" disabled type="button">Full</button>
                     ) : (
                       <SignInButton mode="modal">
                         <button className="class-session-save" type="button">
                           <Plus className="cta-plus-icon" aria-hidden="true" />
-                          Sign in to reserve
+                          Sign in to book
                         </button>
                       </SignInButton>
                     )}

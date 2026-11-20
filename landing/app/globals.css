@@ -23,6 +23,12 @@
   --shadow-float: 0 22px 70px rgba(52, 47, 44, 0.17);
   --page-padding: 48px;
   --content-max: 1320px;
+  /* Column that page content lines up on. */
+  --content-width: calc(var(--content-max) - 2 * var(--page-padding));
+  /* Two button sizes: regular for in-content actions, compact for headers,
+     calendars and card secondary actions. */
+  --button-height: 52px;
+  --button-height-compact: 44px;
   --header-height: 92px;
   --section-space: 104px;
 }
@@ -162,7 +168,7 @@ section[id] {
 }
 
 .section-heading h2 {
-  margin-bottom: 22px;
+  margin-bottom: 24px;
 }
 
 .section-heading > p:last-child {
@@ -183,7 +189,8 @@ section[id] {
 }
 
 .button,
-.pill-link {
+.pill-link,
+.studio-link {
   align-items: center;
   border: 0;
   border-radius: 999px;
@@ -191,19 +198,21 @@ section[id] {
   display: inline-flex;
   font-size: 1rem;
   font-weight: 500;
-  gap: 10px;
+  gap: 12px;
   justify-content: center;
-  min-height: 50px;
-  padding: 0 24px;
+  min-height: var(--button-height);
+  padding: 0 28px;
   transition:
     background-color 180ms ease,
-    color 180ms ease,
-    transform 180ms ease;
+    color 180ms ease;
 }
 
-.button:hover,
-.pill-link:hover {
-  transform: translateY(-2px);
+/* A trailing 32px arrow chip sits the same distance from the top, bottom
+   and right edge of the pill: (52 - 32) / 2 = 10px. */
+.button:has(> .animated-arrow),
+.pill-link:has(> .animated-arrow),
+.studio-link:has(> .animated-arrow) {
+  padding: 0 10px 0 24px;
 }
 
 .button-primary,
@@ -223,10 +232,18 @@ section[id] {
   color: var(--charcoal-900);
 }
 
+.button-secondary:hover {
+  background: var(--stone-100);
+}
+
 .pill-link {
   background: var(--white);
   color: var(--charcoal-900);
   width: fit-content;
+}
+
+.pill-link:hover {
+  background: var(--peach-50);
 }
 
 .pill-link-light {
@@ -234,7 +251,13 @@ section[id] {
   color: var(--charcoal-900);
 }
 
-/* Permanent responsive action corner */
+/* Cards with an action in the bottom-right corner.
+   The corner radius is the action's inset plus half its height, so the
+   curve runs parallel to the button or arrow circle. Each card type sets
+   its own inset and action size in proportion to the card:
+   - large panels (stories, price, studio): 52px button, 28px inset
+   - class cards: 44px compact button, 20px inset (the card's own padding)
+   - link tiles (hero, community): 40px arrow circle, inset = tile padding */
 
 .hero-pathways a,
 .program-story-copy,
@@ -243,8 +266,11 @@ section[id] {
 .path-link,
 .studio-profile,
 .menu-card {
-  --action-corner-radius: 56px;
   --action-inset: 28px;
+  --action-size: var(--button-height);
+  /* Cards with a 1px border measure the inset from inside it. */
+  --action-border: 0px;
+  --action-corner-radius: calc(var(--action-border) + var(--action-inset) + var(--action-size) / 2);
   border-bottom-right-radius: var(--action-corner-radius);
   isolation: isolate;
   overflow: hidden;
@@ -267,15 +293,10 @@ section[id] {
 
 .program-story-copy .pill-link,
 .restoration-story-copy .pill-link {
-  border-radius: 999px;
   bottom: var(--action-inset);
-  box-shadow: 0 10px 28px rgba(24, 21, 20, 0.2);
   margin: 0;
-  min-height: 52px;
-  padding: 0 10px 0 22px;
   position: absolute;
   right: var(--action-inset);
-  transform: none;
 }
 
 .animated-arrow {
@@ -336,25 +357,26 @@ section[id] {
 }
 
 .studio-content .studio-link {
-  align-items: center;
   background: var(--white);
-  border: 0;
-  border-radius: 999px;
   bottom: var(--action-inset);
-  box-shadow: 0 10px 28px rgba(24, 21, 20, 0.2);
   color: var(--charcoal-900);
-  display: inline-flex;
-  gap: 10px;
-  min-height: 50px;
-  padding: 0 9px 0 20px;
   position: absolute;
   right: var(--action-inset);
-  transform: none;
 }
 
+.studio-content .studio-link:hover {
+  background: var(--peach-50);
+}
+
+.menu-card {
+  --action-inset: 20px;
+  --action-size: var(--button-height-compact);
+}
+
+/* Room for the pinned button: inset + button + 16px above it. */
 .menu-card:has(.menu-card-save) .menu-card-body {
   flex: 1 1 auto;
-  padding-bottom: 84px;
+  padding-bottom: calc(var(--action-inset) + var(--action-size) + 16px);
 }
 
 .menu-card:has(.menu-card-save) {
@@ -363,26 +385,16 @@ section[id] {
 }
 
 .menu-card:has(.menu-card-save) .menu-card-save {
-  border-radius: 999px;
   bottom: var(--action-inset);
-  flex-direction: row-reverse;
-  gap: 8px;
-  min-height: 44px;
-  padding: 0 6px 0 15px;
   position: absolute;
   right: var(--action-inset);
   top: auto;
-  transform: none;
   z-index: 3;
 }
 
 .price-card .checkout-control .pass-purchase-button {
-  border-radius: 999px;
-  gap: 10px;
   justify-content: flex-end;
   margin-left: auto;
-  padding: 0 9px 0 22px;
-  transform: none;
   width: fit-content;
 }
 
@@ -401,19 +413,6 @@ section[id] {
   margin: 0 0 10px;
   max-width: 280px;
   text-align: right;
-}
-
-.program-story-copy .pill-link:hover,
-.program-story-copy .pill-link:focus-visible,
-.restoration-story-copy .pill-link:hover,
-.restoration-story-copy .pill-link:focus-visible,
-.price-card .pass-purchase-button:hover,
-.price-card .pass-purchase-button:focus-visible,
-.menu-card .menu-card-save:hover,
-.menu-card .menu-card-save:focus-visible,
-.studio-content .studio-link:hover,
-.studio-content .studio-link:focus-visible {
-  transform: none;
 }
 
 .path-link:hover > .animated-arrow,
@@ -928,7 +927,7 @@ section[id] {
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-rows: auto 1fr;
   min-height: 112px;
-  padding: 22px 64px 22px 24px;
+  padding: 22px calc(var(--action-inset) + var(--action-size) + 16px) 22px var(--action-inset);
   transition: background-color 200ms ease;
 }
 
@@ -968,10 +967,36 @@ section[id] {
   margin-top: 5px;
 }
 
-.hero-pathways .animated-arrow {
+.hero-pathways a,
+.path-link {
+  --action-size: 40px;
+}
+
+.hero-pathways a {
+  --action-border: 1px;
+  --action-inset: 24px;
+}
+
+.price-card,
+.studio-profile {
+  --action-border: 1px;
+}
+
+/* A standalone arrow circle is the tile's only visible action, so it is
+   larger than the 32px chip inside a button. */
+.hero-pathways .animated-arrow,
+.path-link > .animated-arrow {
   bottom: var(--action-inset);
+  height: var(--action-size);
   position: absolute;
   right: var(--action-inset);
+  width: var(--action-size);
+}
+
+.hero-pathways .animated-arrow svg,
+.path-link > .animated-arrow svg {
+  height: 20px;
+  width: 20px;
 }
 
 @keyframes heroImageReveal {
@@ -1012,9 +1037,10 @@ section[id] {
 .program-story,
 .restoration-story {
   display: grid;
-  max-width: 1180px;
+  max-width: var(--content-width);
   padding-left: 0;
   padding-right: 0;
+  width: calc(100% - 2 * var(--page-padding));
 }
 
 .program-story {
@@ -1061,11 +1087,11 @@ section[id] {
 .program-story-copy h2,
 .restoration-story-copy h2 {
   font-size: 3.35rem;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
-.program-story-copy p,
-.restoration-story-copy p {
+.program-story-copy p:not(.eyebrow),
+.restoration-story-copy p:not(.eyebrow) {
   color: rgba(255, 255, 255, 0.76);
   font-size: 1.02rem;
   margin-bottom: 18px;
@@ -1141,8 +1167,8 @@ section[id] {
 .menu-section {
   background: var(--peach-100);
   max-width: none;
-  padding-left: max(var(--page-padding), calc((100vw - var(--content-max)) / 2 + var(--page-padding)));
-  padding-right: max(var(--page-padding), calc((100vw - var(--content-max)) / 2 + var(--page-padding)));
+  padding-left: max(var(--page-padding), calc((100% - var(--content-max)) / 2 + var(--page-padding)));
+  padding-right: max(var(--page-padding), calc((100% - var(--content-max)) / 2 + var(--page-padding)));
 }
 
 .menu-section > .section-heading {
@@ -1190,10 +1216,16 @@ section[id] {
   max-width: 700px;
 }
 
+/* As many columns as fit at 260px or wider, up to four:
+   4 on wide screens, then 3, 2 and 1 as the page narrows. */
 .menu-grid {
+  --menu-gap: 18px;
   display: grid;
-  gap: 18px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--menu-gap);
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(max(260px, calc((100% - 3 * var(--menu-gap)) / 4)), 1fr)
+  );
 }
 
 .menu-card {
@@ -1267,7 +1299,11 @@ section[id] {
   margin: 0;
 }
 
-.menu-card-save {
+/* Compact buttons with a trailing icon chip: class card, session list and
+   calendar popover. The 32px chip sits (44 - 32) / 2 = 6px from the edges. */
+.menu-card-save,
+.class-session-save,
+.calendar-event-popover-action {
   align-items: center;
   background: var(--charcoal-900);
   border: 0;
@@ -1276,18 +1312,30 @@ section[id] {
   cursor: pointer;
   display: inline-flex;
   flex: 0 0 auto;
-  font-size: 0.86rem;
+  flex-direction: row-reverse;
+  font-size: 0.9rem;
   font-weight: 500;
-  gap: 6px;
-  min-height: 34px;
-  padding: 0 12px;
+  gap: 10px;
+  justify-content: center;
+  min-height: var(--button-height-compact);
+  padding: 0 20px;
+  transition: background-color 180ms ease;
 }
 
-.menu-card-save svg {
+:is(.menu-card-save, .class-session-save, .calendar-event-popover-action):has(svg) {
+  padding: 0 6px 0 16px;
+}
+
+:is(.menu-card-save, .class-session-save, .calendar-event-popover-action):hover:not(:disabled, [data-saved="true"]) {
+  background: var(--charcoal-800);
+}
+
+:is(.menu-card-save, .class-session-save, .calendar-event-popover-action) svg {
   background: var(--peach-100);
   border-radius: 50%;
   box-sizing: content-box;
   color: var(--charcoal-950);
+  flex: 0 0 auto;
   height: 18px;
   padding: 7px;
   width: 18px;
@@ -1320,6 +1368,11 @@ section[id] {
   overflow: hidden;
   padding: 38px;
   width: 100vw;
+}
+
+.lesson-dialog[open] {
+  align-items: center;
+  display: grid;
 }
 
 .lesson-dialog::backdrop {
@@ -1455,10 +1508,11 @@ section[id] {
   border-radius: 8px 8px 56px 8px;
   box-shadow: var(--shadow-float);
   display: grid;
-  grid-template-columns: minmax(320px, 0.82fr) minmax(0, 1.18fr);
-  height: calc(100dvh - 76px);
+  grid-template-columns: minmax(300px, 0.72fr) minmax(0, 1.28fr);
   margin: 0 auto;
+  max-height: calc(100dvh - 76px);
   max-width: 1120px;
+  width: 100%;
   overflow: hidden;
   position: relative;
   transform-origin: center;
@@ -1527,11 +1581,13 @@ section[id] {
   z-index: 1;
 }
 
+/* Scrolls only if the screen is too short for the content. */
 .lesson-dialog-content {
   -webkit-overflow-scrolling: touch;
+  max-height: calc(100dvh - 76px);
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 68px 58px 54px;
+  padding: 44px 48px 36px;
 }
 
 .lesson-dialog[data-shared-transition] .lesson-dialog-content {
@@ -1539,12 +1595,12 @@ section[id] {
 }
 
 .lesson-dialog-content .eyebrow {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .lesson-dialog-content h2 {
-  font-size: 3.2rem;
-  margin-bottom: 18px;
+  font-size: 2.5rem;
+  margin-bottom: 12px;
 }
 
 .lesson-dialog[data-shared-transition] .lesson-dialog-content h2 {
@@ -1553,8 +1609,9 @@ section[id] {
 
 .lesson-dialog-description {
   color: var(--charcoal-800);
-  font-size: 1.15rem;
-  margin-bottom: 24px;
+  font-size: 1.02rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
 }
 
 .lesson-dialog[data-shared-transition] .lesson-dialog-description {
@@ -1562,7 +1619,7 @@ section[id] {
 }
 
 .lesson-dialog-highlights {
-  margin-bottom: 34px;
+  margin-bottom: 22px;
 }
 
 .lesson-dialog-subheading {
@@ -1578,7 +1635,7 @@ section[id] {
 }
 
 .lesson-dialog-subheading h3 {
-  font-size: 1rem;
+  font-size: 0.95rem;
   margin: 0;
 }
 
@@ -1587,24 +1644,21 @@ section[id] {
   flex-wrap: wrap;
   gap: 8px;
   list-style: none;
-  margin: 16px 0 0;
+  margin: 12px 0 0;
   padding: 0;
 }
 
 .lesson-dialog-highlights li {
   background: var(--peach-100);
   border-radius: 999px;
-  font-size: 0.78rem;
-  padding: 8px 12px;
+  font-size: 0.76rem;
+  padding: 6px 11px;
 }
 
 .lesson-dialog-cta {
-  border-radius: 999px;
   display: flex;
-  gap: 10px;
-  margin: 26px 0 0 auto;
+  margin: 20px 0 0 auto;
   max-width: 100%;
-  padding: 0 9px 0 22px;
   width: fit-content;
 }
 
@@ -1619,8 +1673,8 @@ section[id] {
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: 8px;
-  margin-top: 32px;
-  padding: 22px;
+  margin-top: 0;
+  padding: 18px;
   scroll-margin-top: 24px;
 }
 
@@ -1632,7 +1686,7 @@ section[id] {
 
 .class-session-picker-heading {
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .class-session-picker-heading > div:first-child {
@@ -1696,7 +1750,7 @@ section[id] {
 
 .mini-calendar {
   border-top: 1px solid var(--line);
-  padding-top: 16px;
+  padding-top: 12px;
 }
 
 .mini-calendar-weekdays,
@@ -1708,13 +1762,19 @@ section[id] {
 .mini-calendar-weekdays span {
   color: var(--muted);
   font-size: 0.72rem;
-  padding: 5px;
+  padding: 4px;
   text-align: center;
 }
 
+.mini-calendar-grid {
+  row-gap: 2px;
+}
+
+/* Fixed-size day circles, so the month doesn't grow with the popup's width. */
 .mini-calendar-day,
 .mini-calendar-blank {
-  aspect-ratio: 1;
+  --mini-day-size: 34px;
+  height: var(--mini-day-size);
 }
 
 .mini-calendar-day {
@@ -1724,7 +1784,9 @@ section[id] {
   color: var(--muted);
   cursor: default;
   font-size: 0.72rem;
+  justify-self: center;
   padding: 0;
+  width: var(--mini-day-size);
 }
 
 .mini-calendar-day:enabled {
@@ -1741,8 +1803,8 @@ section[id] {
 
 .class-session-times {
   border-top: 1px solid var(--line);
-  margin-top: 16px;
-  padding-top: 16px;
+  margin-top: 12px;
+  padding-top: 12px;
 }
 
 .class-session-date {
@@ -1782,38 +1844,6 @@ section[id] {
 .class-session-time svg {
   height: 13px;
   width: 13px;
-}
-
-.class-session-save {
-  align-items: center;
-  background: var(--charcoal-900);
-  border: 0;
-  border-radius: 999px;
-  color: var(--white);
-  cursor: pointer;
-  display: inline-flex;
-  flex: 0 0 auto;
-  font-size: 0.76rem;
-  font-weight: 500;
-  gap: 5px;
-  min-height: 34px;
-  padding: 0 12px;
-}
-
-.class-session-save:has(svg) {
-  gap: 7px;
-  min-height: 38px;
-  padding: 0 6px 0 13px;
-}
-
-.class-session-save svg {
-  background: var(--peach-100);
-  border-radius: 50%;
-  box-sizing: content-box;
-  color: var(--charcoal-950);
-  height: 14px;
-  padding: 5px;
-  width: 14px;
 }
 
 .class-session-save[data-saved="true"] {
@@ -1938,10 +1968,10 @@ section[id] {
 .admin-calendar .fc .fc-button {
   border-radius: 999px;
   box-shadow: none;
-  font-size: 0.76rem;
+  font-size: 0.84rem;
   font-weight: 500;
-  min-height: 38px;
-  padding: 0 14px;
+  min-height: var(--button-height-compact);
+  padding: 0 16px;
   text-transform: capitalize;
 }
 
@@ -2155,20 +2185,13 @@ section[id] {
 }
 
 .calendar-event-popover-action {
-  align-items: center;
-  background: var(--charcoal-900);
-  border: 0;
-  border-radius: 999px;
-  color: var(--white);
-  cursor: pointer;
-  display: inline-flex;
-  font-size: 0.75rem;
-  font-weight: 500;
-  gap: 7px;
-  justify-content: center;
-  min-height: 42px;
-  padding: 0 16px;
   width: 100%;
+}
+
+/* Full-width compact buttons keep the chip at the right edge, like every
+   other chip, with the label at the left. */
+.calendar-event-popover-action:has(svg) {
+  justify-content: space-between;
 }
 
 .calendar-event-popover-action[data-saved="true"] {
@@ -2179,11 +2202,6 @@ section[id] {
 .calendar-event-popover-action:disabled {
   cursor: not-allowed;
   opacity: 0.58;
-}
-
-.calendar-event-popover-action svg {
-  height: 15px;
-  width: 15px;
 }
 
 .calendar-event-popover-error {
@@ -2246,16 +2264,16 @@ section[id] {
 .public-calendar-shell .fc .fc-next-button {
   align-items: center;
   display: inline-flex;
-  height: 42px;
+  height: var(--button-height-compact);
   justify-content: center;
   padding: 0;
-  width: 42px;
+  width: var(--button-height-compact);
 }
 
 .public-calendar-shell .fc .fc-today-button {
   background: var(--peach-100);
   border-color: var(--peach-300);
-  min-height: 42px;
+  min-height: var(--button-height-compact);
   padding: 0 18px;
 }
 
@@ -2539,22 +2557,6 @@ section[id] {
   padding: 8px 0;
 }
 
-.calendar-event-popover-action {
-  gap: 8px;
-  min-height: 46px;
-  padding: 0 8px 0 18px;
-}
-
-.calendar-event-popover-action svg {
-  background: var(--peach-100);
-  border-radius: 50%;
-  box-sizing: content-box;
-  color: var(--charcoal-950);
-  height: 15px;
-  padding: 6px;
-  width: 15px;
-}
-
 .calendar-event-popover-action[data-saved="true"] svg {
   background: var(--charcoal-900);
   color: var(--white);
@@ -2570,8 +2572,8 @@ section[id] {
   min-height: 660px;
   max-width: none;
   overflow: hidden;
-  padding-left: max(var(--page-padding), calc((100vw - var(--content-max)) / 2 + var(--page-padding)));
-  padding-right: max(var(--page-padding), calc((100vw - var(--content-max)) / 2 + var(--page-padding)));
+  padding-left: max(var(--page-padding), calc((100% - var(--content-max)) / 2 + var(--page-padding)));
+  padding-right: max(var(--page-padding), calc((100% - var(--content-max)) / 2 + var(--page-padding)));
   position: relative;
 }
 
@@ -2604,9 +2606,10 @@ section[id] {
 
 .pass-copy h2 {
   font-size: 4.8rem;
+  margin-bottom: 28px;
 }
 
-.pass-copy p {
+.pass-copy p:not(.eyebrow) {
   color: rgba(255, 255, 255, 0.78);
   font-size: 1.08rem;
   max-width: 620px;
@@ -2652,7 +2655,10 @@ section[id] {
 .pass-purchase-button {
   background: var(--charcoal-900);
   color: var(--white);
-  min-height: 56px;
+}
+
+.pass-purchase-button:hover {
+  background: var(--charcoal-800);
 }
 
 .checkout-error {
@@ -2662,7 +2668,6 @@ section[id] {
 }
 
 .community-section {
-  max-width: 1180px;
   padding-bottom: 108px;
   padding-top: 108px;
 }
@@ -2682,6 +2687,7 @@ section[id] {
 }
 
 .path-link {
+  --action-inset: 28px;
   align-items: center;
   background: var(--charcoal-900);
   border-radius: 8px 8px var(--action-corner-radius) 8px;
@@ -2690,7 +2696,7 @@ section[id] {
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-rows: auto 1fr;
   min-height: 152px;
-  padding: 28px 72px 28px 28px;
+  padding: var(--action-inset) calc(var(--action-inset) + var(--action-size) + 16px) var(--action-inset) var(--action-inset);
   transition: background-color 200ms ease;
 }
 
@@ -2716,12 +2722,6 @@ section[id] {
   margin-top: 22px;
 }
 
-.path-link > .animated-arrow {
-  bottom: var(--action-inset);
-  position: absolute;
-  right: var(--action-inset);
-}
-
 .contact-section {
   align-items: center;
   background: var(--charcoal-900);
@@ -2729,8 +2729,8 @@ section[id] {
   display: flex;
   justify-content: space-between;
   max-width: none;
-  padding-left: max(var(--page-padding), calc((100vw - var(--content-max)) / 2 + var(--page-padding)));
-  padding-right: max(var(--page-padding), calc((100vw - var(--content-max)) / 2 + var(--page-padding)));
+  padding-left: max(var(--page-padding), calc((100% - var(--content-max)) / 2 + var(--page-padding)));
+  padding-right: max(var(--page-padding), calc((100% - var(--content-max)) / 2 + var(--page-padding)));
 }
 
 .contact-section > div {
@@ -2742,10 +2742,10 @@ section[id] {
 }
 
 .contact-section h2 {
-  margin-bottom: 18px;
+  margin-bottom: 24px;
 }
 
-.contact-section p {
+.contact-section p:not(.eyebrow) {
   color: rgba(255, 255, 255, 0.7);
   margin-bottom: 0;
   max-width: 580px;
@@ -2803,7 +2803,7 @@ section[id] {
 
 .studios-hero-content h1 {
   font-size: 5.3rem;
-  margin-bottom: 22px;
+  margin-bottom: 24px;
   max-width: 880px;
 }
 
@@ -2830,7 +2830,7 @@ section[id] {
 }
 
 .studios-introduction h2 {
-  margin-bottom: 22px;
+  margin-bottom: 24px;
 }
 
 .studios-introduction > div > p {
@@ -2851,10 +2851,6 @@ section[id] {
   border: 1px solid var(--line);
   border-radius: 8px 8px var(--action-corner-radius) 8px;
   overflow: hidden;
-}
-
-.studio-profile-rhizome {
-  background: var(--peach-50);
 }
 
 .studio-profile-heading {
@@ -2898,10 +2894,6 @@ section[id] {
 
 .studio-media-belleville {
   background: #ffffff;
-}
-
-.studio-media-rhizome {
-  background: #6e0044;
 }
 
 .studio-logo-image {
@@ -2984,11 +2976,6 @@ section[id] {
   margin: 0;
 }
 
-.studio-link {
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
 .studios-cta {
   align-items: end;
   background: var(--peach-100);
@@ -3005,6 +2992,10 @@ section[id] {
 .studios-cta .pill-link {
   background: var(--charcoal-900);
   color: var(--white);
+}
+
+.studios-cta .pill-link:hover {
+  background: var(--charcoal-800);
 }
 
 /* Account */
@@ -3029,7 +3020,7 @@ section[id] {
 .welcome-shell,
 .checkout-result > div {
   margin: 0 auto;
-  max-width: 1180px;
+  max-width: var(--content-width);
 }
 
 .account-heading,
@@ -3954,7 +3945,7 @@ textarea:focus {
   margin: 30px 0 10px;
 }
 
-.legal-document p,
+.legal-document p:not(.eyebrow),
 .legal-document li {
   font-size: 0.94rem;
   line-height: 1.75;
@@ -3990,7 +3981,7 @@ textarea:focus {
   gap: 50px;
   grid-template-columns: minmax(280px, 1.7fr) repeat(3, minmax(150px, 0.7fr));
   margin: 0 auto;
-  max-width: var(--content-max);
+  max-width: var(--content-width);
   padding-bottom: 70px;
 }
 
@@ -4029,8 +4020,8 @@ textarea:focus {
 
 .footer-column h2 {
   color: var(--peach-300);
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 0.78rem;
+  font-weight: 600;
   margin-bottom: 8px;
   text-transform: uppercase;
 }
@@ -4052,7 +4043,7 @@ textarea:focus {
   gap: 34px;
   justify-content: space-between;
   margin: 0 auto;
-  max-width: var(--content-max);
+  max-width: var(--content-width);
   padding-top: 26px;
 }
 
@@ -4080,6 +4071,89 @@ textarea:focus {
 
 /* Responsive */
 
+/* Shorter laptop windows: tighten the class popup so it fits without
+   scrolling on screens down to about 760px tall. */
+@media (min-width: 641px) and (max-height: 860px) {
+  .lesson-dialog {
+    padding-bottom: 24px;
+    padding-top: 24px;
+  }
+
+  .lesson-dialog-layout,
+  .lesson-dialog-content {
+    max-height: calc(100dvh - 48px);
+  }
+
+  .lesson-dialog-content {
+    padding-bottom: 28px;
+    padding-top: 32px;
+  }
+
+  .lesson-dialog-content h2 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+  }
+
+  .lesson-dialog-description {
+    margin-bottom: 14px;
+  }
+
+  .lesson-dialog-highlights {
+    margin-bottom: 16px;
+  }
+
+  .lesson-dialog-highlights ul {
+    margin-top: 10px;
+  }
+
+  .class-session-picker {
+    padding: 14px 16px;
+  }
+
+  .class-session-picker-heading {
+    margin-bottom: 10px;
+  }
+
+  .mini-calendar {
+    padding-top: 10px;
+  }
+
+  .mini-calendar-day,
+  .mini-calendar-blank {
+    --mini-day-size: 30px;
+  }
+
+  .class-session-times {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+
+  .lesson-dialog-cta {
+    margin-top: 14px;
+  }
+}
+
+@media (min-width: 641px) and (max-height: 740px) {
+  .lesson-dialog {
+    padding-bottom: 16px;
+    padding-top: 16px;
+  }
+
+  .lesson-dialog-layout,
+  .lesson-dialog-content {
+    max-height: calc(100dvh - 32px);
+  }
+
+  .lesson-dialog-content {
+    padding-bottom: 24px;
+    padding-top: 28px;
+  }
+
+  .lesson-dialog-content h2 {
+    font-size: 2rem;
+  }
+}
+
 @media (max-width: 1180px) {
   :root {
     --page-padding: 32px;
@@ -4097,16 +4171,6 @@ textarea:focus {
   .account-cta,
   .auth-link {
     display: none;
-  }
-
-  .program-story,
-  .restoration-story {
-    margin-left: var(--page-padding);
-    margin-right: var(--page-padding);
-  }
-
-  .menu-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .pass-copy h2 {
@@ -4171,8 +4235,9 @@ textarea:focus {
   }
 
   .hero-pathways a {
+    --action-inset: 18px;
     min-height: 76px;
-    padding: 15px 56px 15px 18px;
+    padding: 15px calc(var(--action-inset) + var(--action-size) + 14px) 15px var(--action-inset);
   }
 
   .hero-pathways a:nth-child(3) {
@@ -4297,16 +4362,17 @@ textarea:focus {
   }
 
   .lesson-dialog-layout {
-    grid-template-columns: 0.8fr 1.2fr;
-    height: calc(100dvh - 44px);
+    grid-template-columns: 0.72fr 1.28fr;
+    max-height: calc(100dvh - 44px);
   }
 
   .lesson-dialog-content {
-    padding: 58px 36px 42px;
+    max-height: calc(100dvh - 44px);
+    padding: 44px 32px 32px;
   }
 
   .lesson-dialog-content h2 {
-    font-size: 2.6rem;
+    font-size: 2.3rem;
   }
 
   .admin-dashboard-grid {
@@ -4362,8 +4428,6 @@ textarea:focus {
 
   .site-header {
     gap: 10px;
-    padding-left: max(16px, env(safe-area-inset-left));
-    padding-right: max(16px, env(safe-area-inset-right));
   }
 
   .brand {
@@ -4441,14 +4505,10 @@ textarea:focus {
 
   .program-story,
   .restoration-story {
-    margin-left: 0;
-    margin-right: 0;
-  }
-
-  .program-story,
-  .restoration-story {
+    max-width: none;
     padding-left: 0;
     padding-right: 0;
+    width: 100%;
   }
 
   .program-story-media,
@@ -4495,24 +4555,12 @@ textarea:focus {
     font-size: 2rem;
   }
 
-  .menu-grid {
-    grid-template-columns: 1fr;
-  }
-
   .menu-card {
     min-height: 0;
   }
 
   .menu-card-image {
     aspect-ratio: 16 / 9;
-  }
-
-  .menu-card-body {
-    padding: 18px 18px 84px;
-  }
-
-  .menu-card-save {
-    min-height: 44px;
   }
 
   .schedule-summary {
@@ -4575,9 +4623,7 @@ textarea:focus {
 
   .public-calendar-shell .fc .fc-button,
   .admin-calendar .fc .fc-button {
-    font-size: 0.74rem;
-    min-height: 44px;
-    padding: 0 13px;
+    padding: 0 14px;
   }
 
   .public-calendar-shell .fc .fc-list {
@@ -4683,10 +4729,6 @@ textarea:focus {
     width: 44px;
   }
 
-  .calendar-event-popover-action {
-    min-height: 44px;
-  }
-
   .pass-section {
     gap: 28px;
     min-height: 700px;
@@ -4711,8 +4753,8 @@ textarea:focus {
   }
 
   .path-link {
+    --action-inset: 24px;
     min-height: 132px;
-    padding: 24px 64px 24px 24px;
   }
 
   .contact-section {
@@ -4792,8 +4834,9 @@ textarea:focus {
   .lesson-dialog-layout {
     border-radius: 8px 8px 56px 8px;
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(250px, 38dvh) minmax(0, 1fr);
+    grid-template-rows: minmax(180px, 28dvh) minmax(0, 1fr);
     height: 100dvh;
+    max-height: none;
     max-width: none;
   }
 
@@ -4805,8 +4848,17 @@ textarea:focus {
       max(22px, env(safe-area-inset-left));
   }
 
+  .lesson-dialog-content {
+    max-height: none;
+  }
+
   .lesson-dialog-content h2 {
-    font-size: 2.45rem;
+    font-size: 2.2rem;
+  }
+
+  .mini-calendar-day,
+  .mini-calendar-blank {
+    --mini-day-size: 44px;
   }
 
   .lesson-dialog-close {
@@ -4839,11 +4891,12 @@ textarea:focus {
     flex-direction: column;
   }
 
-  .class-session-save,
-  .class-session-save:has(svg) {
-    justify-content: center;
-    min-height: 44px;
+  .class-session-save {
     width: 100%;
+  }
+
+  .class-session-save:has(svg) {
+    justify-content: space-between;
   }
 
   .account-page,

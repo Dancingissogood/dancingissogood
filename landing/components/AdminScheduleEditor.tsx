@@ -434,7 +434,7 @@ export function AdminScheduleEditor() {
               <select value={bulkDraft.bookingStatus} onChange={(event) => setBulkDraft({ ...bulkDraft, bookingStatus: event.target.value as BulkDraft["bookingStatus"] })}>
                 <option value="">No change</option>
                 <option value="OPEN">Available</option>
-                <option value="CLOSED">No vacancy</option>
+                <option value="CLOSED">Full</option>
               </select>
             </label>
             <label className="field">
@@ -565,7 +565,7 @@ export function AdminScheduleEditor() {
               <legend>Reservations</legend>
               <div className="schedule-choice-group">
                 <button className={draft.bookingStatus === "OPEN" ? "is-selected" : ""} type="button" onClick={() => setDraft({ ...draft, bookingStatus: "OPEN" })}>Available</button>
-                <button className={draft.bookingStatus === "CLOSED" ? "is-selected" : ""} type="button" onClick={() => setDraft({ ...draft, bookingStatus: "CLOSED" })}>No vacancy</button>
+                <button className={draft.bookingStatus === "CLOSED" ? "is-selected" : ""} type="button" onClick={() => setDraft({ ...draft, bookingStatus: "CLOSED" })}>Full</button>
               </div>
             </fieldset>
             <label className="publish-control">

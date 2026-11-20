@@ -190,7 +190,7 @@ export default function HomePage() {
             <p className="eyebrow">Current schedule</p>
             <h2>Make the morning your own.</h2>
             <p>
-              Reserve the sessions that feel right for you. Times are shown in your
+              Book the sessions that feel right for you. Times are shown in your
               selected time zone.
             </p>
           </div>

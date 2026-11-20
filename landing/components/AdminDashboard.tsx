@@ -158,7 +158,7 @@ export function AdminDashboard() {
                       <span>{dateTimeFormatter.format(new Date(session.startsAt))} ET</span>
                       <span className="admin-roster-status">
                         {session.bookingStatus === "CLOSED"
-                          ? "No vacancy"
+                          ? "Full"
                           : session.deliveryMode === "ONLINE"
                             ? "Online class"
                             : "Available"}

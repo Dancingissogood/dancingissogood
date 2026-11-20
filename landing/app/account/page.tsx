@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Account",
-  description: "Your passes, reservations, and account for Summer in the Mitten.",
+  description: "Your passes, bookings, and account for Summer in the Mitten.",
   robots: { index: false, follow: false },
 };
 

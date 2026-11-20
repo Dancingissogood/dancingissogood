@@ -15,7 +15,7 @@ export async function fetchRegistrations(from: string, to: string, signal?: Abor
   const parsed = registrationListSchema.safeParse(payload);
 
   if (!response.ok || !parsed.success) {
-    throw new Error(readApiError(payload, "Your reservations could not be loaded."));
+    throw new Error(readApiError(payload, "Your bookings could not be loaded."));
   }
 
   return parsed.data.registrations;
@@ -32,7 +32,7 @@ export async function reserveClassSession(classSessionId: string): Promise<Class
   const parsed = registrationMutationSchema.safeParse(payload);
 
   if (!response.ok || !parsed.success) {
-    throw new Error(readApiError(payload, "This class could not be reserved."));
+    throw new Error(readApiError(payload, "This class could not be booked."));
   }
 
   return parsed.data.registration;
@@ -51,7 +51,7 @@ export async function cancelClassReservation(classSessionId: string): Promise<vo
     } catch {
       payload = null;
     }
-    throw new Error(readApiError(payload, "This reservation could not be canceled."));
+    throw new Error(readApiError(payload, "This booking could not be canceled."));
   }
 }
 

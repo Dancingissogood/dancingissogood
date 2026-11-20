@@ -22,7 +22,7 @@ export type StudioProfile = {
   imageWidth: number;
   imageHeight: number;
   imageVariant: "portrait" | "emblem";
-  imageTheme: "belleville" | "rhizome";
+  imageTheme: "belleville";
   tags: string[];
   details: Array<{
     label: string;
@@ -205,39 +205,6 @@ export const studioProfiles: StudioProfile[] = [
     ],
     website: {
       href: "https://www.bellevillelakedance.com",
-    },
-  },
-  {
-    name: "Rhizome Roots Studio",
-    locationLabel: "Ypsilanti, Michigan",
-    description:
-      "An inclusive Ypsilanti space for movement, wellness, creativity, and community, open to all ages and ability levels.",
-    image: "/assets/studios/rhizome-roots-contact-logo.png",
-    imageAlt: "Rhizome Roots Studio logo",
-    imageWidth: 594,
-    imageHeight: 460,
-    imageVariant: "emblem",
-    imageTheme: "rhizome",
-    tags: [
-      "Social dancing",
-      "Yoga",
-      "Mindful movement",
-      "Qigong",
-      "Foraging",
-      "Cooking classes",
-    ],
-    details: [
-      {
-        label: "Location",
-        value: "108 Pearl St, Ypsilanti, MI",
-      },
-      {
-        label: "Classes and activities",
-        value: "Social dance, yoga, outdoor adventures, and wellness education",
-      },
-    ],
-    website: {
-      href: "https://rhizomeroots.com",
     },
   },
 ];

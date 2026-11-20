@@ -149,7 +149,7 @@ export async function registerRegistrationRoutes(
       reply.header("cache-control", "no-store");
       return reply.send({ registrations: registrations.map(serializeRegistration) });
     } catch (error) {
-      return handleRegistrationError(request, reply, error, "load your reservations");
+      return handleRegistrationError(request, reply, error, "load your bookings");
     }
   });
 
@@ -237,7 +237,7 @@ export async function registerRegistrationRoutes(
         });
 
         if (availability.availabilityStatus === "NO_VACANCY") {
-          throw new ClassUnavailableError("This class no longer has a vacancy.");
+          throw new ClassUnavailableError("This class is full.");
         }
 
         const saved = await transaction.classRegistration.upsert({
@@ -279,7 +279,7 @@ export async function registerRegistrationRoutes(
       reply.header("cache-control", "no-store");
       return reply.send({ registration: serializeRegistration(registration) });
     } catch (error) {
-      return handleRegistrationError(request, reply, error, "reserve this class");
+      return handleRegistrationError(request, reply, error, "book this class");
     }
   });
 
@@ -333,7 +333,7 @@ export async function registerRegistrationRoutes(
 
       return reply.code(204).send();
     } catch (error) {
-      return handleRegistrationError(request, reply, error, "cancel this reservation");
+      return handleRegistrationError(request, reply, error, "cancel this booking");
     }
   });
 
@@ -397,7 +397,7 @@ function handleRegistrationError(
   if (error instanceof PassRequiredError) {
     return reply.code(403).send({
       code: "PASS_REQUIRED",
-      error: "An active camp pass is required to reserve a class.",
+      error: "An active camp pass is required to book a class.",
     });
   }
 

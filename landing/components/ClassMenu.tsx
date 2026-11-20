@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Sparkles, X } from "lucide-react";
+import { ArrowRight, Sparkles, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -130,6 +130,9 @@ export function ClassMenu({ classes }: ClassMenuProps) {
       setIsSharedTransitioning(false);
     };
 
+    // A skipped transition (for example in a hidden tab) rejects `ready`;
+    // the dialog still opens, so the rejection only needs to be handled.
+    void transition.ready.catch(() => undefined);
     void transition.finished.then(finishOpening, finishOpening);
   };
 
@@ -275,13 +278,13 @@ export function ClassMenu({ classes }: ClassMenuProps) {
                       <button
                         className="menu-card-save"
                         type="button"
-                        aria-label={`Reserve a ${item.title} session`}
+                        aria-label={`See times for ${item.title}`}
                         onClick={(event) => {
                           openClass(item, event.currentTarget, true);
                         }}
                       >
-                        <Plus className="cta-plus-icon" aria-hidden="true" />
-                        Reserve
+                        <ArrowRight className="cta-arrow-icon" aria-hidden="true" />
+                        See times
                       </button>
                     </div>
                   </div>

@@ -108,10 +108,10 @@ export function CalendarEventPopover({
       {isPending
         ? "Updating..."
         : isSaved
-          ? "Reserved"
+          ? "Booked"
           : details.availabilityStatus === "NO_VACANCY"
-            ? "No vacancy"
-            : "Reserve class"}
+            ? "Full"
+            : "Book"}
     </button>
   );
 
@@ -200,12 +200,12 @@ export function CalendarEventPopover({
               {error ? "Schedule unavailable" : "Checking schedule..."}
             </button>
           ) : isSignedIn && isSaved && details.deliveryMode === "ONLINE" && details.isLive ? joinButton : isSignedIn ? saveButton : details.availabilityStatus === "NO_VACANCY" ? (
-            <button className="calendar-event-popover-action" disabled type="button">No vacancy</button>
+            <button className="calendar-event-popover-action" disabled type="button">Full</button>
           ) : (
             <SignInButton mode="modal">
               <button className="calendar-event-popover-action" type="button">
                 <Plus className="cta-plus-icon" aria-hidden="true" />
-                Sign in to reserve
+                Sign in to book
               </button>
             </SignInButton>
           )}

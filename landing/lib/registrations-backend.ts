@@ -19,7 +19,7 @@ type RegistrationRequestOptions = {
 export async function forwardRegistrationRequest(options: RegistrationRequestOptions) {
   const backendUrl = process.env["BACKEND_URL"];
   if (!backendUrl) {
-    return NextResponse.json({ error: "Class reservations are not configured." }, { status: 503 });
+    return NextResponse.json({ error: "Class booking is not configured." }, { status: 503 });
   }
 
   const { getToken, userId } = await auth();
@@ -51,7 +51,7 @@ export async function forwardRegistrationRequest(options: RegistrationRequestOpt
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "The reservation service returned invalid data." },
+        { error: "The booking service returned invalid data." },
         { status: 502 },
       );
     }
@@ -61,12 +61,12 @@ export async function forwardRegistrationRequest(options: RegistrationRequestOpt
       status: response.status,
     });
   } catch {
-    return NextResponse.json({ error: "The reservation service is unavailable." }, { status: 502 });
+    return NextResponse.json({ error: "The booking service is unavailable." }, { status: 502 });
   }
 }
 
 function normalizeError(payload: unknown) {
   return typeof payload === "object" && payload !== null && "error" in payload && typeof payload.error === "string"
     ? { error: payload.error }
-    : { error: "The reservation request could not be completed." };
+    : { error: "The booking request could not be completed." };
 }

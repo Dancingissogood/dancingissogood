@@ -230,7 +230,7 @@ export function PublicSchedule() {
     eventInfo.el.tabIndex = 0;
     eventInfo.el.setAttribute(
       "aria-label",
-      `${eventInfo.event.title}, ${formatEventTime(eventInfo.event)}. ${eventInfo.event.extendedProps["availabilityStatus"] === "NO_VACANCY" ? "No vacancy." : "Available to reserve."} View class details.`,
+      `${eventInfo.event.title}, ${formatEventTime(eventInfo.event)}. ${eventInfo.event.extendedProps["availabilityStatus"] === "NO_VACANCY" ? "Full." : "Available to book."} View class details.`,
     );
     eventInfo.el.addEventListener("blur", scheduleHide);
     eventInfo.el.addEventListener("keydown", handleKeyDown);
@@ -347,7 +347,7 @@ export function PublicSchedule() {
             setReservationStateError(
               caughtError instanceof Error
                 ? caughtError.message
-                : "Your reservations could not be loaded.",
+                : "Your bookings could not be loaded.",
             );
           }
         } else {
@@ -421,7 +421,7 @@ export function PublicSchedule() {
     <div className="public-calendar-shell">
       <div className="calendar-legend" aria-label="Class availability legend">
         <span><i className="calendar-legend-swatch calendar-legend-available" aria-hidden="true" />Available</span>
-        <span><i className="calendar-legend-swatch calendar-legend-unavailable" aria-hidden="true" />No vacancy</span>
+        <span><i className="calendar-legend-swatch calendar-legend-unavailable" aria-hidden="true" />Full</span>
         <span><i className="calendar-legend-swatch calendar-legend-online" aria-hidden="true" />Online class</span>
       </div>
       <FullCalendar
@@ -445,6 +445,7 @@ export function PublicSchedule() {
           : { left: "prev,next today", center: "title", right: "" }}
         height="auto"
         initialView={isMobileCalendar ? "listWeek" : "timeGridWeek"}
+        noEventsText="No classes are posted for the selected dates."
         nowIndicator
         plugins={[timeGridPlugin, listPlugin, interactionPlugin, luxonPlugin]}
         ref={calendarRef}
@@ -477,7 +478,8 @@ export function PublicSchedule() {
           document.body,
         )
         : null}
-      {isEmpty ? <p className="calendar-state">No classes are posted for the selected dates.</p> : null}
+      {/* The mobile list view shows its own empty message (noEventsText). */}
+      {isEmpty && !isMobileCalendar ? <p className="calendar-state">No classes are posted for the selected dates.</p> : null}
       {error ? <p className="calendar-state calendar-error" role="alert">{error}</p> : null}
     </div>
   );

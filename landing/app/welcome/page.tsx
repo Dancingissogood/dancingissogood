@@ -20,7 +20,7 @@ export default async function WelcomePage() {
         <p className="eyebrow">Welcome to the Movement Series</p>
         <h1>Your account is ready.</h1>
         <p className="welcome-intro">
-          Your passes and class reservations will live in one place, ready whenever
+          Your passes and class bookings will live in one place, ready whenever
           you return.
         </p>
         <MarketingPreference onboarding />

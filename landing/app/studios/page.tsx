@@ -9,7 +9,7 @@ import { createPublicPageMetadata } from "@/lib/site-config";
 export const metadata = createPublicPageMetadata({
   title: "Partner Studios",
   description:
-    "Movement Series partner studios, including Belleville Lake Dance Company and Rhizome Roots Studio.",
+    "Movement Series partner studios, including Belleville Lake Dance Company.",
   path: "/studios",
 });
 

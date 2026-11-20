@@ -78,7 +78,7 @@ export function ProfileCalendar() {
       } catch (caughtError) {
         const loadError = caughtError instanceof Error
           ? caughtError
-          : new Error("Your reservations could not be loaded.");
+          : new Error("Your bookings could not be loaded.");
         setVisibleRegistrations([]);
         setHasLoaded(true);
         setError(loadError.message);
@@ -148,7 +148,7 @@ export function ProfileCalendar() {
         <div>
           <h2 id="my-schedule-title">My schedule</h2>
           <p>
-            Your reserved classes in {timeZoneName}.
+            Your booked classes in {timeZoneName}.
           </p>
         </div>
         <span>{visibleRegistrations.length}</span>
@@ -187,7 +187,7 @@ export function ProfileCalendar() {
         <div className="profile-calendar-empty">
           <CalendarDays aria-hidden="true" />
           <div>
-            <h3>No reservations for these dates</h3>
+            <h3>No bookings for these dates</h3>
             <p>Choose a class from the movement menu or current schedule.</p>
           </div>
           <Link className="button button-secondary" href="/#menu">Explore Classes</Link>
@@ -208,14 +208,14 @@ export function ProfileCalendar() {
             </div>
           ) : null}
           <div className="profile-selection-copy">
-            <span>{selected.session.published ? "Reserved class" : "No longer published"}</span>
+            <span>{selected.session.published ? "Booked class" : "No longer published"}</span>
             <h3>{selected.session.title}</h3>
             <p><Clock3 aria-hidden="true" />{dateTimeFormatter.format(new Date(selected.session.startsAt))}</p>
             {selected.session.locationName ? <p><MapPin aria-hidden="true" />{selected.session.locationName}</p> : null}
           </div>
           <button className="profile-selection-remove" disabled={isRemoving} type="button" onClick={() => void removeSelected()}>
             <Trash2 aria-hidden="true" />
-            {isRemoving ? "Canceling..." : "Cancel reservation"}
+            {isRemoving ? "Canceling..." : "Cancel booking"}
           </button>
         </article>
       ) : null}
