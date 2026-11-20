@@ -78,7 +78,24 @@ const classSessionFieldsSchema = z
   .strict();
 
 const createClassSessionSchema = classSessionFieldsSchema.superRefine(validateClassSession);
-const updateClassSessionSchema = classSessionFieldsSchema
+// Updates must not use the create defaults: zod still applies `.default()` inside
+// `.partial()`, which would silently reset fields the admin did not change.
+const updateClassSessionSchema = z
+  .object({
+    bookingStatus: classBookingStatusSchema,
+    capacity: z.union([z.number().int().min(1).max(500), z.null()]),
+    classKey: z.string().trim().min(1).max(80).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+    deliveryMode: classDeliveryModeSchema,
+    description: nullableTextSchema(1_000),
+    endsAt: dateTimeSchema,
+    instructorName: nullableTextSchema(120),
+    locationName: nullableTextSchema(160),
+    meetUrl: nullableOnlineClassUrlSchema,
+    published: z.boolean(),
+    startsAt: dateTimeSchema,
+    title: z.string().trim().min(1).max(120),
+  })
+  .strict()
   .partial()
   .refine((value) => Object.keys(value).length > 0, "At least one field is required.");
 const bulkClassSessionUpdateSchema = z
@@ -378,19 +395,24 @@ export async function registerClassSessionRoutes(
         return reply.code(404).send({ error: "Class session not found." });
       }
 
+      // `null` is a real value for nullable fields (e.g. unlimited capacity), so only
+      // fields that are absent from the request fall back to the stored value.
+      const changes = body.data;
       const fullSession = {
-        bookingStatus: body.data.bookingStatus ?? existing.bookingStatus,
-        capacity: body.data.capacity ?? existing.capacity,
-        classKey: body.data.classKey ?? existing.classKey,
-        deliveryMode: body.data.deliveryMode ?? existing.deliveryMode,
-        description: body.data.description ?? existing.description,
-        endsAt: body.data.endsAt ?? existing.endsAt.toISOString(),
-        instructorName: body.data.instructorName ?? existing.instructorName,
-        locationName: body.data.locationName ?? existing.locationName,
-        meetUrl: body.data.meetUrl === undefined ? existing.meetUrl : body.data.meetUrl,
-        published: body.data.published ?? existing.published,
-        startsAt: body.data.startsAt ?? existing.startsAt.toISOString(),
-        title: body.data.title ?? existing.title,
+        bookingStatus: changes.bookingStatus ?? existing.bookingStatus,
+        capacity: changes.capacity === undefined ? existing.capacity : changes.capacity,
+        classKey: changes.classKey ?? existing.classKey,
+        deliveryMode: changes.deliveryMode ?? existing.deliveryMode,
+        description: changes.description === undefined ? existing.description : changes.description,
+        endsAt: changes.endsAt ?? existing.endsAt.toISOString(),
+        instructorName:
+          changes.instructorName === undefined ? existing.instructorName : changes.instructorName,
+        locationName:
+          changes.locationName === undefined ? existing.locationName : changes.locationName,
+        meetUrl: changes.meetUrl === undefined ? existing.meetUrl : changes.meetUrl,
+        published: changes.published ?? existing.published,
+        startsAt: changes.startsAt ?? existing.startsAt.toISOString(),
+        title: changes.title ?? existing.title,
       };
       const fullSessionValidation = createClassSessionSchema.safeParse(fullSession);
 
@@ -400,34 +422,41 @@ export async function registerClassSessionRoutes(
         });
       }
 
-      if (typeof body.data.capacity === "number") {
-        const reservationCount = await dependencies.database.classRegistration.count({
-          where: { classSessionId: existing.id, status: "RESERVED" },
-        });
+      const { session, reservationCount } = await dependencies.database.$transaction(
+        async (transaction) => {
+          // Same lock as reservations, so a booking can't slip in while capacity changes.
+          await lockClassSession(transaction, existing.id);
 
-        if (reservationCount > body.data.capacity) {
-          return reply.code(409).send({
-            error: "Capacity cannot be set below the number of existing reservations.",
+          const currentReservations = await transaction.classRegistration.count({
+            where: { classSessionId: existing.id, status: "RESERVED" },
           });
-        }
-      }
 
-      const session = await dependencies.database.classSession.update({
-        data: {
-          ...body.data,
-          ...(body.data.endsAt ? { endsAt: new Date(body.data.endsAt) } : {}),
-          ...(body.data.startsAt ? { startsAt: new Date(body.data.startsAt) } : {}),
-          updatedById: authorization.userId,
+          if (typeof changes.capacity === "number" && currentReservations > changes.capacity) {
+            throw new CapacityBelowReservationsError();
+          }
+
+          const updated = await transaction.classSession.update({
+            data: {
+              ...changes,
+              ...(changes.endsAt ? { endsAt: new Date(changes.endsAt) } : {}),
+              ...(changes.startsAt ? { startsAt: new Date(changes.startsAt) } : {}),
+              updatedById: authorization.userId,
+            },
+            where: { id: sessionId },
+          });
+
+          return { reservationCount: currentReservations, session: updated };
         },
-        where: { id: sessionId },
-      });
-
-      const reservationCount = await dependencies.database.classRegistration.count({
-        where: { classSessionId: session.id, status: "RESERVED" },
-      });
+      );
 
       return reply.send({ session: serializeClassSession(session, reservationCount, true) });
     } catch (error) {
+      if (error instanceof CapacityBelowReservationsError) {
+        return reply.code(409).send({
+          error: "Capacity cannot be set below the number of existing reservations.",
+        });
+      }
+
       return handleAdministrativeError(request, reply, error, "update the class session");
     }
   });
@@ -456,6 +485,19 @@ export async function registerClassSessionRoutes(
       const requestedCapacity = body.data.capacity;
 
       const result = await dependencies.database.$transaction(async (transaction) => {
+        if (typeof requestedCapacity === "number") {
+          const targets = await transaction.classSession.findMany({
+            orderBy: { id: "asc" },
+            select: { id: true },
+            where,
+          });
+
+          // Lock in a stable order so concurrent bulk edits can't deadlock.
+          for (const target of targets) {
+            await lockClassSession(transaction, target.id);
+          }
+        }
+
         const sessions = await transaction.classSession.findMany({
           select: {
             _count: { select: { registrations: { where: { status: "RESERVED" } } } },
@@ -536,6 +578,14 @@ export async function registerClassSessionRoutes(
 }
 
 class CapacityBelowReservationsError extends Error {}
+
+type TransactionClient = Parameters<Parameters<DatabaseClient["$transaction"]>[0]>[0];
+
+async function lockClassSession(transaction: TransactionClient, classSessionId: string) {
+  await transaction.$executeRaw`
+    SELECT pg_advisory_xact_lock(hashtextextended(${classSessionId}, 0))
+  `;
+}
 
 function handleAdministrativeError(
   request: FastifyRequest,

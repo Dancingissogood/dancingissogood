@@ -1,9 +1,10 @@
 import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { AdminDashboard } from "@/components/AdminDashboard";
+import { fetchAccountSummary } from "@/lib/account";
 
 export const dynamic = "force-dynamic";
 
@@ -13,8 +14,14 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminPage() {
-  const { userId } = await auth();
+  const { getToken, userId } = await auth();
   if (!userId) redirect("/sign-in?redirect_url=/admin");
+
+  const token = await getToken();
+  if (!token) redirect("/sign-in?redirect_url=/admin");
+
+  const account = await fetchAccountSummary(token);
+  if (account.role !== "ADMIN") notFound();
 
   return (
     <main className="admin-page">

@@ -21,7 +21,11 @@ export async function registerCheckoutRoutes(
     stripe: Stripe;
   },
 ): Promise<void> {
-  app.post("/v1/checkout-sessions", async (request, reply) => {
+  // Starting checkout needs no login and calls Stripe, so it has a tighter limit.
+  app.post(
+    "/v1/checkout-sessions",
+    { config: { rateLimit: { max: 60, timeWindow: "1 minute" } } },
+    async (request, reply) => {
     const parsedRequest = checkoutRequestSchema.safeParse(request.body);
 
     if (!parsedRequest.success) {

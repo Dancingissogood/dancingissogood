@@ -5,6 +5,13 @@ import { z } from "zod";
 import { AccountIdentityConflictError, synchronizeAccount } from "../accounts.js";
 import type { IdentityProvider } from "../auth.js";
 import { getClassAvailability } from "../class-availability.js";
+import {
+  formatPassWindow,
+  lockMemberPasses,
+  refreshPassWindow,
+  selectPassForClass,
+} from "../pass-access.js";
+import type { PassWindow } from "../pass-access.js";
 
 const MAXIMUM_QUERY_RANGE_MILLISECONDS = 366 * 24 * 60 * 60 * 1_000;
 const dateTimeSchema = z.iso.datetime({ offset: true });
@@ -171,30 +178,11 @@ export async function registerRegistrationRoutes(
         return reply.code(409).send({ error: "Past class sessions cannot be reserved." });
       }
 
-      const passPurchase = await dependencies.database.passPurchase.findFirst({
-        orderBy: [{ paidAt: "desc" }],
-        where: {
-          AND: [
-            { OR: [{ passStatus: null }, { passStatus: "ACTIVE" }] },
-            { OR: [{ validFrom: null }, { validFrom: { lte: classSession.startsAt } }] },
-            { OR: [{ validUntil: null }, { validUntil: { gte: classSession.startsAt } }] },
-          ],
-          status: "PAID",
-          userId: user.id,
-        },
-      });
-
-      if (!passPurchase) {
-        return reply.code(403).send({
-          code: "PASS_REQUIRED",
-          error: "An active camp pass is required to reserve a class.",
-        });
-      }
-
       const registration = await dependencies.database.$transaction(async (transaction) => {
         await transaction.$executeRaw`
           SELECT pg_advisory_xact_lock(hashtextextended(${classSession.id}, 0))
         `;
+        await lockMemberPasses(transaction, user.id);
 
         const lockedSession = await transaction.classSession.findFirst({
           select: {
@@ -203,6 +191,7 @@ export async function registerRegistrationRoutes(
             capacity: true,
             endsAt: true,
             id: true,
+            startsAt: true,
           },
           where: { id: classSession.id, published: true },
         });
@@ -221,8 +210,24 @@ export async function registerRegistrationRoutes(
           },
         });
 
-        if (existingRegistration?.status === "RESERVED") {
+        // Only canceled bookings can be booked again; attendance records are kept as they are.
+        if (existingRegistration && existingRegistration.status !== "CANCELED") {
           return existingRegistration;
+        }
+
+        const passSelection = await selectPassForClass(
+          transaction,
+          user.id,
+          lockedSession.startsAt,
+          now,
+        );
+
+        if (passSelection.status === "no-pass") {
+          throw new PassRequiredError();
+        }
+
+        if (passSelection.status === "outside-window") {
+          throw new OutsidePassDatesError(passSelection.windows);
         }
 
         const availability = getClassAvailability({
@@ -235,16 +240,16 @@ export async function registerRegistrationRoutes(
           throw new ClassUnavailableError("This class no longer has a vacancy.");
         }
 
-        return transaction.classRegistration.upsert({
+        const saved = await transaction.classRegistration.upsert({
           create: {
             classSessionId: lockedSession.id,
-            passPurchaseId: passPurchase.id,
+            passPurchaseId: passSelection.passPurchaseId,
             userId: user.id,
           },
           include: { classSession: { select: sessionSelection } },
           update: {
             canceledAt: null,
-            passPurchaseId: passPurchase.id,
+            passPurchaseId: passSelection.passPurchaseId,
             status: "RESERVED",
           },
           where: {
@@ -254,6 +259,21 @@ export async function registerRegistrationRoutes(
             },
           },
         });
+
+        await transaction.passPurchase.update({
+          data: passSelection.window,
+          where: { id: passSelection.passPurchaseId },
+        });
+
+        // A re-booked class may have been covered by a different pass before.
+        if (
+          existingRegistration?.passPurchaseId
+          && existingRegistration.passPurchaseId !== passSelection.passPurchaseId
+        ) {
+          await refreshPassWindow(transaction, existingRegistration.passPurchaseId, now);
+        }
+
+        return saved;
       });
 
       reply.header("cache-control", "no-store");
@@ -276,13 +296,39 @@ export async function registerRegistrationRoutes(
       const user = await authenticateAccount(request, reply, dependencies);
       if (!user) return;
 
-      await dependencies.database.classRegistration.updateMany({
-        data: { canceledAt: new Date(), status: "CANCELED" },
-        where: {
-          classSessionId: classSessionId.data,
-          status: "RESERVED",
-          userId: user.id,
-        },
+      const now = new Date();
+
+      await dependencies.database.$transaction(async (transaction) => {
+        await lockMemberPasses(transaction, user.id);
+
+        const registration = await transaction.classRegistration.findUnique({
+          select: {
+            classSession: { select: { startsAt: true } },
+            id: true,
+            passPurchaseId: true,
+            status: true,
+          },
+          where: {
+            userId_classSessionId: { classSessionId: classSessionId.data, userId: user.id },
+          },
+        });
+
+        if (!registration || registration.status !== "RESERVED") {
+          return;
+        }
+
+        if (registration.classSession.startsAt <= now) {
+          throw new ReservationStartedError();
+        }
+
+        await transaction.classRegistration.update({
+          data: { canceledAt: now, status: "CANCELED" },
+          where: { id: registration.id },
+        });
+
+        if (registration.passPurchaseId) {
+          await refreshPassWindow(transaction, registration.passPurchaseId, now);
+        }
       });
 
       return reply.code(204).send();
@@ -309,15 +355,10 @@ export async function registerRegistrationRoutes(
         select: { classSession: { select: { meetUrl: true } } },
         where: {
           classSessionId: classSessionId.data,
+          // Pass dates are enforced when booking. A booked class stays joinable even if an
+          // admin later moves it, as long as the pass itself is still valid (not refunded).
           passPurchase: {
-            is: {
-              AND: [
-                { OR: [{ passStatus: null }, { passStatus: "ACTIVE" }] },
-                { OR: [{ validFrom: null }, { validFrom: { lte: now } }] },
-                { OR: [{ validUntil: null }, { validUntil: { gte: now } }] },
-              ],
-              status: "PAID",
-            },
+            is: { passStatus: "ACTIVE", status: "PAID" },
           },
           classSession: {
             deliveryMode: "ONLINE",
@@ -353,6 +394,24 @@ function handleRegistrationError(
     return reply.code(409).send({ code: "NO_VACANCY", error: error.message });
   }
 
+  if (error instanceof PassRequiredError) {
+    return reply.code(403).send({
+      code: "PASS_REQUIRED",
+      error: "An active camp pass is required to reserve a class.",
+    });
+  }
+
+  if (error instanceof OutsidePassDatesError) {
+    return reply.code(403).send({
+      code: "OUTSIDE_PASS_DATES",
+      error: `This class is outside your pass dates (${error.windows.map(formatPassWindow).join("; ")}).`,
+    });
+  }
+
+  if (error instanceof ReservationStartedError) {
+    return reply.code(409).send({ error: "Classes that have already started can't be canceled." });
+  }
+
   if (error instanceof AccountIdentityConflictError) {
     request.log.warn(error, "Account identity conflict");
     return reply.code(409).send({ error: error.message });
@@ -363,3 +422,13 @@ function handleRegistrationError(
 }
 
 class ClassUnavailableError extends Error {}
+
+class PassRequiredError extends Error {}
+
+class OutsidePassDatesError extends Error {
+  constructor(readonly windows: PassWindow[]) {
+    super("The class is outside the member's pass dates.");
+  }
+}
+
+class ReservationStartedError extends Error {}

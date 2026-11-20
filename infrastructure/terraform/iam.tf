@@ -58,6 +58,18 @@ resource "aws_iam_role_policy" "backend_runtime" {
         ]
         Resource = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter${var.secret_parameter_prefix}/*"
       },
+      {
+        Sid    = "WriteBackendContainerLogs"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+        ]
+        Resource = [
+          aws_cloudwatch_log_group.backend.arn,
+          "${aws_cloudwatch_log_group.backend.arn}:*",
+        ]
+      },
     ]
   })
 }

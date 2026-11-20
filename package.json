@@ -23,8 +23,9 @@
     "db:studio": "npm run db:studio --workspace @dancingissogood/db",
     "db:up": "docker compose up -d postgres",
     "db:validate": "npm run db:validate --workspace @dancingissogood/db",
-    "lint": "npm run lint --workspace landing",
-    "typecheck": "npm run typecheck --workspace landing",
-    "test": "npm run lint && npm run typecheck && npm run build && npm run backend:test"
+    "lint": "npm run lint --workspace landing && npm run lint --workspace @dancingissogood/backend",
+    "typecheck": "npm run build --workspace @dancingissogood/db && npm run typecheck --workspace landing && npm run typecheck --workspace @dancingissogood/db && npm run typecheck --workspace @dancingissogood/backend",
+    "test": "npm run lint && npm run typecheck && npm run build && npm run backend:test",
+    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true"
   }
 }

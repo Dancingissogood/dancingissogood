@@ -65,6 +65,60 @@ export async function synchronizeAccount(
   });
 }
 
+/**
+ * Removes a deleted Clerk user's personal data while keeping the purchase, booking and
+ * consent records the studio needs for its books (they no longer identify the person).
+ */
+export async function anonymizeDeletedAccount(database: DatabaseClient, clerkUserId: string) {
+  await database.$transaction(async (transaction) => {
+    const user = await transaction.userProfile.findUnique({ where: { clerkUserId } });
+
+    if (!user) return;
+
+    const placeholderEmail = `deleted-${user.id}@deleted.invalid`;
+
+    await transaction.passPurchase.updateMany({
+      data: { purchaserEmail: null },
+      where: { userId: user.id },
+    });
+
+    const preference = await transaction.marketingPreference.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (preference) {
+      const placeholderPreferenceEmail = `deleted-${preference.id}@deleted.invalid`;
+      await transaction.marketingConsentEvent.updateMany({
+        data: { email: placeholderPreferenceEmail },
+        where: { preferenceId: preference.id },
+      });
+      await transaction.marketingPreference.update({
+        data: {
+          email: placeholderPreferenceEmail,
+          status: "UNSUBSCRIBED",
+          unsubscribedAt: preference.unsubscribedAt ?? new Date(),
+          userId: null,
+        },
+        where: { id: preference.id },
+      });
+    }
+
+    await transaction.adminDashboardState.deleteMany({ where: { userId: user.id } });
+    await transaction.userProfile.update({
+      data: {
+        clerkUserId: `deleted:${user.id}`,
+        email: placeholderEmail,
+        firstName: null,
+        lastName: null,
+        phone: null,
+        role: "MEMBER",
+        stripeCustomerId: null,
+      },
+      where: { id: user.id },
+    });
+  });
+}
+
 export async function getAccountSummary(database: DatabaseClient, userId: string) {
   const user = await database.userProfile.findUniqueOrThrow({
     include: {
@@ -113,7 +167,8 @@ export async function getAccountNavigationState(database: DatabaseClient, userId
   const usablePass = await database.passPurchase.findFirst({
     select: { id: true },
     where: {
-      OR: [{ passStatus: null }, { passStatus: "ACTIVE" }],
+      OR: [{ validUntil: null }, { validUntil: { gt: new Date() } }],
+      passStatus: "ACTIVE",
       status: "PAID",
       userId,
     },

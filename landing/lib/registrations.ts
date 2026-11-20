@@ -18,7 +18,7 @@ export const registrationMutationSchema = z.object({
 });
 
 export const classJoinSchema = z.object({
-  meetUrl: z.string().url(),
+  meetUrl: z.url({ protocol: /^https$/ }),
 });
 
 export type ClassRegistration = z.infer<typeof registrationSchema>;

@@ -193,7 +193,7 @@ test("an administrator can create, move, list, and delete a 20-minute class", as
     });
     registeredUserId = registeredUser.id;
     await database.classRegistration.create({
-      data: { classSessionId: sessionId, userId: registeredUser.id },
+      data: { classSessionId: created.id, userId: registeredUser.id },
     });
 
     const protectedDeleteResponse = await app.inject({

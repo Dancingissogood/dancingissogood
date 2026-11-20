@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 
 type CheckoutState = "complete" | "loading" | "processing" | "unavailable";
 
+const POLL_INTERVAL_MS = 3_000;
+const MAX_STATUS_CHECKS = 10;
+
 export function CheckoutStatus() {
   const searchParams = useSearchParams();
   const [state, setState] = useState<CheckoutState>("loading");
@@ -16,13 +19,19 @@ export function CheckoutStatus() {
     }
 
     const requestedSessionId = sessionId;
+    let isActive = true;
+    let retryTimeout: number | undefined;
 
-    async function getCheckoutStatus() {
+    async function getCheckoutStatus(checkCount: number) {
       try {
         const response = await fetch(`/api/checkout-sessions/${encodeURIComponent(requestedSessionId)}`, {
           cache: "no-store",
         });
         const payload: unknown = await response.json();
+
+        if (!isActive) {
+          return;
+        }
 
         if (
           !response.ok ||
@@ -35,35 +44,73 @@ export function CheckoutStatus() {
           return;
         }
 
-        const nextState = payload.paymentStatus === "paid" ? "complete" : "processing";
-        setState(nextState);
-
-        if (nextState === "complete") {
+        if (payload.paymentStatus === "paid") {
+          setState("complete");
           window.dispatchEvent(new CustomEvent("pass-status-changed"));
+          return;
         }
+
+        if (checkCount < MAX_STATUS_CHECKS) {
+          retryTimeout = window.setTimeout(() => {
+            void getCheckoutStatus(checkCount + 1);
+          }, POLL_INTERVAL_MS);
+          return;
+        }
+
+        setState("processing");
       } catch {
-        setState("unavailable");
+        if (isActive) {
+          setState("unavailable");
+        }
       }
     }
 
-    void getCheckoutStatus();
+    void getCheckoutStatus(1);
+
+    return () => {
+      isActive = false;
+      window.clearTimeout(retryTimeout);
+    };
   }, [sessionId]);
 
-  if (!sessionId || state === "unavailable") {
-    return <p>We couldn&apos;t confirm this payment. Contact us for help with your pass.</p>;
-  }
-
-  if (state === "loading") {
-    return <p>Confirming payment...</p>;
-  }
-
   if (state === "complete") {
-    return <p>Payment confirmed. Your pass is ready.</p>;
+    return (
+      <>
+        <p className="eyebrow">You&apos;re in</p>
+        <h1>Welcome to the Movement Series.</h1>
+        <p>Payment confirmed. Your pass is ready.</p>
+      </>
+    );
   }
 
-  if (state === "processing") {
-    return <p>Your payment is processing. Your pass will appear as soon as it clears.</p>;
+  if (sessionId && state === "loading") {
+    return <CheckoutStatusLoading />;
   }
 
-  return <p>We couldn&apos;t confirm this payment. Contact us for help with your pass.</p>;
+  if (sessionId && state === "processing") {
+    return (
+      <>
+        <p className="eyebrow">Purchase confirmation</p>
+        <h1>Payment processing</h1>
+        <p>Your payment is processing. Your pass will appear as soon as it clears.</p>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <p className="eyebrow">Purchase confirmation</p>
+      <h1>Payment not confirmed</h1>
+      <p>We couldn&apos;t confirm this payment. Contact us for help with your pass.</p>
+    </>
+  );
+}
+
+export function CheckoutStatusLoading() {
+  return (
+    <>
+      <p className="eyebrow">Purchase confirmation</p>
+      <h1>Confirming payment...</h1>
+    </>
+  );
 }

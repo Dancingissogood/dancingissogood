@@ -11,13 +11,9 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { navigationItems } from "@/content/site";
 import { fetchAccountNavigationState } from "@/lib/account-navigation";
 
-type SiteHeaderProps = {
-  ctaHref?: string;
-};
-
 type AccountActionState = "loading" | "has-pass" | "no-pass" | "unavailable";
 
-export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
+export function SiteHeader() {
   const { isLoaded, isSignedIn } = useAuth();
   const pathname = usePathname();
   const mobileMenuRef = useRef<HTMLDialogElement>(null);
@@ -102,7 +98,7 @@ export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
       aria-label="Primary navigation"
     >
       <Link className="brand" href="/" aria-label="Summer in the Mitten Movement Series home">
-        <BrandLogo priority variant="adaptive" />
+        <BrandLogo priority variant="adaptive" visibleVariant={pathname === "/" ? "on-dark" : "on-light"} />
       </Link>
       <nav className="nav-links" aria-label="Main menu">
         {navigationItems.map((item) => (
@@ -144,7 +140,7 @@ export function SiteHeader({ ctaHref = "/#pass" }: SiteHeaderProps) {
             My Account
           </Link>
         ) : (
-          <Link className="header-cta" href={ctaHref}>
+          <Link className="header-cta" href="/#pass">
             Buy Pass
           </Link>
         )}

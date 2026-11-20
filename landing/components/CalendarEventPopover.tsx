@@ -3,7 +3,7 @@
 import { SignInButton } from "@clerk/nextjs";
 import { Check, Plus, Video, X } from "lucide-react";
 import Image from "next/image";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import type { ClassMenuItem } from "@/content/site";
 
@@ -33,6 +33,7 @@ const ANCHOR_GAP = 8;
 type CalendarEventPopoverProps = {
   details: CalendarEventDetails;
   error: string | null;
+  focusOnOpen?: boolean;
   isAuthLoaded: boolean;
   isPending: boolean;
   isJoining: boolean;
@@ -49,6 +50,7 @@ type CalendarEventPopoverProps = {
 export function CalendarEventPopover({
   details,
   error,
+  focusOnOpen = false,
   isAuthLoaded,
   isPending,
   isJoining,
@@ -83,6 +85,12 @@ export function CalendarEventPopover({
       top: Math.min(Math.max(centeredTop, VIEWPORT_MARGIN), maximumTop),
     });
   }, [details, error, isAuthLoaded, isSavedStateReady, isSignedIn]);
+
+  useEffect(() => {
+    if (focusOnOpen) {
+      popoverRef.current?.querySelector<HTMLButtonElement>("button:not(:disabled)")?.focus({ preventScroll: true });
+    }
+  }, [details, focusOnOpen]);
 
   const saveButton = (
     <button

@@ -88,8 +88,9 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
           throw new Error("Class times could not be loaded.");
         }
 
+        const now = Date.now();
         const matchingSessions = publicSchedule.data.sessions.filter(
-          (session) => session.classKey === classItem.key,
+          (session) => session.classKey === classItem.key && Date.parse(session.endsAt) > now,
         );
         setSessions(matchingSessions);
         setSelectedDate((currentDate) => {
@@ -238,11 +239,12 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
               {selectedSessions.map((session) => {
                 const isSaved = reservedSessionIds.has(session.id);
                 const isPending = pendingSessionId === session.id;
+                const hasNoVacancy = session.availabilityStatus === "NO_VACANCY";
                 const action = (
                   <button
                     className="class-session-save"
                     data-saved={isSaved}
-                    disabled={isPending || !isLoaded}
+                    disabled={isPending || !isLoaded || (!isSaved && hasNoVacancy)}
                     type="button"
                     onClick={() => void toggleReservation(session)}
                   >
@@ -251,7 +253,7 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
                     ) : (
                       <Plus className="cta-plus-icon" aria-hidden="true" />
                     )}
-                    {isPending ? "Updating..." : isSaved ? "Reserved" : "Reserve"}
+                    {isPending ? "Updating..." : isSaved ? "Reserved" : hasNoVacancy ? "No vacancy" : "Reserve"}
                   </button>
                 );
 
@@ -265,7 +267,9 @@ export function ClassSessionPicker({ autoFocus, classItem }: ClassSessionPickerP
                       <button className="class-session-save" disabled type="button">
                         Checking account...
                       </button>
-                    ) : isSignedIn ? action : (
+                    ) : isSignedIn ? action : hasNoVacancy ? (
+                      <button className="class-session-save" disabled type="button">No vacancy</button>
+                    ) : (
                       <SignInButton mode="modal">
                         <button className="class-session-save" type="button">
                           <Plus className="cta-plus-icon" aria-hidden="true" />

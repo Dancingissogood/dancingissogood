@@ -38,7 +38,7 @@ async function createTestPassProduct() {
 
 function createStripeMock() {
   let checkoutParameters: Stripe.Checkout.SessionCreateParams | undefined;
-  const stripe = new Stripe(configuredStripeSecretKey, { apiVersion: "2026-06-24.dahlia" });
+  const stripe = new Stripe(configuredStripeSecretKey, { apiVersion: "2026-08-26.dahlia" });
 
   stripe.prices.retrieve = (async (priceId) =>
     ({
@@ -75,7 +75,7 @@ function createCheckoutEvent(
   paymentStatus: "paid" | "unpaid",
 ) {
   return {
-    api_version: "2026-06-24.dahlia",
+    api_version: "2026-08-26.dahlia",
     created: Math.floor(Date.now() / 1_000),
     data: {
       object: {
@@ -184,12 +184,12 @@ test("Stripe webhook verifies its signature and processes a payment event once",
       passProductId: product.id,
     },
   });
-  const stripe = new Stripe(configuredStripeSecretKey, { apiVersion: "2026-06-24.dahlia" });
+  const stripe = new Stripe(configuredStripeSecretKey, { apiVersion: "2026-08-26.dahlia" });
   const app = await buildApp({ database, stripe });
   const eventId = `evt_test_${randomUUID().replaceAll("-", "")}`;
   const sessionId = `cs_test_${randomUUID().replaceAll("-", "")}`;
   const payload = JSON.stringify({
-    api_version: "2026-06-24.dahlia",
+    api_version: "2026-08-26.dahlia",
     created: 1_783_705_600,
     data: {
       object: {

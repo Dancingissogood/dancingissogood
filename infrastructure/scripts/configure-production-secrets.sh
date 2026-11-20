@@ -37,6 +37,8 @@ read_secret "Clerk production publishable key" CLERK_PUBLISHABLE_KEY
 read_secret "Clerk production secret key" CLERK_SECRET_KEY
 read_secret "Stripe live restricted or secret key" STRIPE_SECRET_KEY
 read_secret "Stripe live webhook signing secret" STRIPE_WEBHOOK_SECRET
+read -r -s -p "Clerk webhook signing secret (optional, press Enter to skip): " CLERK_WEBHOOK_SIGNING_SECRET
+printf '\n'
 
 [[ "${CLERK_PUBLISHABLE_KEY}" == pk_live_* ]] || {
   echo "Clerk publishable key must be a production pk_live_ key." >&2
@@ -74,6 +76,13 @@ put_secret clerk_publishable_key "${CLERK_PUBLISHABLE_KEY}"
 put_secret clerk_secret_key "${CLERK_SECRET_KEY}"
 put_secret stripe_secret_key "${STRIPE_SECRET_KEY}"
 put_secret stripe_webhook_secret "${STRIPE_WEBHOOK_SECRET}"
+if [[ -n "${CLERK_WEBHOOK_SIGNING_SECRET}" ]]; then
+  [[ "${CLERK_WEBHOOK_SIGNING_SECRET}" == whsec_* ]] || {
+    echo "Clerk webhook signing secret must start with whsec_." >&2
+    exit 1
+  }
+  put_secret clerk_webhook_signing_secret "${CLERK_WEBHOOK_SIGNING_SECRET}"
+fi
 
 RUNTIME_PASSWORD_PARAMETER="${PARAMETER_PREFIX}/runtime_database_password"
 if ! aws ssm get-parameter \
@@ -87,5 +96,5 @@ if ! aws ssm get-parameter \
   unset RUNTIME_DATABASE_PASSWORD
 fi
 
-unset CLERK_PUBLISHABLE_KEY CLERK_SECRET_KEY STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET
+unset CLERK_PUBLISHABLE_KEY CLERK_SECRET_KEY CLERK_WEBHOOK_SIGNING_SECRET STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET
 echo "Production credentials stored in AWS account ${ACTUAL_ACCOUNT_ID} as Standard SecureString parameters."

@@ -11,7 +11,7 @@ export async function registerStripeWebhookRoutes(
 ): Promise<void> {
   app.post(
     "/v1/webhooks/stripe",
-    { config: { rawBody: true } },
+    { config: { rateLimit: false, rawBody: true } },
     async (request, reply) => {
       if (!config.stripeWebhookSecret) {
         request.log.error("Stripe webhook endpoint is not configured");

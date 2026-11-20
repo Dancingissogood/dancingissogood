@@ -81,9 +81,11 @@ export async function registerAccountRoutes(
       if (!identity) return reply.code(401).send({ error: "Authentication required." });
 
       const user = await synchronizeAccount(dependencies.database, identity);
-      const preference = await dependencies.database.marketingPreference.findUnique({
-        where: { email: user.email.toLowerCase() },
-      });
+      const preference =
+        (await dependencies.database.marketingPreference.findUnique({ where: { userId: user.id } }))
+        ?? (await dependencies.database.marketingPreference.findUnique({
+          where: { email: user.email.toLowerCase() },
+        }));
 
       reply.header("cache-control", "no-store");
       return reply.send({ subscribed: preference?.status === "SUBSCRIBED" });

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { CheckoutStatus } from "@/components/CheckoutStatus";
+import { CheckoutStatus, CheckoutStatusLoading } from "@/components/CheckoutStatus";
 
 export const metadata: Metadata = {
   title: "Purchase confirmation",
@@ -13,9 +13,7 @@ export default function PurchaseSuccessPage() {
   return (
     <main className="checkout-result">
       <div>
-        <p className="eyebrow">You&apos;re in</p>
-        <h1>Welcome to the Movement Series.</h1>
-        <Suspense fallback={<p>Confirming payment...</p>}>
+        <Suspense fallback={<CheckoutStatusLoading />}>
           <CheckoutStatus />
         </Suspense>
         <Link className="button button-primary" href="/#schedule">

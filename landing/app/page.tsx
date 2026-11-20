@@ -4,7 +4,7 @@ import Link from "next/link";
 import { AnimatedArrowIcon } from "@/components/AnimatedArrowIcon";
 import { ClassMenu } from "@/components/ClassMenu";
 import { CheckoutButton } from "@/components/CheckoutButton";
-import { PublicSchedule } from "@/components/PublicSchedule";
+import { LazyPublicSchedule } from "@/components/LazyPublicSchedule";
 import { ViewerTimeZoneLabel } from "@/components/ViewerTimeZoneLabel";
 import { classMenuItems } from "@/content/site";
 import { createPublicPageMetadata } from "@/lib/site-config";
@@ -201,7 +201,7 @@ export default function HomePage() {
             <div><span>Your time</span><strong><ViewerTimeZoneLabel /></strong></div>
           </div>
         </div>
-        <PublicSchedule />
+        <LazyPublicSchedule />
       </section>
 
       <section id="pass" className="section pass-section" data-reveal>

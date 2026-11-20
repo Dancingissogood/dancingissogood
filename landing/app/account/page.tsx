@@ -4,6 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { fetchAccountSummary } from "@/lib/account";
+import { STUDIO_TIME_ZONE } from "@/lib/time-zone";
 import { ProfileCalendar } from "@/components/ProfileCalendar";
 import { MarketingPreference } from "@/components/MarketingPreference";
 
@@ -15,14 +16,17 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  currency: "USD",
-  style: "currency",
-});
-
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
+  timeZone: STUDIO_TIME_ZONE,
 });
+
+function formatAmount(amountCents: number, currency: string) {
+  return new Intl.NumberFormat("en-US", {
+    currency: currency.toUpperCase(),
+    style: "currency",
+  }).format(amountCents / 100);
+}
 
 export default async function AccountPage() {
   const { getToken, userId } = await auth();
@@ -103,6 +107,15 @@ export default async function AccountPage() {
                       {purchase.pass.accessDays}-day pass, {purchase.pass.accessStarts}-
                       {purchase.pass.accessEnds} ET
                     </p>
+                    {purchase.passStatus === "ACTIVE" ? (
+                      <p>
+                        {purchase.validFrom && purchase.validUntil
+                          ? `Valid ${dateFormatter.format(new Date(purchase.validFrom))} – ${dateFormatter.format(
+                              new Date(new Date(purchase.validUntil).getTime() - 1),
+                            )}.`
+                          : "Your pass starts on the day of your first booked class."}
+                      </p>
+                    ) : null}
                   </div>
                   <dl>
                     <div>
@@ -111,9 +124,7 @@ export default async function AccountPage() {
                     </div>
                     <div>
                       <dt>Amount</dt>
-                      <dd>
-                        {currencyFormatter.format(purchase.amountTotalCents / 100)} {purchase.currency.toUpperCase()}
-                      </dd>
+                      <dd>{formatAmount(purchase.amountTotalCents, purchase.currency)}</dd>
                     </div>
                   </dl>
                 </article>
@@ -143,9 +154,7 @@ export default async function AccountPage() {
                     </div>
                     <div>
                       <dt>Amount</dt>
-                      <dd>
-                        {currencyFormatter.format(payment.amountTotalCents / 100)} {payment.currency.toUpperCase()}
-                      </dd>
+                      <dd>{formatAmount(payment.amountTotalCents, payment.currency)}</dd>
                     </div>
                   </dl>
                 </article>

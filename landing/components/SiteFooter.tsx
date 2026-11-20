@@ -14,7 +14,7 @@ export function SiteFooter() {
             className="footer-brand-home"
             href="/"
           >
-            <BrandLogo className="footer-brand-logo" variant="on-dark" />
+            <BrandLogo className="footer-brand-logo" sizes="300px" variant="on-dark" />
           </Link>
           <p className="footer-brand-tagline">
             Move, learn, restore, and connect in Southeast Michigan.

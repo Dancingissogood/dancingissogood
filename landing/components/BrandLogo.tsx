@@ -3,7 +3,10 @@ import Image from "next/image";
 type BrandLogoProps = {
   className?: string;
   priority?: boolean;
+  sizes?: string;
   variant: "adaptive" | "on-dark" | "on-light";
+  /** For the adaptive variant: the image shown on first paint, the only one marked priority. */
+  visibleVariant?: "on-dark" | "on-light";
 };
 
 const logoDimensions = {
@@ -19,7 +22,9 @@ const logoSources = {
 export function BrandLogo({
   className = "",
   priority = false,
+  sizes = "185px",
   variant,
+  visibleVariant = "on-light",
 }: BrandLogoProps) {
   const classes = ["brand-logo", `brand-logo-${variant}`, className]
     .filter(Boolean)
@@ -33,7 +38,8 @@ export function BrandLogo({
           src={logoSources["on-light"]}
           alt=""
           height={logoDimensions.height}
-          priority={priority}
+          priority={priority && visibleVariant === "on-light"}
+          sizes={sizes}
           width={logoDimensions.width}
         />
         <Image
@@ -41,7 +47,8 @@ export function BrandLogo({
           src={logoSources["on-dark"]}
           alt=""
           height={logoDimensions.height}
-          priority={priority}
+          priority={priority && visibleVariant === "on-dark"}
+          sizes={sizes}
           width={logoDimensions.width}
         />
       </span>
@@ -56,6 +63,7 @@ export function BrandLogo({
         alt=""
         height={logoDimensions.height}
         priority={priority}
+        sizes={sizes}
         width={logoDimensions.width}
       />
     </span>

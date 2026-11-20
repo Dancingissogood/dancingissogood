@@ -61,6 +61,7 @@ test("account synchronization claims only paid guest purchases for the verified 
       currency: product.currency,
       paidAt: new Date(),
       passProductId: product.id,
+      passStatus: "ACTIVE",
       purchaserEmail: "Dancer@Example.com",
       status: "PAID",
       stripeCustomerId,
@@ -141,19 +142,28 @@ test("account synchronization claims only paid guest purchases for the verified 
     assert.equal(navigationResponse.statusCode, 200);
     assert.deepEqual(navigationResponse.json(), { hasUsablePass: true });
 
+    // A pass whose dates have passed is no longer usable.
     await database.passPurchase.update({
-      data: { passStatus: "ACTIVE" },
+      data: {
+        validFrom: new Date(Date.now() - 4 * 24 * 60 * 60 * 1_000),
+        validUntil: new Date(Date.now() - 24 * 60 * 60 * 1_000),
+      },
       where: { id: paidPurchase.id },
     });
 
-    const activePassNavigationResponse = await app.inject({
+    const expiredPassNavigationResponse = await app.inject({
       headers: { authorization: "Bearer valid-session" },
       method: "GET",
       url: "/v1/account/navigation",
     });
 
-    assert.equal(activePassNavigationResponse.statusCode, 200);
-    assert.deepEqual(activePassNavigationResponse.json(), { hasUsablePass: true });
+    assert.equal(expiredPassNavigationResponse.statusCode, 200);
+    assert.deepEqual(expiredPassNavigationResponse.json(), { hasUsablePass: false });
+
+    await database.passPurchase.update({
+      data: { validFrom: null, validUntil: null },
+      where: { id: paidPurchase.id },
+    });
 
     await database.passPurchase.update({
       data: { passStatus: "USED" },

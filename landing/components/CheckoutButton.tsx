@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AnimatedArrowIcon } from "@/components/AnimatedArrowIcon";
 
@@ -12,6 +12,17 @@ type CheckoutButtonProps = {
 export function CheckoutButton({ className = "button button-primary", passSlug }: CheckoutButtonProps) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    function resetAfterBackNavigation(event: PageTransitionEvent) {
+      if (event.persisted) {
+        setIsLoading(false);
+      }
+    }
+
+    window.addEventListener("pageshow", resetAfterBackNavigation);
+    return () => window.removeEventListener("pageshow", resetAfterBackNavigation);
+  }, []);
 
   async function startCheckout() {
     setError(null);

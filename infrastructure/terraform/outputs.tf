@@ -39,3 +39,23 @@ output "runtime_parameter_names" {
     "${var.secret_parameter_prefix}/stripe_webhook_secret",
   ]
 }
+
+output "backend_log_group_name" {
+  description = "CloudWatch Logs group receiving backend container logs."
+  value       = aws_cloudwatch_log_group.backend.name
+}
+
+# Non-secret settings consumed by infrastructure/scripts/remote-deploy.sh.
+output "backend_deploy_config" {
+  description = "Non-secret runtime settings passed to the remote deploy script."
+  value = {
+    aws_region       = var.aws_region
+    cors_origins     = join(",", var.allowed_frontend_origins)
+    database_host    = aws_db_instance.postgres.address
+    database_name    = aws_db_instance.postgres.db_name
+    database_port    = tostring(aws_db_instance.postgres.port)
+    landing_url      = var.landing_url
+    log_group_name   = aws_cloudwatch_log_group.backend.name
+    parameter_prefix = var.secret_parameter_prefix
+  }
+}

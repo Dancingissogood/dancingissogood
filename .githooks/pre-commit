@@ -1,13 +1,27 @@
 #!/bin/sh
+# POSIX sh + grep -E only, so the check works without ripgrep installed.
 
 set -eu
 
-if git diff --cached --no-ext-diff --unified=0 | rg -q '^\+[^+].*\b(?:sk|rk)_(?:test|live)_[A-Za-z0-9]{16,}'; then
+added_lines="$(git diff --cached --no-ext-diff --unified=0 | grep -E '^\+' | grep -Ev '^\+\+\+ ' || true)"
+
+staged_lines_match() {
+  grep -Eq "$1" <<EOF
+${added_lines}
+EOF
+}
+
+if staged_lines_match '(^|[^A-Za-z0-9_])(sk|rk)_(test|live)_[A-Za-z0-9]{16,}'; then
   echo "Blocked commit: staged Stripe server-side API key detected."
   exit 1
 fi
 
-if git diff --cached --no-ext-diff --unified=0 | rg -q '^\+[^+].*\bwhsec_[A-Za-z0-9]{16,}'; then
+if staged_lines_match '(^|[^A-Za-z0-9_])whsec_[A-Za-z0-9]{16,}'; then
   echo "Blocked commit: staged Stripe webhook signing secret detected."
+  exit 1
+fi
+
+if staged_lines_match '(^|[^A-Za-z0-9])AKIA[0-9A-Z]{16}([^A-Za-z0-9]|$)'; then
+  echo "Blocked commit: staged AWS access key ID detected."
   exit 1
 fi

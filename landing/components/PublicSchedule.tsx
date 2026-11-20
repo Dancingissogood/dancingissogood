@@ -94,7 +94,10 @@ export function PublicSchedule() {
   }), [timeZone]);
   const calendarRef = useRef<FullCalendar>(null);
   const hideTimeoutRef = useRef<number | null>(null);
+  const eventTriggerRef = useRef<HTMLElement | null>(null);
+  const loadEventsRequestRef = useRef(0);
   const [eventDetails, setEventDetails] = useState<CalendarEventDetails | null>(null);
+  const [shouldFocusPopover, setShouldFocusPopover] = useState(false);
   const [reservedSessionIds, setReservedSessionIds] = useState<Set<string>>(new Set());
   const [isReservationStateReady, setIsReservationStateReady] = useState(false);
   const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
@@ -119,11 +122,41 @@ export function PublicSchedule() {
 
   const scheduleHide = useCallback(() => {
     cancelHide();
-    hideTimeoutRef.current = window.setTimeout(hideEventDetails, POPOVER_HIDE_DELAY);
+    hideTimeoutRef.current = window.setTimeout(() => {
+      hideTimeoutRef.current = null;
+      const focusedElement = document.activeElement;
+
+      if (
+        focusedElement?.matches(":focus-visible")
+        && document.querySelector(".calendar-event-popover")?.contains(focusedElement)
+      ) {
+        return;
+      }
+
+      hideEventDetails();
+    }, POPOVER_HIDE_DELAY);
   }, [cancelHide, hideEventDetails]);
 
-  const showEventDetails = useCallback((event: EventApi, element: HTMLElement) => {
+  const dismissEventDetails = useCallback(() => {
+    const shouldRestoreFocus = Boolean(
+      document.querySelector(".calendar-event-popover")?.contains(document.activeElement),
+    );
+    hideEventDetails();
+
+    if (shouldRestoreFocus && eventTriggerRef.current?.isConnected) {
+      eventTriggerRef.current.focus({ preventScroll: true });
+    }
+  }, [hideEventDetails]);
+
+  const formatEventTime = useCallback((event: EventApi) => (
+    event.start
+      ? `${scheduleDateTimeFormatter.format(event.start)}${event.end ? ` - ${scheduleEndTimeFormatter.format(event.end)}` : ""}`
+      : "Time unavailable"
+  ), [scheduleDateTimeFormatter, scheduleEndTimeFormatter]);
+
+  const showEventDetails = useCallback((event: EventApi, element: HTMLElement, moveFocus = false) => {
     cancelHide();
+    eventTriggerRef.current = element;
     const rect = element.getBoundingClientRect();
     const instructorName = event.extendedProps["instructorName"];
     const locationName = event.extendedProps["locationName"];
@@ -153,19 +186,21 @@ export function PublicSchedule() {
         : undefined,
       isLive: Boolean(startsAt && endsAt && Date.parse(startsAt) <= now && now < Date.parse(endsAt)),
       startsAt,
-      timeLabel: event.start
-        ? `${scheduleDateTimeFormatter.format(event.start)}${event.end ? ` - ${scheduleEndTimeFormatter.format(event.end)}` : ""}`
-        : "Time unavailable",
+      timeLabel: formatEventTime(event),
       title: event.title,
     });
+    setShouldFocusPopover(moveFocus);
     setMutationError(null);
-  }, [cancelHide, scheduleDateTimeFormatter, scheduleEndTimeFormatter]);
+  }, [cancelHide, formatEventTime]);
 
   const handleEventMouseEnter = useCallback((eventInfo: EventHoveringArg) => {
     showEventDetails(eventInfo.event, eventInfo.el);
   }, [showEventDetails]);
 
   const handleEventClick = useCallback((eventInfo: EventClickArg) => {
+    // Keyboard activation is handled in handleEventDidMount so focus can move into the popover.
+    if (eventInfo.jsEvent instanceof KeyboardEvent) return;
+
     showEventDetails(eventInfo.event, eventInfo.el);
   }, [showEventDetails]);
 
@@ -183,29 +218,28 @@ export function PublicSchedule() {
   }, []);
 
   const handleEventDidMount = useCallback((eventInfo: EventMountArg) => {
-    const showDetails = () => showEventDetails(eventInfo.event, eventInfo.el);
     const handleKeyDown = (keyboardEvent: KeyboardEvent) => {
-      if (keyboardEvent.key === "Escape") {
+      if (keyboardEvent.key === "Enter" || keyboardEvent.key === " ") {
+        keyboardEvent.preventDefault();
+        showEventDetails(eventInfo.event, eventInfo.el, true);
+      } else if (keyboardEvent.key === "Escape") {
         hideEventDetails();
-        eventInfo.el.blur();
       }
     };
 
     eventInfo.el.tabIndex = 0;
     eventInfo.el.setAttribute(
       "aria-label",
-      `${eventInfo.event.title}. ${eventInfo.event.extendedProps["availabilityStatus"] === "NO_VACANCY" ? "No vacancy." : "Available to reserve."} View class details.`,
+      `${eventInfo.event.title}, ${formatEventTime(eventInfo.event)}. ${eventInfo.event.extendedProps["availabilityStatus"] === "NO_VACANCY" ? "No vacancy." : "Available to reserve."} View class details.`,
     );
-    eventInfo.el.addEventListener("focus", showDetails);
     eventInfo.el.addEventListener("blur", scheduleHide);
     eventInfo.el.addEventListener("keydown", handleKeyDown);
     eventInteractionCleanups.set(eventInfo.el, () => {
-      eventInfo.el.removeEventListener("focus", showDetails);
       eventInfo.el.removeEventListener("blur", scheduleHide);
       eventInfo.el.removeEventListener("keydown", handleKeyDown);
       eventInteractionCleanups.delete(eventInfo.el);
     });
-  }, [hideEventDetails, scheduleHide, showEventDetails]);
+  }, [formatEventTime, hideEventDetails, scheduleHide, showEventDetails]);
 
   useEffect(() => {
     calendarRef.current?.getApi().refetchEvents();
@@ -227,6 +261,14 @@ export function PublicSchedule() {
   }, []);
 
   useEffect(() => () => cancelHide(), [cancelHide]);
+
+  useEffect(() => {
+    const resetAfterBackNavigation = (event: PageTransitionEvent) => {
+      if (event.persisted) setIsJoining(false);
+    };
+    window.addEventListener("pageshow", resetAfterBackNavigation);
+    return () => window.removeEventListener("pageshow", resetAfterBackNavigation);
+  }, []);
 
   useEffect(() => {
     if (!eventDetails) return;
@@ -257,6 +299,9 @@ export function PublicSchedule() {
       success: (events: EventInput[]) => void,
       failure: (error: Error) => void,
     ) => {
+      const requestId = ++loadEventsRequestRef.current;
+      const isStale = () => requestId !== loadEventsRequestRef.current;
+
       try {
         setError(null);
         setReservationStateError(null);
@@ -272,7 +317,7 @@ export function PublicSchedule() {
           throw new Error("The current schedule could not be loaded.");
         }
 
-        setIsEmpty(parsed.data.sessions.length === 0);
+        if (!isStale()) setIsEmpty(parsed.data.sessions.length === 0);
         success(
           parsed.data.sessions.map((session) => ({
             end: session.endsAt,
@@ -292,9 +337,11 @@ export function PublicSchedule() {
         if (isSignedIn) {
           try {
             const registrations = await fetchRegistrations(range.startStr, range.endStr);
+            if (isStale()) return;
             setReservedSessionIds(new Set(registrations.map((item) => item.session.id)));
             setIsReservationStateReady(true);
           } catch (caughtError) {
+            if (isStale()) return;
             setReservedSessionIds(new Set());
             setIsReservationStateReady(false);
             setReservationStateError(
@@ -311,8 +358,10 @@ export function PublicSchedule() {
         const loadError = caughtError instanceof Error
           ? caughtError
           : new Error("The current schedule could not be loaded.");
-        setError(loadError.message);
-        setIsEmpty(false);
+        if (!isStale()) {
+          setError(loadError.message);
+          setIsEmpty(false);
+        }
         failure(loadError);
       }
     },
@@ -418,7 +467,8 @@ export function PublicSchedule() {
             isSaved={reservedSessionIds.has(eventDetails.classSessionId)}
             isSavedStateReady={isReservationStateReady}
             isSignedIn={Boolean(isSignedIn)}
-            onDismiss={hideEventDetails}
+            focusOnOpen={shouldFocusPopover}
+            onDismiss={dismissEventDetails}
             onJoin={() => void joinClass()}
             onMouseEnter={cancelHide}
             onMouseLeave={scheduleHide}

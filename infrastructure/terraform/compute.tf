@@ -29,18 +29,17 @@ resource "aws_instance" "backend" {
   }
 
   user_data = templatefile("${path.module}/templates/user-data.sh.tftpl", {
-    api_domain          = var.api_domain
-    aws_account_id      = data.aws_caller_identity.current.account_id
-    aws_region          = var.aws_region
-    cors_origins        = join(",", var.allowed_frontend_origins)
-    database_host       = aws_db_instance.postgres.address
-    database_name       = aws_db_instance.postgres.db_name
-    database_port       = aws_db_instance.postgres.port
-    database_secret_arn = aws_db_instance.postgres.master_user_secret[0].secret_arn
-    landing_url         = var.landing_url
-    parameter_prefix    = var.secret_parameter_prefix
-    repository_url      = aws_ecr_repository.backend.repository_url
+    api_domain = var.api_domain
   })
+
+  # The AMI comes from the "latest AL2023" SSM parameter and user_data only
+  # bootstraps the host. Changing either would stop/start or replace the
+  # instance, so both are ignored here. OS refreshes and bootstrap changes are
+  # deliberate operations: `terraform apply -replace=aws_instance.backend`.
+  # Deployment logic lives in infrastructure/scripts/remote-deploy.sh instead.
+  lifecycle {
+    ignore_changes = [ami, user_data]
+  }
 
   tags = {
     Name = "${local.name_prefix}-backend"

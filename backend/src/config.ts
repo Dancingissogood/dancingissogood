@@ -10,6 +10,7 @@ const corsOriginsSchema = z
 const environmentSchema = z.object({
   CLERK_PUBLISHABLE_KEY: z.string().regex(/^pk_(?:test|live)_/).optional(),
   CLERK_SECRET_KEY: z.string().regex(/^sk_(?:test|live)_/).optional(),
+  CLERK_WEBHOOK_SIGNING_SECRET: z.string().regex(/^whsec_/, "must be a Clerk webhook signing secret").optional(),
   CORS_ORIGINS: corsOriginsSchema,
   DATABASE_URL: z.string().url(),
   LANDING_URL: z.string().url().default("http://localhost:3000"),
@@ -36,7 +37,39 @@ const environmentSchema = z.object({
       path: ["CLERK_SECRET_KEY"],
     });
   }
+
+  if (environment.NODE_ENV === "production") {
+    // Without the webhook secret, paid checkouts would never be confirmed.
+    if (!environment.STRIPE_WEBHOOK_SECRET) {
+      context.addIssue({
+        code: "custom",
+        message: "STRIPE_WEBHOOK_SECRET is required in production",
+        path: ["STRIPE_WEBHOOK_SECRET"],
+      });
+    }
+
+    if (isLocalhostUrl(environment.LANDING_URL)) {
+      context.addIssue({
+        code: "custom",
+        message: "LANDING_URL must be set to the public site in production",
+        path: ["LANDING_URL"],
+      });
+    }
+
+    if (environment.CORS_ORIGINS.some(isLocalhostUrl)) {
+      context.addIssue({
+        code: "custom",
+        message: "CORS_ORIGINS must not include localhost in production",
+        path: ["CORS_ORIGINS"],
+      });
+    }
+  }
 });
+
+function isLocalhostUrl(value: string) {
+  const { hostname } = new URL(value);
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]";
+}
 
 const parsedEnvironment = environmentSchema.parse(process.env);
 
@@ -49,6 +82,7 @@ export const config = {
           secretKey: parsedEnvironment.CLERK_SECRET_KEY,
         }
       : null,
+  clerkWebhookSigningSecret: parsedEnvironment.CLERK_WEBHOOK_SIGNING_SECRET,
   corsOrigins: parsedEnvironment.CORS_ORIGINS,
   landingUrl: parsedEnvironment.LANDING_URL,
   nodeEnv: parsedEnvironment.NODE_ENV,

@@ -91,3 +91,44 @@ resource "aws_budgets_budget" "monthly" {
     subscriber_email_addresses = [var.budget_notification_email]
   }
 }
+
+resource "aws_cloudwatch_log_group" "backend" {
+  name              = "/${local.name_prefix}/backend"
+  retention_in_days = 14
+}
+
+# Public uptime check of the API through Caddy. Route 53 health check metrics
+# are published in us-east-1, which is this stack's only region.
+resource "aws_route53_health_check" "api" {
+  type              = "HTTPS"
+  fqdn              = var.api_domain
+  port              = 443
+  resource_path     = "/health/ready"
+  enable_sni        = true
+  request_interval  = 30
+  failure_threshold = 3
+
+  tags = {
+    Name = "${local.name_prefix}-api-ready"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "api_health" {
+  alarm_name          = "${local.name_prefix}-api-health"
+  alarm_description   = "https://${var.api_domain}/health/ready is failing Route 53 health checks."
+  namespace           = "AWS/Route53"
+  metric_name         = "HealthCheckStatus"
+  statistic           = "Minimum"
+  period              = 60
+  evaluation_periods  = 3
+  datapoints_to_alarm = 3
+  comparison_operator = "LessThanThreshold"
+  threshold           = 1
+  treat_missing_data  = "breaching"
+  alarm_actions       = [aws_sns_topic.operations.arn]
+  ok_actions          = [aws_sns_topic.operations.arn]
+
+  dimensions = {
+    HealthCheckId = aws_route53_health_check.api.id
+  }
+}
